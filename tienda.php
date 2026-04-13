@@ -59,12 +59,12 @@ try {
     <!-- NAVBAR -->
     <nav class="navbar" id="navbar">
         <div class="container navbar__inner">
-            <a href="index.html" class="navbar__logo">BTLDECO<span class="logo-dot"></span></a>
+            <a href="index.php" class="navbar__logo">BTLDECO<span class="logo-dot"></span></a>
             <ul class="navbar__links" id="navLinks">
-                <li><a href="index.html">Inicio</a></li>
+                <li><a href="index.php">Inicio</a></li>
                 <li><a href="tienda.php" class="active">Tienda</a></li>
-                <li><a href="index.html#galeria">Galeria</a></li>
-                <li><a href="index.html#nosotros">Nosotros</a></li>
+                <li><a href="index.php#galeria">Galeria</a></li>
+                <li><a href="index.php#nosotros">Nosotros</a></li>
                 <li><a href="#contacto">Contacto</a></li>
             </ul>
             <div class="navbar__actions">
@@ -89,7 +89,7 @@ try {
     <main class="tienda">
         <div class="container">
             <nav class="breadcrumb">
-                <a href="index.html">Inicio</a>
+                <a href="index.php">Inicio</a>
                 <span class="breadcrumb__sep">/</span>
                 <span>Tienda</span>
             </nav>
