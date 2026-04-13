@@ -729,8 +729,13 @@ button { cursor: pointer; border: none; background: none; font: inherit; color: 
    ============================================================ */
 .products__grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 24px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+}
+.product-card {
+    text-decoration: none;
+    color: inherit;
+    display: block;
 }
 .product-card {
     background: var(--bg-card);
