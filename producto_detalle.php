@@ -135,8 +135,9 @@ $waText = urlencode('Hola! Me interesa el producto: ' . $p['nombre'] . ' (' . pr
             <div class="producto__layout">
                 <!-- Gallery -->
                 <div class="producto__gallery">
-                    <div class="producto__main-img">
+                    <div class="producto__main-img" id="zoomContainer">
                         <img id="productoMainImg" src="<?= img_url($allImages[0]) ?>" alt="<?= sanitize($p['nombre']) ?>">
+                        <div class="producto__zoom-lens" id="zoomLens"></div>
                     </div>
                     <?php if (count($allImages) > 1): ?>
                     <div class="producto__thumbs">
@@ -290,6 +291,50 @@ $waText = urlencode('Hola! Me interesa el producto: ' . $p['nombre'] . ' (' . pr
         document.querySelectorAll('.producto__thumb').forEach(t => t.classList.remove('active'));
         btn.classList.add('active');
     }
+
+    // Zoom on hover
+    (function() {
+        const container = document.getElementById('zoomContainer');
+        const img = document.getElementById('productoMainImg');
+        const lens = document.getElementById('zoomLens');
+        if (!container || !img || !lens) return;
+
+        container.addEventListener('mouseenter', function() {
+            lens.style.backgroundImage = 'url(' + img.src + ')';
+            lens.classList.add('active');
+        });
+
+        container.addEventListener('mouseleave', function() {
+            lens.classList.remove('active');
+        });
+
+        container.addEventListener('mousemove', function(e) {
+            const rect = container.getBoundingClientRect();
+            const x = (e.clientX - rect.left) / rect.width * 100;
+            const y = (e.clientY - rect.top) / rect.height * 100;
+            lens.style.backgroundPosition = x + '% ' + y + '%';
+            lens.style.left = (e.clientX - rect.left - 75) + 'px';
+            lens.style.top = (e.clientY - rect.top - 75) + 'px';
+        });
+
+        // Touch zoom for mobile
+        container.addEventListener('touchmove', function(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const rect = container.getBoundingClientRect();
+            const x = (touch.clientX - rect.left) / rect.width * 100;
+            const y = (touch.clientY - rect.top) / rect.height * 100;
+            lens.style.backgroundImage = 'url(' + img.src + ')';
+            lens.style.backgroundPosition = x + '% ' + y + '%';
+            lens.style.left = (touch.clientX - rect.left - 75) + 'px';
+            lens.style.top = (touch.clientY - rect.top - 75) + 'px';
+            lens.classList.add('active');
+        }, { passive: false });
+
+        container.addEventListener('touchend', function() {
+            lens.classList.remove('active');
+        });
+    })();
     </script>
 </body>
 </html>

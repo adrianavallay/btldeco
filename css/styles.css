@@ -1639,6 +1639,8 @@ a.contact-card:hover {
     background: var(--bg-elevated);
     border: 1px solid var(--border);
     margin-bottom: 12px;
+    position: relative;
+    cursor: zoom-in;
 }
 .producto__main-img img {
     width: 100%;
@@ -1646,8 +1648,24 @@ a.contact-card:hover {
     object-fit: cover;
     transition: transform 0.5s var(--ease);
 }
-.producto__main-img:hover img {
-    transform: scale(1.03);
+.producto__zoom-lens {
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.6);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+    background-size: 300%;
+    background-repeat: no-repeat;
+    pointer-events: none;
+    opacity: 0;
+    transform: scale(0.6);
+    transition: opacity 0.2s, transform 0.2s;
+    z-index: 10;
+}
+.producto__zoom-lens.active {
+    opacity: 1;
+    transform: scale(1);
 }
 .producto__thumbs {
     display: flex;
