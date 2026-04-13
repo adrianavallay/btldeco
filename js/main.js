@@ -1,11 +1,250 @@
 /* ============================================================
-   BTL IMPRESION 3D — INTERACTIONS + THEME TOGGLE
+   BTLDECO — INTERACTIONS, SHADER HERO, GALLERY EXPAND
    ============================================================ */
 
 (function () {
     'use strict';
 
-    // --- Theme Toggle ---
+    // =========================================================
+    // WEBGL SHADER HERO (paper-design MeshGradient style)
+    // Colors: #000000, #8B4513, #ffffff, #3E2723, #5D4037
+    // =========================================================
+    function initShaderCanvas(canvasId, isWireframe) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+
+        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        if (!gl) return;
+
+        const vertexSource = `
+            attribute vec2 a_position;
+            void main() { gl_Position = vec4(a_position, 0.0, 1.0); }
+        `;
+
+        // MeshGradient-style fragment shader
+        const fragmentSource = isWireframe ? `
+            precision mediump float;
+            uniform float u_time;
+            uniform vec2 u_resolution;
+
+            void main() {
+                vec2 uv = gl_FragCoord.xy / u_resolution;
+                vec2 p = uv * 2.0 - 1.0;
+                p.x *= u_resolution.x / u_resolution.y;
+
+                float t = u_time * 0.2;
+
+                // Grid wireframe
+                float gridSize = 0.12;
+                vec2 grid = abs(fract(p / gridSize + t * 0.1) - 0.5);
+                float line = min(grid.x, grid.y);
+                float wire = 1.0 - smoothstep(0.0, 0.02, line);
+
+                // Distort grid
+                float distort = sin(p.x * 4.0 + t) * cos(p.y * 3.0 + t * 0.7) * 0.5;
+                wire *= (0.3 + distort * 0.3);
+
+                // Color: white wireframe on transparent
+                vec3 col = vec3(1.0) * wire;
+                float alpha = wire * 0.4;
+
+                gl_FragColor = vec4(col, alpha);
+            }
+        ` : `
+            precision mediump float;
+            uniform float u_time;
+            uniform vec2 u_resolution;
+
+            // Simplex-like hash
+            vec2 hash(vec2 p) {
+                p = vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3)));
+                return -1.0 + 2.0 * fract(sin(p) * 43758.5453123);
+            }
+
+            float noise(vec2 p) {
+                vec2 i = floor(p);
+                vec2 f = fract(p);
+                vec2 u = f * f * (3.0 - 2.0 * f);
+                return mix(mix(dot(hash(i), f),
+                               dot(hash(i + vec2(1.0, 0.0)), f - vec2(1.0, 0.0)), u.x),
+                           mix(dot(hash(i + vec2(0.0, 1.0)), f - vec2(0.0, 1.0)),
+                               dot(hash(i + vec2(1.0, 1.0)), f - vec2(1.0, 1.0)), u.x), u.y);
+            }
+
+            void main() {
+                vec2 uv = gl_FragCoord.xy / u_resolution;
+                vec2 p = uv * 2.0 - 1.0;
+                p.x *= u_resolution.x / u_resolution.y;
+
+                float t = u_time * 0.3;
+
+                // 5 mesh control points with paper-design colors
+                // #000000, #8B4513, #ffffff, #3E2723, #5D4037
+                vec3 c1 = vec3(0.0, 0.0, 0.0);              // black
+                vec3 c2 = vec3(0.545, 0.271, 0.075);         // saddle brown #8B4513
+                vec3 c3 = vec3(1.0, 1.0, 1.0);               // white
+                vec3 c4 = vec3(0.243, 0.153, 0.137);          // dark brown #3E2723
+                vec3 c5 = vec3(0.365, 0.251, 0.216);          // brown #5D4037
+
+                // Animated positions for mesh points
+                vec2 p1 = vec2(sin(t * 0.7) * 0.8, cos(t * 0.5) * 0.7);
+                vec2 p2 = vec2(cos(t * 0.4) * 0.9, sin(t * 0.6) * 0.8);
+                vec2 p3 = vec2(sin(t * 0.5 + 2.0) * 0.6, cos(t * 0.3 + 1.0) * 0.9);
+                vec2 p4 = vec2(cos(t * 0.8 + 3.0) * 0.7, sin(t * 0.4 + 2.0) * 0.6);
+                vec2 p5 = vec2(sin(t * 0.3 + 4.0) * 0.5, cos(t * 0.9 + 3.0) * 0.5);
+
+                // Soft radial weights
+                float w1 = 1.0 / (0.2 + length(p - p1) * 2.5);
+                float w2 = 1.0 / (0.2 + length(p - p2) * 2.5);
+                float w3 = 1.0 / (0.2 + length(p - p3) * 2.5);
+                float w4 = 1.0 / (0.2 + length(p - p4) * 2.5);
+                float w5 = 1.0 / (0.2 + length(p - p5) * 2.5);
+
+                float totalW = w1 + w2 + w3 + w4 + w5;
+                vec3 col = (c1 * w1 + c2 * w2 + c3 * w3 + c4 * w4 + c5 * w5) / totalW;
+
+                // Add noise for organic feel
+                float n = noise(p * 3.0 + t * 0.5) * 0.08;
+                col += n;
+
+                // Vignette
+                float vig = 1.0 - smoothstep(0.5, 1.8, length(p));
+                col *= 0.8 + vig * 0.2;
+
+                // Clamp
+                col = clamp(col, 0.0, 1.0);
+
+                gl_FragColor = vec4(col, 1.0);
+            }
+        `;
+
+        function createShader(type, source) {
+            const shader = gl.createShader(type);
+            gl.shaderSource(shader, source);
+            gl.compileShader(shader);
+            if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                gl.deleteShader(shader);
+                return null;
+            }
+            return shader;
+        }
+
+        const vs = createShader(gl.VERTEX_SHADER, vertexSource);
+        const fs = createShader(gl.FRAGMENT_SHADER, fragmentSource);
+        if (!vs || !fs) return;
+
+        const program = gl.createProgram();
+        gl.attachShader(program, vs);
+        gl.attachShader(program, fs);
+        gl.linkProgram(program);
+        if (!gl.getProgramParameter(program, gl.LINK_STATUS)) return;
+
+        gl.useProgram(program);
+
+        const buf = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]), gl.STATIC_DRAW);
+
+        const posLoc = gl.getAttribLocation(program, 'a_position');
+        gl.enableVertexAttribArray(posLoc);
+        gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+
+        if (isWireframe) {
+            gl.enable(gl.BLEND);
+            gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+        }
+
+        const timeLoc = gl.getUniformLocation(program, 'u_time');
+        const resLoc = gl.getUniformLocation(program, 'u_resolution');
+
+        function resize() {
+            const dpr = Math.min(window.devicePixelRatio, 1.5);
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            gl.viewport(0, 0, canvas.width, canvas.height);
+        }
+
+        window.addEventListener('resize', resize);
+        resize();
+
+        let startTime = performance.now();
+        let animId = null;
+
+        function render() {
+            const elapsed = (performance.now() - startTime) / 1000;
+            gl.uniform1f(timeLoc, elapsed);
+            gl.uniform2f(resLoc, canvas.width, canvas.height);
+            gl.drawArrays(gl.TRIANGLES, 0, 6);
+            animId = requestAnimationFrame(render);
+        }
+
+        // Only render when hero visible
+        const heroEl = canvas.closest('.hero');
+        const obs = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    if (!animId) { startTime = performance.now(); render(); }
+                } else {
+                    if (animId) { cancelAnimationFrame(animId); animId = null; }
+                }
+            });
+        }, { threshold: 0 });
+        obs.observe(heroEl);
+    }
+
+    // Init both shader layers
+    initShaderCanvas('heroShader', false);
+    initShaderCanvas('heroShaderWire', true);
+
+    // =========================================================
+    // PULSING BORDER CIRCLE (Canvas 2D)
+    // =========================================================
+    const pulsingCanvas = document.getElementById('pulsingCanvas');
+    if (pulsingCanvas) {
+        const ctx = pulsingCanvas.getContext('2d');
+        const colors = ['#BEECFF', '#E77EDC', '#FF4C3E', '#00FF88', '#FFD700', '#FF6B35', '#8A2BE2'];
+        let pulseStart = performance.now();
+
+        function drawPulse() {
+            const elapsed = (performance.now() - pulseStart) / 1000;
+            const w = pulsingCanvas.width;
+            const h = pulsingCanvas.height;
+            const cx = w / 2;
+            const cy = h / 2;
+            const radius = Math.min(w, h) * 0.38;
+
+            ctx.clearRect(0, 0, w, h);
+
+            // Draw pulsing colored ring
+            const segments = colors.length * 3;
+            for (let i = 0; i < segments; i++) {
+                const angle = (i / segments) * Math.PI * 2 + elapsed * 0.5;
+                const nextAngle = ((i + 1) / segments) * Math.PI * 2 + elapsed * 0.5;
+                const colorIdx = i % colors.length;
+                const pulseAmount = Math.sin(elapsed * 1.5 + i * 0.8) * 0.1 + 0.9;
+                const r = radius * pulseAmount;
+
+                ctx.beginPath();
+                ctx.arc(cx, cy, r, angle, nextAngle + 0.05);
+                ctx.strokeStyle = colors[colorIdx];
+                ctx.lineWidth = 3;
+                ctx.shadowBlur = 12;
+                ctx.shadowColor = colors[colorIdx];
+                ctx.globalAlpha = 0.7 + Math.sin(elapsed * 2 + i) * 0.3;
+                ctx.stroke();
+            }
+            ctx.globalAlpha = 1;
+            ctx.shadowBlur = 0;
+
+            requestAnimationFrame(drawPulse);
+        }
+        drawPulse();
+    }
+
+    // =========================================================
+    // THEME TOGGLE
+    // =========================================================
     const html = document.documentElement;
     const themeToggle = document.getElementById('themeToggle');
     const STORAGE_KEY = 'btl-theme';
@@ -15,7 +254,6 @@
         localStorage.setItem(STORAGE_KEY, theme);
     }
 
-    // Init from storage or system preference
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
         setTheme(saved);
@@ -30,241 +268,160 @@
         });
     }
 
-    // --- i18n Language Toggle ---
+    // =========================================================
+    // i18n LANGUAGE TOGGLE
+    // =========================================================
     const langSwitch = document.getElementById('langSwitch');
     const langBtns = langSwitch ? langSwitch.querySelectorAll('.lang-switch__btn') : [];
     const LANG_KEY = 'btl-lang';
 
     const translations = {
         es: {
-            // Nav
-            'nav-inicio': 'INICIO',
-            'nav-servicios': 'SERVICIOS',
-            'nav-proceso': 'PROCESO',
-            'nav-materiales': 'MATERIALES',
-            'nav-contacto': 'CONTACTO',
-            'nav-cta': 'SOLICITAR PRESUPUESTO',
-            // Hero
-            'hero-tag': 'SERVICIO PROFESIONAL DE IMPRESION 3D',
-            'hero-t1': 'CONVERTIMOS',
-            'hero-t2': 'ARCHIVOS EN',
-            'hero-t3': 'OBJETOS REALES',
-            'hero-sub': 'Servicio profesional de impresion 3D a medida. Convertimos tus ideas digitales en productos fisicos con la maxima resolucion y cuidado del detalle. Para empresas, diseñadores y emprendedores.',
-            'hero-btn1': 'VER SERVICIOS',
-            'hero-btn2': 'COMO TRABAJAMOS',
-            'hero-c1-label': 'PRECISION',
-            'hero-c2-label': 'ENTREGA PROMEDIO',
-            'hero-c3-label': 'PROYECTOS ENTREGADOS',
-            'hero-c4-label': 'SATISFACCION',
-            // Services
-            'srv-tag': 'NUESTROS SERVICIOS',
-            'srv-title': 'TODO LO QUE NECESITAS<br>PARA MATERIALIZAR TU IDEA',
-            'srv1-t': 'IMPRESION 3D PERSONALIZADA',
-            'srv1-d': 'Recibimos tus archivos STL o STEP y seleccionamos la tecnologia, resolucion, relleno y parametros termicos optimos. Alto control dimensional, configuracion de malla eficiente y post-procesado basico incluido.',
-            'srv2-t': 'DISEÑO Y MODELADO CAD',
-            'srv2-d': 'Creamos modelos 3D desde cero a partir de bocetos, planos 2D o referencias fotograficas. Modelado parametrico industrial, optimizacion para manufactura aditiva e ingenieria inversa de piezas rotas o discontinuadas.',
-            'srv3-t': 'PROTOTIPADO RAPIDO',
-            'srv3-d': 'Iteraciones veloces para validar formas, ensambles y funcionalidad. Reducimos hasta 90% los tiempos respecto a manufactura tradicional. Ideal para startups, ingenieros y diseñadores industriales que necesitan testear antes de producir.',
-            'srv4-t': 'PRODUCCION EN SERIE',
-            'srv4-d': 'Tiradas de 10 a 500 unidades sin costo de moldes iniciales. Control de calidad y homogeneidad pieza por pieza. Produccion bajo demanda con packaging incluido y logistica coordinada a todo el pais.',
-            // Process
-            'proc-tag': 'COMO TRABAJAMOS',
-            'proc-title': 'UN PROCESO SIMPLE,<br>RESULTADOS PRECISOS',
-            'proc-desc': 'De la idea al objeto fisico en cuatro pasos. Sin complicaciones, con seguimiento en cada etapa.',
-            'proc1-t': 'CONTACTO INICIAL',
-            'proc1-d': 'Nos envias tu archivo, boceto o idea. Evaluamos viabilidad, materiales y tiempos. Te pasamos presupuesto en menos de 24hs.',
-            'proc2-t': 'DISEÑO Y VALIDACION',
-            'proc2-d': 'Si es necesario, modelamos o ajustamos el diseño. Te mostramos previsualizaciones antes de imprimir para asegurar que todo esta correcto.',
-            'proc3-t': 'IMPRESION Y CONTROL',
-            'proc3-d': 'Configuramos parametros optimos para cada pieza. Impresion capa por capa con control de calidad durante y despues del proceso.',
-            'proc4-t': 'ENTREGA',
-            'proc4-d': 'Embalaje protector a medida. Envios a todo el pais con seguimiento o retiro en nuestro taller en Buenos Aires.',
-            // Materials
-            'mat-tag': 'MATERIALES',
-            'mat-title': 'ELEGIMOS EL MATERIAL<br>SEGUN TU PROYECTO',
-            'mat1-badge': 'MAS USADO',
-            'mat1-sub': 'Acido polilactico. El estandar versatil.',
-            'mat1-l1': 'Biodegradable, derivado del maiz',
-            'mat1-l2': 'Alta resolucion y nivel de detalle',
-            'mat1-l3': 'Excelente acabado superficial',
-            'mat1-l4': 'Ideal para piezas decorativas, maquetas y prototipos rapidos',
-            'mat2-badge': 'RESISTENTE',
-            'mat2-sub': 'Maxima resistencia mecanica y termica.',
-            'mat2-l1': 'Resistente a impactos, quimicos y UV',
-            'mat2-l2': 'Soporta hasta 80 grados centigrados',
-            'mat2-l3': 'Flexibilidad inherente, practicamente irrompible',
-            'mat2-l4': 'Ideal para piezas mecanicas, repuestos y uso exterior',
-            'mat3-badge': 'FLEXIBLE',
-            'mat3-sub': 'Caucho sintetico para adaptabilidad.',
-            'mat3-l1': 'Elastomero para piezas tipo goma',
-            'mat3-l2': 'Fundas flexibles, sellos hermeticos, ruedas',
-            'mat3-l3': 'Alta resistencia a abrasion y tension',
-            'mat3-l4': 'Aislacion de impactos y vibraciones',
-            // Applications
-            'app-tag': 'APLICACIONES',
-            'app-title': 'DONDE SE APLICA<br>LA IMPRESION 3D',
-            'app1-t': 'PROTOTIPOS',
-            'app1-d': 'Valida modelos, testea ensambles y evalua dimensiones y apariencia antes de invertir en moldes o inyeccion plastica.',
-            'app2-t': 'PIEZAS FUNCIONALES',
-            'app2-d': 'Componentes con tolerancias mecanicas, resistencia termica y estructural. Materiales tecnicos para tension, impacto y friccion.',
-            'app3-t': 'REPUESTOS',
-            'app3-d': 'Ingenieria inversa para recuperar piezas rotas o discontinuadas. Restaura la utilidad de equipos sin depender del fabricante original.',
-            'app4-t': 'NEGOCIOS Y BRANDING',
-            'app4-d': 'Merchandising personalizado, logos corporativos 3D, componentes de exhibicion y stands. Elementos unicos para identidad de marca.',
-            // Why us
-            'why-tag': 'POR QUE ELEGIR BTLDECO',
-            'why-title': 'VENTAJAS QUE MARCAN<br>LA DIFERENCIA',
-            'why1-t': 'PRODUCCION PERSONALIZADA',
-            'why1-d': 'Cada impresion se ajusta exactamente a los requerimientos geometricos y funcionales de tu modelo.',
-            'why2-t': 'ENTREGAS RAPIDAS',
-            'why2-d': 'Plazos ajustables y velocidad de respuesta para que tu proyecto no se detenga. Entrega promedio en 48hs.',
-            'why3-t': 'ASESORAMIENTO TECNICO',
-            'why3-d': 'Te acompañamos desde la idea hasta el material ideal y la configuracion de impresion optima.',
-            'why4-t': 'MATERIALES DE CALIDAD',
-            'why4-d': 'Polimeros seleccionados (PLA, PETG, TPU) garantizando estetica, resistencia y durabilidad.',
-            // CTA
-            'cta-tag': 'EMPEZA TU PROYECTO',
-            'cta-title': '¿TENES UNA IDEA?<br>LA HACEMOS REALIDAD.',
-            'cta-desc': 'Contanos que necesitas. Te respondemos en menos de 24 horas con un presupuesto detallado y sin compromiso.',
-            'cta-btn': 'PEDIR PRESUPUESTO',
-            // Contact
+            'nav-inicio': 'Inicio',
+            'nav-productos': 'Productos',
+            'nav-galeria': 'Galeria',
+            'nav-nosotros': 'Nosotros',
+            'nav-contacto': 'Contacto',
+            'nav-cta': 'TIENDA',
+            'hero-tag': 'DECORACION DE DISEÑO',
+            'hero-t1': 'Piezas que',
+            'hero-t2': 'transforman',
+            'hero-t3': 'espacios',
+            'hero-sub': 'Objetos decorativos unicos, fabricados con tecnologia 3D y terminaciones artesanales. Macetas, figuras, portavelas y mas — diseño argentino para tu hogar.',
+            'hero-btn1': 'VER PRODUCTOS',
+            'hero-btn2': 'EXPLORAR GALERIA',
+            'hero-s1': 'Piezas vendidas',
+            'hero-s2': 'Diseños unicos',
+            'hero-s3': 'Clientes felices',
+            'prod-tag': 'NUESTROS PRODUCTOS',
+            'prod-title': 'Diseño que decora,<br>detalle que enamora',
+            'prod-sub': 'Cada pieza esta pensada para aportar personalidad y calidez a tus ambientes.',
+            'prod1-badge': 'POPULAR',
+            'prod1-t': 'Macetas de Diseño',
+            'prod1-d': 'Geometricas, organicas y minimalistas. Ideales para suculentas, cactus y plantas de interior.',
+            'prod2-badge': 'NUEVO',
+            'prod2-t': 'Figuras & Esculturas',
+            'prod2-d': 'Piezas esculturales para repisas, mesas y bibliotecas. Arte moderno para tu hogar.',
+            'prod3-t': 'Portavelas & Difusores',
+            'prod3-d': 'Ambientacion con estilo. Portavelas texturados y difusores con diseño unico.',
+            'prod4-t': 'Organizadores & Bandejas',
+            'prod4-d': 'Funcionalidad y diseño en uno. Organizadores para escritorio, baño y cocina.',
+            'prod-link': 'Consultar',
+            'gal-tag': 'NUESTROS TRABAJOS',
+            'gal-title': 'Galeria de<br>productos',
+            'gal-consult': 'CONSULTAR',
+            'about-tag': 'SOBRE BTLDECO',
+            'about-title': 'Diseño argentino,<br>fabricacion artesanal',
+            'about-desc': 'Combinamos tecnologia de impresion 3D con acabados manuales para crear piezas decorativas unicas. Cada producto esta pensado para aportar caracter y calidez a tus espacios.',
+            'about-f1-t': 'Diseño Original',
+            'about-f1-d': 'Cada pieza nace de un proceso creativo propio. No revendemos, creamos.',
+            'about-f2-t': 'Calidad Premium',
+            'about-f2-d': 'Terminaciones a mano, control pieza por pieza. Sin defectos, sin apuro.',
+            'about-f3-t': 'Envios Seguros',
+            'about-f3-d': 'Packaging protector a medida. Envios a todo el pais con seguimiento.',
+            'about-f4-t': 'Entrega Rapida',
+            'about-f4-d': 'Produccion agil con entrega promedio en 48 horas habiles.',
+            'cta-tag': 'PEDIDOS PERSONALIZADOS',
+            'cta-title': '¿Tenes una idea?<br>La hacemos realidad.',
+            'cta-desc': 'Tambien hacemos piezas a medida. Contanos que necesitas y te armamos un presupuesto sin compromiso.',
+            'cta-btn': 'HACER PEDIDO',
             'ct-tag': 'CONTACTO',
-            'ct-title': 'HABLEMOS DE<br>TU PROYECTO',
+            'ct-title': 'Hablemos de<br>tu pedido',
             'ct-desc': 'Respondemos en menos de 24hs. Tambien podes escribirnos directo por WhatsApp.',
             'ct-label-name': 'NOMBRE',
             'ct-label-email': 'EMAIL',
-            'ct-label-service': 'SERVICIO',
+            'ct-label-product': 'PRODUCTO',
             'ct-label-msg': 'MENSAJE',
             'ct-ph-name': 'Tu nombre completo',
             'ct-ph-email': 'tu@email.com',
-            'ct-ph-service': 'Selecciona un servicio',
-            'ct-ph-msg': 'Contanos sobre tu proyecto...',
+            'ct-ph-product': 'Selecciona un producto',
+            'ct-ph-msg': 'Contanos que te gustaria...',
             'ct-label-phone': 'WHATSAPP',
             'ct-label-phone2': 'TELEFONO',
             'ct-ph-phone': '+54 11 ...',
             'ct-label-location': 'UBICACION',
             'ct-label-social': 'REDES SOCIALES',
             'ct-btn': 'ENVIAR MENSAJE',
-            // Gallery
-            'gal-tag': 'NUESTROS TRABAJOS',
-            'gal-title': 'GALERIA DE<br>PRODUCTOS',
-            'ct-copy': '2026 BTLDECO. Todos los derechos reservados.',
-            // Select options
-            'ct-opt1': 'Impresion 3D personalizada',
-            'ct-opt2': 'Diseño y modelado 3D',
-            'ct-opt3': 'Prototipado rapido',
-            'ct-opt4': 'Produccion en serie',
-            'ct-opt5': 'Acabado y post-procesado',
+            'ct-copy': '&copy; 2026 BTLDECO. Todos los derechos reservados.',
+            'ct-opt1': 'Macetas de diseño',
+            'ct-opt2': 'Figuras & esculturas',
+            'ct-opt3': 'Portavelas & difusores',
+            'ct-opt4': 'Organizadores & bandejas',
+            'ct-opt5': 'Pedido personalizado',
             'ct-opt6': 'Consulta general',
         },
         en: {
-            'nav-inicio': 'HOME',
-            'nav-servicios': 'SERVICES',
-            'nav-proceso': 'PROCESS',
-            'nav-materiales': 'MATERIALS',
-            'nav-contacto': 'CONTACT',
-            'nav-cta': 'REQUEST QUOTE',
-            'hero-tag': 'PROFESSIONAL 3D PRINTING SERVICE',
-            'hero-t1': 'WE TURN',
-            'hero-t2': 'FILES INTO',
-            'hero-t3': 'REAL OBJECTS',
-            'hero-sub': 'Professional custom 3D printing service. We turn your digital ideas into physical products with maximum resolution and attention to detail. For companies, designers and entrepreneurs.',
-            'hero-btn1': 'VIEW SERVICES',
-            'hero-btn2': 'HOW WE WORK',
-            'hero-c1-label': 'PRECISION',
-            'hero-c2-label': 'AVERAGE DELIVERY',
-            'hero-c3-label': 'PROJECTS DELIVERED',
-            'hero-c4-label': 'SATISFACTION',
-            'srv-tag': 'OUR SERVICES',
-            'srv-title': 'EVERYTHING YOU NEED<br>TO MATERIALIZE YOUR IDEA',
-            'srv1-t': 'CUSTOM 3D PRINTING',
-            'srv1-d': 'We receive your STL or STEP files and select the optimal technology, resolution, infill and thermal parameters. High dimensional control, efficient mesh configuration and basic post-processing included.',
-            'srv2-t': 'CAD DESIGN & MODELING',
-            'srv2-d': 'We create 3D models from scratch based on sketches, 2D plans or photo references. Parametric industrial modeling, additive manufacturing optimization and reverse engineering of broken or discontinued parts.',
-            'srv3-t': 'RAPID PROTOTYPING',
-            'srv3-d': 'Fast iterations to validate shapes, assemblies and functionality. We reduce up to 90% of time compared to traditional manufacturing. Ideal for startups, engineers and industrial designers who need to test before production.',
-            'srv4-t': 'SERIES PRODUCTION',
-            'srv4-d': 'Runs from 10 to 500 units with no initial mold costs. Quality control and homogeneity piece by piece. On-demand production with packaging included and coordinated logistics nationwide.',
-            'proc-tag': 'HOW WE WORK',
-            'proc-title': 'A SIMPLE PROCESS,<br>PRECISE RESULTS',
-            'proc-desc': 'From idea to physical object in four steps. No complications, with tracking at every stage.',
-            'proc1-t': 'INITIAL CONTACT',
-            'proc1-d': 'Send us your file, sketch or idea. We evaluate feasibility, materials and timelines. You get a quote in less than 24 hours.',
-            'proc2-t': 'DESIGN & VALIDATION',
-            'proc2-d': 'If needed, we model or adjust the design. We show you previews before printing to make sure everything is correct.',
-            'proc3-t': 'PRINTING & QUALITY CONTROL',
-            'proc3-d': 'We set optimal parameters for each piece. Layer by layer printing with quality control during and after the process.',
-            'proc4-t': 'DELIVERY',
-            'proc4-d': 'Custom protective packaging. Nationwide shipping with tracking or pickup at our workshop in Buenos Aires.',
-            'mat-tag': 'MATERIALS',
-            'mat-title': 'WE CHOOSE THE MATERIAL<br>BASED ON YOUR PROJECT',
-            'mat1-badge': 'MOST USED',
-            'mat1-sub': 'Polylactic acid. The versatile standard.',
-            'mat1-l1': 'Biodegradable, corn-derived',
-            'mat1-l2': 'High resolution and detail level',
-            'mat1-l3': 'Excellent surface finish',
-            'mat1-l4': 'Ideal for decorative pieces, models and quick prototypes',
-            'mat2-badge': 'RESISTANT',
-            'mat2-sub': 'Maximum mechanical and thermal resistance.',
-            'mat2-l1': 'Resistant to impacts, chemicals and UV',
-            'mat2-l2': 'Withstands up to 80 degrees Celsius',
-            'mat2-l3': 'Inherent flexibility, virtually unbreakable',
-            'mat2-l4': 'Ideal for mechanical parts, replacements and outdoor use',
-            'mat3-badge': 'FLEXIBLE',
-            'mat3-sub': 'Synthetic rubber for adaptability.',
-            'mat3-l1': 'Elastomer for rubber-like parts',
-            'mat3-l2': 'Flexible cases, hermetic seals, wheels',
-            'mat3-l3': 'High abrasion and tension resistance',
-            'mat3-l4': 'Impact and vibration isolation',
-            'app-tag': 'APPLICATIONS',
-            'app-title': 'WHERE 3D PRINTING<br>IS APPLIED',
-            'app1-t': 'PROTOTYPES',
-            'app1-d': 'Validate models, test assemblies and evaluate dimensions and appearance before investing in molds or plastic injection.',
-            'app2-t': 'FUNCTIONAL PARTS',
-            'app2-d': 'Components with mechanical tolerances, thermal and structural resistance. Technical materials for tension, impact and friction.',
-            'app3-t': 'SPARE PARTS',
-            'app3-d': 'Reverse engineering to recover broken or discontinued parts. Restore equipment utility without depending on the original manufacturer.',
-            'app4-t': 'BUSINESS & BRANDING',
-            'app4-d': 'Custom merchandising, 3D corporate logos, exhibition components and stands. Unique elements for brand identity.',
-            'why-tag': 'WHY CHOOSE BTLDECO',
-            'why-title': 'ADVANTAGES THAT MAKE<br>THE DIFFERENCE',
-            'why1-t': 'CUSTOM PRODUCTION',
-            'why1-d': 'Each print adjusts exactly to the geometric and functional requirements of your model.',
-            'why2-t': 'FAST DELIVERY',
-            'why2-d': 'Adjustable deadlines and fast response so your project never stops. Average delivery in 48 hours.',
-            'why3-t': 'TECHNICAL ADVISORY',
-            'why3-d': 'We guide you from the idea to the ideal material and optimal printing configuration.',
-            'why4-t': 'QUALITY MATERIALS',
-            'why4-d': 'Selected polymers (PLA, PETG, TPU) ensuring aesthetics, resistance and durability.',
-            'cta-tag': 'START YOUR PROJECT',
-            'cta-title': 'HAVE AN IDEA?<br>WE MAKE IT REAL.',
-            'cta-desc': 'Tell us what you need. We respond within 24 hours with a detailed quote, no commitment.',
-            'cta-btn': 'REQUEST QUOTE',
+            'nav-inicio': 'Home',
+            'nav-productos': 'Products',
+            'nav-galeria': 'Gallery',
+            'nav-nosotros': 'About',
+            'nav-contacto': 'Contact',
+            'nav-cta': 'SHOP',
+            'hero-tag': 'DESIGNER DECOR',
+            'hero-t1': 'Pieces that',
+            'hero-t2': 'transform',
+            'hero-t3': 'spaces',
+            'hero-sub': 'Unique decorative objects, made with 3D technology and artisanal finishes. Planters, figures, candle holders and more — Argentine design for your home.',
+            'hero-btn1': 'VIEW PRODUCTS',
+            'hero-btn2': 'EXPLORE GALLERY',
+            'hero-s1': 'Pieces sold',
+            'hero-s2': 'Unique designs',
+            'hero-s3': 'Happy clients',
+            'prod-tag': 'OUR PRODUCTS',
+            'prod-title': 'Design that decorates,<br>detail that captivates',
+            'prod-sub': 'Each piece is designed to add personality and warmth to your spaces.',
+            'prod1-badge': 'POPULAR',
+            'prod1-t': 'Design Planters',
+            'prod1-d': 'Geometric, organic and minimalist. Perfect for succulents, cacti and indoor plants.',
+            'prod2-badge': 'NEW',
+            'prod2-t': 'Figures & Sculptures',
+            'prod2-d': 'Sculptural pieces for shelves, tables and bookcases. Modern art for your home.',
+            'prod3-t': 'Candle Holders & Diffusers',
+            'prod3-d': 'Stylish ambiance. Textured candle holders and uniquely designed diffusers.',
+            'prod4-t': 'Organizers & Trays',
+            'prod4-d': 'Function meets design. Organizers for desk, bathroom and kitchen.',
+            'prod-link': 'Inquire',
+            'gal-tag': 'OUR WORK',
+            'gal-title': 'Product<br>gallery',
+            'gal-consult': 'INQUIRE',
+            'about-tag': 'ABOUT BTLDECO',
+            'about-title': 'Argentine design,<br>artisanal craftsmanship',
+            'about-desc': 'We combine 3D printing technology with hand-finished details to create unique decorative pieces. Every product is designed to add character and warmth to your spaces.',
+            'about-f1-t': 'Original Design',
+            'about-f1-d': 'Every piece comes from our own creative process. We don\'t resell, we create.',
+            'about-f2-t': 'Premium Quality',
+            'about-f2-d': 'Hand-finished, inspected piece by piece. No defects, no rush.',
+            'about-f3-t': 'Safe Shipping',
+            'about-f3-d': 'Custom protective packaging. Nationwide shipping with tracking.',
+            'about-f4-t': 'Fast Delivery',
+            'about-f4-d': 'Agile production with average delivery in 48 business hours.',
+            'cta-tag': 'CUSTOM ORDERS',
+            'cta-title': 'Have an idea?<br>We make it real.',
+            'cta-desc': 'We also make custom pieces. Tell us what you need and we\'ll put together a no-commitment quote.',
+            'cta-btn': 'PLACE ORDER',
             'ct-tag': 'CONTACT',
-            'ct-title': 'LET\'S TALK ABOUT<br>YOUR PROJECT',
+            'ct-title': 'Let\'s talk about<br>your order',
             'ct-desc': 'We respond within 24 hours. You can also message us directly on WhatsApp.',
             'ct-label-name': 'NAME',
             'ct-label-email': 'EMAIL',
-            'ct-label-service': 'SERVICE',
+            'ct-label-product': 'PRODUCT',
             'ct-label-msg': 'MESSAGE',
             'ct-ph-name': 'Your full name',
             'ct-ph-email': 'you@email.com',
-            'ct-ph-service': 'Select a service',
-            'ct-ph-msg': 'Tell us about your project...',
+            'ct-ph-product': 'Select a product',
+            'ct-ph-msg': 'Tell us what you\'d like...',
             'ct-label-phone': 'WHATSAPP',
             'ct-label-phone2': 'PHONE',
             'ct-ph-phone': '+54 11 ...',
             'ct-label-location': 'LOCATION',
             'ct-label-social': 'SOCIAL MEDIA',
             'ct-btn': 'SEND MESSAGE',
-            'gal-tag': 'OUR WORK',
-            'gal-title': 'PRODUCT<br>GALLERY',
-            'ct-copy': '2026 BTLDECO. All rights reserved.',
-            'ct-opt1': 'Custom 3D printing',
-            'ct-opt2': '3D design & modeling',
-            'ct-opt3': 'Rapid prototyping',
-            'ct-opt4': 'Series production',
-            'ct-opt5': 'Finishing & post-processing',
+            'ct-copy': '&copy; 2026 BTLDECO. All rights reserved.',
+            'ct-opt1': 'Design planters',
+            'ct-opt2': 'Figures & sculptures',
+            'ct-opt3': 'Candle holders & diffusers',
+            'ct-opt4': 'Organizers & trays',
+            'ct-opt5': 'Custom order',
             'ct-opt6': 'General inquiry',
         }
     };
@@ -282,7 +439,6 @@
         });
         document.documentElement.lang = lang === 'es' ? 'es' : 'en';
         localStorage.setItem(LANG_KEY, lang);
-        // Update switch UI
         if (langSwitch) {
             langSwitch.setAttribute('data-active', lang);
             langBtns.forEach((btn) => {
@@ -291,7 +447,6 @@
         }
     }
 
-    // Detect language
     const savedLang = localStorage.getItem(LANG_KEY);
     let currentLang = 'es';
     if (savedLang) {
@@ -312,14 +467,25 @@
         });
     });
 
-    // --- Scroll Reveal (Intersection Observer with stagger) ---
+    // =========================================================
+    // IMAGE ACCORDION (hover to expand)
+    // =========================================================
+    const accordionItems = document.querySelectorAll('.accordion-item');
+    accordionItems.forEach((item) => {
+        item.addEventListener('mouseenter', () => {
+            accordionItems.forEach((el) => el.classList.remove('active'));
+            item.classList.add('active');
+        });
+    });
+
+    // =========================================================
+    // SCROLL REVEAL
+    // =========================================================
     const revealElements = document.querySelectorAll('.reveal');
-    let revealIndex = 0;
     const revealObserver = new IntersectionObserver(
         (entries) => {
             entries.forEach((entry) => {
                 if (entry.isIntersecting) {
-                    // Stagger delay based on visible order
                     const siblings = entry.target.parentElement.querySelectorAll('.reveal');
                     let sibIndex = 0;
                     siblings.forEach((s, i) => { if (s === entry.target) sibIndex = i; });
@@ -333,13 +499,15 @@
     );
     revealElements.forEach((el) => revealObserver.observe(el));
 
-    // --- Navbar scroll effect ---
+    // =========================================================
+    // NAVBAR
+    // =========================================================
     const navbar = document.getElementById('navbar');
     window.addEventListener('scroll', () => {
         navbar.classList.toggle('scrolled', window.scrollY > 50);
     }, { passive: true });
 
-    // --- Mobile toggle ---
+    // Mobile toggle
     const navToggle = document.getElementById('navToggle');
     const navLinks = document.getElementById('navLinks');
     if (navToggle) {
@@ -355,7 +523,9 @@
         });
     }
 
-    // --- Counter animation ---
+    // =========================================================
+    // COUNTER ANIMATION
+    // =========================================================
     const counters = document.querySelectorAll('[data-count]');
     const counterObserver = new IntersectionObserver(
         (entries) => {
@@ -386,7 +556,9 @@
         requestAnimationFrame(update);
     }
 
-    // --- Smooth anchor scroll ---
+    // =========================================================
+    // SMOOTH ANCHOR SCROLL
+    // =========================================================
     document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
         anchor.addEventListener('click', (e) => {
             const id = anchor.getAttribute('href');
@@ -401,7 +573,9 @@
         });
     });
 
-    // --- Navbar dark section detection ---
+    // =========================================================
+    // NAVBAR DARK SECTION DETECTION
+    // =========================================================
     const darkSections = document.querySelectorAll('.dark-section');
     function checkNavbarOverDark() {
         const navRect = navbar.getBoundingClientRect();
@@ -418,7 +592,9 @@
     window.addEventListener('scroll', checkNavbarOverDark, { passive: true });
     checkNavbarOverDark();
 
-    // --- Scroll to top button ---
+    // =========================================================
+    // SCROLL TO TOP
+    // =========================================================
     const scrollTopBtn = document.getElementById('scrollTop');
     if (scrollTopBtn) {
         window.addEventListener('scroll', () => {
@@ -430,7 +606,9 @@
         });
     }
 
-    // --- Active nav link on scroll ---
+    // =========================================================
+    // ACTIVE NAV LINK ON SCROLL
+    // =========================================================
     const sections = document.querySelectorAll('section[id]');
     const navLinkItems = document.querySelectorAll('.navbar__links a');
     const sectionObserver = new IntersectionObserver(
@@ -448,51 +626,46 @@
     );
     sections.forEach((s) => sectionObserver.observe(s));
 
-    // --- Service row hover tilt (subtle) ---
-    const serviceRows = document.querySelectorAll('.service-row');
-    serviceRows.forEach((row) => {
-        row.addEventListener('mouseenter', () => {
-            row.style.transform = 'translateX(8px)';
-        });
-        row.addEventListener('mouseleave', () => {
-            row.style.transform = 'translateX(0)';
-        });
-    });
+    // =========================================================
+    // GALLERY EXPAND (CLICK TO ENLARGE WITH PRODUCT NAME)
+    // =========================================================
+    const galleryExpand = document.getElementById('galleryExpand');
+    const galleryExpandImg = document.getElementById('galleryExpandImg');
+    const galleryExpandName = document.getElementById('galleryExpandName');
+    const galleryExpandClose = document.getElementById('galleryExpandClose');
 
-    // --- Gallery Lightbox ---
-    const lightbox = document.getElementById('lightbox');
-    const lightboxImg = document.getElementById('lightboxImg');
-    const lightboxClose = document.getElementById('lightboxClose');
-
-    if (lightbox) {
+    if (galleryExpand) {
         document.querySelectorAll('.gallery__item').forEach((item) => {
             item.addEventListener('click', () => {
                 const img = item.querySelector('img');
+                const productName = item.getAttribute('data-product') || '';
                 if (img) {
-                    // Load higher res version
-                    lightboxImg.src = img.src.replace('w=600&h=400', 'w=1400&h=1000');
-                    lightboxImg.alt = img.alt;
-                    lightbox.classList.add('active');
+                    galleryExpandImg.src = img.src.replace('w=600&h=450', 'w=1400&h=1050');
+                    galleryExpandImg.alt = productName;
+                    galleryExpandName.textContent = productName;
+                    galleryExpand.classList.add('active');
                     document.body.style.overflow = 'hidden';
                 }
             });
         });
 
-        lightboxClose.addEventListener('click', closeLightbox);
-        lightbox.addEventListener('click', (e) => {
-            if (e.target === lightbox) closeLightbox();
+        galleryExpandClose.addEventListener('click', closeGalleryExpand);
+        galleryExpand.addEventListener('click', (e) => {
+            if (e.target === galleryExpand) closeGalleryExpand();
         });
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && lightbox.classList.contains('active')) closeLightbox();
+            if (e.key === 'Escape' && galleryExpand.classList.contains('active')) closeGalleryExpand();
         });
 
-        function closeLightbox() {
-            lightbox.classList.remove('active');
+        function closeGalleryExpand() {
+            galleryExpand.classList.remove('active');
             document.body.style.overflow = '';
         }
     }
 
-    // --- Form submit feedback ---
+    // =========================================================
+    // FORM SUBMIT FEEDBACK
+    // =========================================================
     const form = document.querySelector('.contact__form');
     if (form) {
         form.addEventListener('submit', (e) => {

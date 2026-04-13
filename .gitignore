@@ -1,0 +1,9 @@
+.DS_Store
+uploads/productos/*
+uploads/categorias/*
+uploads/slides/*
+bkp/*
+!uploads/productos/.gitkeep
+!uploads/categorias/.gitkeep
+!uploads/slides/.gitkeep
+!bkp/.gitkeep
