@@ -260,7 +260,7 @@ if (isset($_GET['edit'])) {
                     <td><span class="drag-handle" title="Arrastrar para reordenar">&#9776;</span></td>
                     <td>
                         <?php if ($cat['imagen']): ?>
-                            <img src="<?= UPLOAD_URL . sanitize($cat['imagen']) ?>" alt="" class="cat-thumb">
+                            <img src="<?= img_url($cat['imagen'], 'categorias') ?>" alt="" class="cat-thumb">
                         <?php else: ?>
                             <div class="cat-thumb-placeholder">---</div>
                         <?php endif; ?>
@@ -375,7 +375,7 @@ if (isset($_GET['edit'])) {
                         <label for="imagen">Imagen</label>
                         <input type="file" id="imagen" name="imagen" accept="image/*" onchange="previewImg(this)">
                         <img id="imgPreview" class="img-preview"
-                             src="<?= $edit && $edit['imagen'] ? UPLOAD_URL . sanitize($edit['imagen']) : '' ?>"
+                             src="<?= $edit && $edit['imagen'] ? img_url($edit['imagen'], 'categorias') : '' ?>"
                              style="<?= $edit && $edit['imagen'] ? 'display:block' : 'display:none' ?>">
                     </div>
                     <div class="form-group">

@@ -13,20 +13,20 @@ $results = [];
 // CATEGORIAS
 // ============================================================
 $categorias = [
-    ['nombre' => 'Floreros',           'slug' => 'floreros',          'descripcion' => 'Floreros de diseño para flores frescas y secas', 'orden' => 1],
-    ['nombre' => 'Aromatización',      'slug' => 'aromatizacion',     'descripcion' => 'Difusores, portavelas y aromas para tu hogar', 'orden' => 2],
-    ['nombre' => 'Cocina',             'slug' => 'cocina',            'descripcion' => 'Organizadores y accesorios para tu cocina', 'orden' => 3],
-    ['nombre' => 'Baño',               'slug' => 'bano',              'descripcion' => 'Accesorios decorativos para el baño', 'orden' => 4],
-    ['nombre' => 'Decoración',         'slug' => 'decoracion',        'descripcion' => 'Figuras, esculturas y piezas decorativas', 'orden' => 5],
-    ['nombre' => 'Living - Comedor',   'slug' => 'living-comedor',    'descripcion' => 'Piezas para living, comedor y espacios compartidos', 'orden' => 6],
+    ['nombre' => 'Floreros',           'slug' => 'floreros',          'descripcion' => 'Floreros de diseño para flores frescas y secas', 'orden' => 1, 'imagen' => 'https://images.unsplash.com/photo-1578500494198-246f612d3b3d?w=600&h=400&fit=crop'],
+    ['nombre' => 'Aromatización',      'slug' => 'aromatizacion',     'descripcion' => 'Difusores, portavelas y aromas para tu hogar', 'orden' => 2, 'imagen' => 'https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?w=600&h=400&fit=crop'],
+    ['nombre' => 'Cocina',             'slug' => 'cocina',            'descripcion' => 'Organizadores y accesorios para tu cocina', 'orden' => 3, 'imagen' => 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600&h=400&fit=crop'],
+    ['nombre' => 'Baño',               'slug' => 'bano',              'descripcion' => 'Accesorios decorativos para el baño', 'orden' => 4, 'imagen' => 'https://images.unsplash.com/photo-1507473885765-e6ed057ab6fe?w=600&h=400&fit=crop'],
+    ['nombre' => 'Decoración',         'slug' => 'decoracion',        'descripcion' => 'Figuras, esculturas y piezas decorativas', 'orden' => 5, 'imagen' => 'https://images.unsplash.com/photo-1544967082-d9d25d867d66?w=600&h=400&fit=crop'],
+    ['nombre' => 'Living - Comedor',   'slug' => 'living-comedor',    'descripcion' => 'Piezas para living, comedor y espacios compartidos', 'orden' => 6, 'imagen' => 'https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?w=600&h=400&fit=crop'],
 ];
 
 $catIds = [];
 foreach ($categorias as $cat) {
     try {
-        $stmt = $db->prepare("INSERT INTO categorias (nombre, slug, descripcion, orden, activa) VALUES (?, ?, ?, ?, 1)
-                              ON DUPLICATE KEY UPDATE nombre = VALUES(nombre)");
-        $stmt->execute([$cat['nombre'], $cat['slug'], $cat['descripcion'], $cat['orden']]);
+        $stmt = $db->prepare("INSERT INTO categorias (nombre, slug, descripcion, orden, activa, imagen) VALUES (?, ?, ?, ?, 1, ?)
+                              ON DUPLICATE KEY UPDATE nombre = VALUES(nombre), imagen = VALUES(imagen)");
+        $stmt->execute([$cat['nombre'], $cat['slug'], $cat['descripcion'], $cat['orden'], $cat['imagen'] ?? null]);
         $catIds[$cat['slug']] = $db->lastInsertId() ?: $db->query("SELECT id FROM categorias WHERE slug = '{$cat['slug']}'")->fetchColumn();
         $results[] = "✅ Categoria: {$cat['nombre']} (ID: {$catIds[$cat['slug']]})";
     } catch (Exception $e) {

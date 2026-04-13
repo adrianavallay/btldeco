@@ -528,7 +528,7 @@ if (isset($_GET['edit'])) {
                 <td><input type="checkbox" class="row-check" value="<?= $p['id'] ?>"></td>
                 <td>
                     <?php if ($p['imagen_principal']): ?>
-                        <img src="<?= UPLOAD_URL . sanitize($p['imagen_principal']) ?>" class="thumb" alt="">
+                        <img src="<?= img_url($p['imagen_principal']) ?>" class="thumb" alt="">
                     <?php else: ?>
                         <span class="no-img"></span>
                     <?php endif; ?>
@@ -695,7 +695,7 @@ if (isset($_GET['edit'])) {
 
                 <!-- Preview -->
                 <div id="previewPrincipal" style="<?= ($edit && $edit['imagen_principal']) ? '' : 'display:none;' ?>position:relative;margin-bottom:12px;">
-                    <img id="imgPreviewPrincipal" src="<?= ($edit && $edit['imagen_principal']) ? UPLOAD_URL . sanitize($edit['imagen_principal']) : '' ?>" style="width:100%;max-height:280px;object-fit:cover;border-radius:8px;border:1px solid var(--border);">
+                    <img id="imgPreviewPrincipal" src="<?= ($edit && $edit['imagen_principal']) ? img_url($edit['imagen_principal']) : '' ?>" style="width:100%;max-height:280px;object-fit:cover;border-radius:8px;border:1px solid var(--border);">
                     <button type="button" onclick="quitarImagenPrincipal()" style="position:absolute;top:8px;right:8px;width:30px;height:30px;border-radius:50%;background:rgba(0,0,0,0.6);color:#fff;border:none;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;">&times;</button>
                 </div>
 
