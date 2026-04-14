@@ -13,8 +13,8 @@ define('ADMIN_USER', 'admin');
 define('ADMIN_PASS', '$2y$10$xQ8kG5YQ7z6wN3v5Q7z6wOJ5Q7z6wN3v5Q7z6wN3v5Q7z6wN3v5Q'); // cambiar
 define('ADMIN_PASS_PLAIN', 'admin123'); // Solo para primer login, después cambiar
 
-define('MP_ACCESS_TOKEN', 'APP_USR-8515178186465900-041322-641161dddd4ad22fd0a385ea2a94310c-3335166956');
-define('MP_PUBLIC_KEY', 'APP_USR-a8a10223-f901-431d-8f5d-faab1c6851b5');
+define('MP_ACCESS_TOKEN', 'APP_USR-7846101981125452-041322-5833c1020b924f1276abf5026351d565-430042144');
+define('MP_PUBLIC_KEY', 'APP_USR-c5a26bbd-13bd-4fc4-b3f8-9f0292b12890');
 
 define('ITEMS_PER_PAGE', 12);
 define('UPLOAD_DIR', __DIR__ . '/uploads/productos/');
