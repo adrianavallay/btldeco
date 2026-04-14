@@ -981,23 +981,28 @@ td img.thumb { width: 48px; height: 48px; object-fit: cover; border-radius: var(
     background: linear-gradient(135deg, #ef4444, #dc2626);
     box-shadow: 0 4px 16px rgba(239,68,68,0.3);
 }
-.estado-btn--pagado { border-color: rgba(16,185,129,0.25); }
-.estado-btn--pagado:hover, .estado-btn--pagado.active {
-    border-color: #10b981; color: #fff;
-    background: linear-gradient(135deg, #10b981, #059669);
-    box-shadow: 0 4px 16px rgba(16,185,129,0.3);
+/* Payment status badges (read-only, updated by MP webhook) */
+.pago-status { display: flex; flex-direction: column; gap: 10px; }
+.pago-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 12px 24px; border-radius: 10px;
+    font-family: var(--font-sans); font-size: 0.9rem; font-weight: 700;
+    width: fit-content;
 }
-.estado-btn--pendiente { border-color: rgba(245,158,11,0.25); }
-.estado-btn--pendiente:hover, .estado-btn--pendiente.active {
-    border-color: #f59e0b; color: #fff;
-    background: linear-gradient(135deg, #f59e0b, #d97706);
-    box-shadow: 0 4px 16px rgba(245,158,11,0.3);
+.pago-badge--pagado {
+    background: rgba(16,185,129,0.1); color: #059669; border: 1.5px solid rgba(16,185,129,0.3);
 }
-.estado-btn--reboto { border-color: rgba(239,68,68,0.25); }
-.estado-btn--reboto:hover, .estado-btn--reboto.active {
-    border-color: #ef4444; color: #fff;
-    background: linear-gradient(135deg, #ef4444, #b91c1c);
-    box-shadow: 0 4px 16px rgba(239,68,68,0.3);
+.pago-badge--pendiente {
+    background: rgba(245,158,11,0.1); color: #D97706; border: 1.5px solid rgba(245,158,11,0.3);
+}
+.pago-badge--reboto {
+    background: rgba(239,68,68,0.1); color: #DC2626; border: 1.5px solid rgba(239,68,68,0.3);
+}
+.pago-badge--cancelado {
+    background: rgba(107,114,128,0.1); color: #6B7280; border: 1.5px solid rgba(107,114,128,0.3);
+}
+.pago-note {
+    font-size: 0.78rem; color: var(--text-light); font-style: italic; margin: 0;
 }
 
 /* Reenviar email buttons */
