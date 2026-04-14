@@ -606,7 +606,7 @@ try {
     </button>
 
     <?php include "includes/cart_drawer.php"; ?>
-    <script src="js/main.js?v=13"></script>
+    <script src="js/main.js?v=17"></script>
     <script src="js/carousel.js?v=16"></script>
 </body>
 </html>

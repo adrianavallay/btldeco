@@ -26,6 +26,7 @@
             precision mediump float;
             uniform float u_time;
             uniform vec2 u_resolution;
+            uniform vec2 u_mouse;
 
             void main() {
                 vec2 uv = gl_FragCoord.xy / u_resolution;
@@ -34,17 +35,14 @@
 
                 float t = u_time * 0.2;
 
-                // Grid wireframe
                 float gridSize = 0.12;
                 vec2 grid = abs(fract(p / gridSize + t * 0.1) - 0.5);
                 float line = min(grid.x, grid.y);
                 float wire = 1.0 - smoothstep(0.0, 0.02, line);
 
-                // Distort grid
                 float distort = sin(p.x * 4.0 + t) * cos(p.y * 3.0 + t * 0.7) * 0.5;
                 wire *= (0.3 + distort * 0.3);
 
-                // Color: white wireframe on transparent
                 vec3 col = vec3(1.0) * wire;
                 float alpha = wire * 0.4;
 
@@ -54,8 +52,8 @@
             precision mediump float;
             uniform float u_time;
             uniform vec2 u_resolution;
+            uniform vec2 u_mouse;
 
-            // Simplex-like hash
             vec2 hash(vec2 p) {
                 p = vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3)));
                 return -1.0 + 2.0 * fract(sin(p) * 43758.5453123);
@@ -78,40 +76,34 @@
 
                 float t = u_time * 0.3;
 
-                // 5 mesh control points with paper-design colors
-                // #000000, #8B4513, #ffffff, #3E2723, #5D4037
-                vec3 c1 = vec3(0.0, 0.0, 0.0);              // black
-                vec3 c2 = vec3(0.545, 0.271, 0.075);         // saddle brown #8B4513
-                vec3 c3 = vec3(1.0, 1.0, 1.0);               // white
-                vec3 c4 = vec3(0.243, 0.153, 0.137);          // dark brown #3E2723
-                vec3 c5 = vec3(0.365, 0.251, 0.216);          // brown #5D4037
+                vec3 c1 = vec3(0.0, 0.0, 0.0);
+                vec3 c2 = vec3(0.545, 0.271, 0.075);
+                vec3 c3 = vec3(1.0, 1.0, 1.0);
+                vec3 c4 = vec3(0.243, 0.153, 0.137);
+                vec3 c5 = vec3(0.365, 0.251, 0.216);
 
-                // Animated positions for mesh points
+                // p3 (white light) follows mouse, others animate
                 vec2 p1 = vec2(sin(t * 0.7) * 0.8, cos(t * 0.5) * 0.7);
                 vec2 p2 = vec2(cos(t * 0.4) * 0.9, sin(t * 0.6) * 0.8);
-                vec2 p3 = vec2(sin(t * 0.5 + 2.0) * 0.6, cos(t * 0.3 + 1.0) * 0.9);
+                vec2 p3 = u_mouse; // white light follows mouse
                 vec2 p4 = vec2(cos(t * 0.8 + 3.0) * 0.7, sin(t * 0.4 + 2.0) * 0.6);
                 vec2 p5 = vec2(sin(t * 0.3 + 4.0) * 0.5, cos(t * 0.9 + 3.0) * 0.5);
 
-                // Soft radial weights
                 float w1 = 1.0 / (0.2 + length(p - p1) * 2.5);
                 float w2 = 1.0 / (0.2 + length(p - p2) * 2.5);
-                float w3 = 1.0 / (0.2 + length(p - p3) * 2.5);
+                float w3 = 1.0 / (0.15 + length(p - p3) * 2.0);
                 float w4 = 1.0 / (0.2 + length(p - p4) * 2.5);
                 float w5 = 1.0 / (0.2 + length(p - p5) * 2.5);
 
                 float totalW = w1 + w2 + w3 + w4 + w5;
                 vec3 col = (c1 * w1 + c2 * w2 + c3 * w3 + c4 * w4 + c5 * w5) / totalW;
 
-                // Add noise for organic feel
                 float n = noise(p * 3.0 + t * 0.5) * 0.08;
                 col += n;
 
-                // Vignette
                 float vig = 1.0 - smoothstep(0.5, 1.8, length(p));
                 col *= 0.8 + vig * 0.2;
 
-                // Clamp
                 col = clamp(col, 0.0, 1.0);
 
                 gl_FragColor = vec4(col, 1.0);
@@ -156,6 +148,30 @@
 
         const timeLoc = gl.getUniformLocation(program, 'u_time');
         const resLoc = gl.getUniformLocation(program, 'u_resolution');
+        const mouseLoc = gl.getUniformLocation(program, 'u_mouse');
+
+        // Mouse tracking state
+        let mouseX = 0.0, mouseY = 0.0;
+        let targetMouseX = 0.0, targetMouseY = 0.0;
+        let mouseInHero = false;
+
+        if (!isWireframe) {
+            const heroEl = canvas.closest('.hero');
+            if (heroEl) {
+                heroEl.addEventListener('mousemove', function(e) {
+                    const rect = heroEl.getBoundingClientRect();
+                    // Convert to -1..1 range, flip Y
+                    targetMouseX = ((e.clientX - rect.left) / rect.width) * 2.0 - 1.0;
+                    targetMouseY = -(((e.clientY - rect.top) / rect.height) * 2.0 - 1.0);
+                    // Scale by aspect ratio
+                    targetMouseX *= rect.width / rect.height;
+                    mouseInHero = true;
+                });
+                heroEl.addEventListener('mouseleave', function() {
+                    mouseInHero = false;
+                });
+            }
+        }
 
         function resize() {
             const dpr = Math.min(window.devicePixelRatio, 1.5);
@@ -173,8 +189,22 @@
 
         function render() {
             const elapsed = (performance.now() - startTime) / 1000;
+
+            // Smooth interpolation toward target or auto-animate
+            if (mouseInHero) {
+                mouseX += (targetMouseX - mouseX) * 0.05;
+                mouseY += (targetMouseY - mouseY) * 0.05;
+            } else {
+                // Auto-animate when mouse is outside
+                const autoX = Math.sin(elapsed * 0.5 + 2.0) * 0.6;
+                const autoY = Math.cos(elapsed * 0.3 + 1.0) * 0.9;
+                mouseX += (autoX - mouseX) * 0.03;
+                mouseY += (autoY - mouseY) * 0.03;
+            }
+
             gl.uniform1f(timeLoc, elapsed);
             gl.uniform2f(resLoc, canvas.width, canvas.height);
+            gl.uniform2f(mouseLoc, mouseX, mouseY);
             gl.drawArrays(gl.TRIANGLES, 0, 6);
             animId = requestAnimationFrame(render);
         }
