@@ -1,7 +1,7 @@
 <?php
 /**
- * API de Codigo Postal — Devuelve localidades y provincia
- * Usa datos embebidos de los CP mas comunes de Argentina
+ * API de Codigo Postal — Devuelve provincia y localidades sugeridas
+ * Combina datos locales + Zippopotam API como fallback
  * GET ?cp=1414
  */
 header('Content-Type: application/json; charset=utf-8');
@@ -9,264 +9,119 @@ header('Access-Control-Allow-Origin: *');
 
 $cp = trim($_GET['cp'] ?? '');
 if (strlen($cp) < 4) {
-    echo json_encode(['ok' => false, 'localidades' => []]);
+    echo json_encode(['ok' => false, 'provincia' => '', 'localidades' => []]);
     exit;
 }
 
-// Mapa de codigos postales argentinos (principales)
-$data = [
-    // CABA
-    '1001' => [['loc' => 'Centro (CABA)', 'prov' => 'CABA']],
-    '1002' => [['loc' => 'Retiro', 'prov' => 'CABA']],
-    '1003' => [['loc' => 'Retiro', 'prov' => 'CABA']],
-    '1004' => [['loc' => 'San Nicolas', 'prov' => 'CABA']],
-    '1005' => [['loc' => 'San Nicolas', 'prov' => 'CABA']],
-    '1006' => [['loc' => 'Monserrat', 'prov' => 'CABA']],
-    '1007' => [['loc' => 'Monserrat', 'prov' => 'CABA']],
-    '1008' => [['loc' => 'San Telmo', 'prov' => 'CABA']],
-    '1009' => [['loc' => 'Constitucion', 'prov' => 'CABA']],
-    '1010' => [['loc' => 'Monserrat', 'prov' => 'CABA']],
-    '1011' => [['loc' => 'San Telmo', 'prov' => 'CABA']],
-    '1012' => [['loc' => 'Balvanera', 'prov' => 'CABA']],
-    '1013' => [['loc' => 'Constitucion', 'prov' => 'CABA']],
-    '1014' => [['loc' => 'San Cristobal', 'prov' => 'CABA']],
-    '1015' => [['loc' => 'San Cristobal', 'prov' => 'CABA']],
-    '1016' => [['loc' => 'Once', 'prov' => 'CABA']],
-    '1017' => [['loc' => 'Congreso', 'prov' => 'CABA']],
-    '1018' => [['loc' => 'Congreso', 'prov' => 'CABA']],
-    '1019' => [['loc' => 'Balvanera', 'prov' => 'CABA']],
-    '1020' => [['loc' => 'Barracas', 'prov' => 'CABA']],
-    '1021' => [['loc' => 'San Telmo', 'prov' => 'CABA']],
-    '1022' => [['loc' => 'La Boca', 'prov' => 'CABA']],
-    '1023' => [['loc' => 'Parque Patricios', 'prov' => 'CABA']],
-    '1024' => [['loc' => 'Barracas', 'prov' => 'CABA']],
-    '1025' => [['loc' => 'Barracas', 'prov' => 'CABA']],
-    '1026' => [['loc' => 'Nueva Pompeya', 'prov' => 'CABA']],
-    '1027' => [['loc' => 'Boedo', 'prov' => 'CABA']],
-    '1028' => [['loc' => 'San Cristobal', 'prov' => 'CABA']],
-    '1029' => [['loc' => 'Parque Patricios', 'prov' => 'CABA']],
-    '1030' => [['loc' => 'Almagro', 'prov' => 'CABA']],
-    '1031' => [['loc' => 'Balvanera', 'prov' => 'CABA']],
-    '1032' => [['loc' => 'Abasto', 'prov' => 'CABA']],
-    '1033' => [['loc' => 'Boedo', 'prov' => 'CABA']],
-    '1034' => [['loc' => 'Almagro', 'prov' => 'CABA']],
-    '1035' => [['loc' => 'Caballito', 'prov' => 'CABA']],
-    '1036' => [['loc' => 'Caballito', 'prov' => 'CABA']],
-    '1037' => [['loc' => 'Caballito', 'prov' => 'CABA']],
-    '1038' => [['loc' => 'Flores', 'prov' => 'CABA']],
-    '1039' => [['loc' => 'Flores', 'prov' => 'CABA']],
-    '1040' => [['loc' => 'Parque Chacabuco', 'prov' => 'CABA']],
-    '1041' => [['loc' => 'Nueva Pompeya', 'prov' => 'CABA']],
-    '1042' => [['loc' => 'Soldati', 'prov' => 'CABA']],
-    '1043' => [['loc' => 'Flores', 'prov' => 'CABA']],
-    '1047' => [['loc' => 'Floresta', 'prov' => 'CABA']],
-    '1048' => [['loc' => 'Floresta', 'prov' => 'CABA']],
-    '1049' => [['loc' => 'Velez Sarsfield', 'prov' => 'CABA']],
-    '1053' => [['loc' => 'Villa Luro', 'prov' => 'CABA']],
-    '1054' => [['loc' => 'Liniers', 'prov' => 'CABA']],
-    '1055' => [['loc' => 'Mataderos', 'prov' => 'CABA']],
-    '1056' => [['loc' => 'Villa Lugano', 'prov' => 'CABA']],
-    '1057' => [['loc' => 'Villa Riachuelo', 'prov' => 'CABA']],
-    '1058' => [['loc' => 'Villa Soldati', 'prov' => 'CABA']],
-    '1060' => [['loc' => 'Recoleta', 'prov' => 'CABA']],
-    '1061' => [['loc' => 'Tribunales', 'prov' => 'CABA']],
-    '1062' => [['loc' => 'Once', 'prov' => 'CABA']],
-    '1063' => [['loc' => 'Abasto', 'prov' => 'CABA']],
-    '1064' => [['loc' => 'Almagro', 'prov' => 'CABA']],
-    '1065' => [['loc' => 'Caballito', 'prov' => 'CABA']],
-    '1066' => [['loc' => 'Flores', 'prov' => 'CABA']],
-    '1067' => [['loc' => 'Flores', 'prov' => 'CABA']],
-    '1068' => [['loc' => 'Floresta', 'prov' => 'CABA']],
-    '1070' => [['loc' => 'Microcentro', 'prov' => 'CABA']],
-    '1071' => [['loc' => 'San Nicolas', 'prov' => 'CABA']],
-    '1073' => [['loc' => 'Tribunales', 'prov' => 'CABA']],
-    '1078' => [['loc' => 'Recoleta', 'prov' => 'CABA']],
-    '1080' => [['loc' => 'San Telmo', 'prov' => 'CABA']],
-    '1082' => [['loc' => 'La Boca', 'prov' => 'CABA']],
-    '1084' => [['loc' => 'Barracas', 'prov' => 'CABA']],
-    '1086' => [['loc' => 'Parque Patricios', 'prov' => 'CABA']],
-    '1088' => [['loc' => 'Boedo', 'prov' => 'CABA']],
-    '1090' => [['loc' => 'Parque Chacabuco', 'prov' => 'CABA']],
-    '1094' => [['loc' => 'Mataderos', 'prov' => 'CABA']],
-    '1096' => [['loc' => 'Liniers', 'prov' => 'CABA']],
-    '1098' => [['loc' => 'Villa Luro', 'prov' => 'CABA']],
-    '1406' => [['loc' => 'Flores', 'prov' => 'CABA']],
-    '1407' => [['loc' => 'Parque Chacabuco', 'prov' => 'CABA']],
-    '1408' => [['loc' => 'Caballito', 'prov' => 'CABA']],
-    '1414' => [['loc' => 'Palermo', 'prov' => 'CABA']],
-    '1416' => [['loc' => 'Palermo Soho', 'prov' => 'CABA']],
-    '1417' => [['loc' => 'Palermo Hollywood', 'prov' => 'CABA']],
-    '1418' => [['loc' => 'Villa Crespo', 'prov' => 'CABA']],
-    '1419' => [['loc' => 'Chacarita', 'prov' => 'CABA']],
-    '1420' => [['loc' => 'Villa Ortuzar', 'prov' => 'CABA']],
-    '1421' => [['loc' => 'Colegiales', 'prov' => 'CABA']],
-    '1424' => [['loc' => 'Villa Urquiza', 'prov' => 'CABA']],
-    '1425' => [['loc' => 'Belgrano', 'prov' => 'CABA']],
-    '1426' => [['loc' => 'Belgrano', 'prov' => 'CABA']],
-    '1427' => [['loc' => 'Nunez', 'prov' => 'CABA']],
-    '1428' => [['loc' => 'Saavedra', 'prov' => 'CABA']],
-    '1429' => [['loc' => 'Villa Devoto', 'prov' => 'CABA']],
-    '1430' => [['loc' => 'Villa del Parque', 'prov' => 'CABA']],
-    '1431' => [['loc' => 'Agronomia', 'prov' => 'CABA']],
-    '1432' => [['loc' => 'Villa Pueyrredon', 'prov' => 'CABA']],
-    '1440' => [['loc' => 'Villa Real', 'prov' => 'CABA']],
-    '1871' => [['loc' => 'Villa General Mitre', 'prov' => 'CABA']],
+$cpNum = (int) $cp;
 
-    // GBA Zona Norte
-    '1602' => [['loc' => 'Florida', 'prov' => 'Buenos Aires'], ['loc' => 'Vicente Lopez', 'prov' => 'Buenos Aires']],
-    '1605' => [['loc' => 'Munro', 'prov' => 'Buenos Aires'], ['loc' => 'Carapachay', 'prov' => 'Buenos Aires']],
-    '1606' => [['loc' => 'Olivos', 'prov' => 'Buenos Aires']],
-    '1607' => [['loc' => 'La Lucila', 'prov' => 'Buenos Aires'], ['loc' => 'Martinez', 'prov' => 'Buenos Aires']],
-    '1609' => [['loc' => 'Boulogne', 'prov' => 'Buenos Aires']],
-    '1610' => [['loc' => 'San Isidro', 'prov' => 'Buenos Aires']],
-    '1611' => [['loc' => 'Don Torcuato', 'prov' => 'Buenos Aires']],
-    '1613' => [['loc' => 'Los Polvorines', 'prov' => 'Buenos Aires']],
-    '1614' => [['loc' => 'Villa de Mayo', 'prov' => 'Buenos Aires']],
-    '1615' => [['loc' => 'Grand Bourg', 'prov' => 'Buenos Aires']],
-    '1617' => [['loc' => 'General Pacheco', 'prov' => 'Buenos Aires']],
-    '1618' => [['loc' => 'El Talar', 'prov' => 'Buenos Aires']],
-    '1619' => [['loc' => 'Garin', 'prov' => 'Buenos Aires']],
-    '1621' => [['loc' => 'Benavidez', 'prov' => 'Buenos Aires']],
-    '1623' => [['loc' => 'Tigre', 'prov' => 'Buenos Aires']],
-    '1625' => [['loc' => 'Escobar', 'prov' => 'Buenos Aires']],
-    '1629' => [['loc' => 'Pilar', 'prov' => 'Buenos Aires']],
-    '1631' => [['loc' => 'Del Viso', 'prov' => 'Buenos Aires']],
-    '1636' => [['loc' => 'La Lonja', 'prov' => 'Buenos Aires']],
-    '1638' => [['loc' => 'San Fernando', 'prov' => 'Buenos Aires']],
-    '1640' => [['loc' => 'Acassuso', 'prov' => 'Buenos Aires'], ['loc' => 'Beccar', 'prov' => 'Buenos Aires']],
-    '1642' => [['loc' => 'San Isidro', 'prov' => 'Buenos Aires']],
-    '1644' => [['loc' => 'Victoria', 'prov' => 'Buenos Aires']],
-
-    // GBA Zona Sur
-    '1801' => [['loc' => 'Banfield', 'prov' => 'Buenos Aires']],
-    '1802' => [['loc' => 'Lomas de Zamora', 'prov' => 'Buenos Aires']],
-    '1804' => [['loc' => 'Avellaneda', 'prov' => 'Buenos Aires']],
-    '1806' => [['loc' => 'Sarandi', 'prov' => 'Buenos Aires']],
-    '1822' => [['loc' => 'Valentin Alsina', 'prov' => 'Buenos Aires']],
-    '1824' => [['loc' => 'Lanus', 'prov' => 'Buenos Aires']],
-    '1826' => [['loc' => 'Remedios de Escalada', 'prov' => 'Buenos Aires']],
-    '1828' => [['loc' => 'Temperley', 'prov' => 'Buenos Aires']],
-    '1832' => [['loc' => 'Lomas de Zamora', 'prov' => 'Buenos Aires']],
-    '1834' => [['loc' => 'Turdera', 'prov' => 'Buenos Aires']],
-    '1836' => [['loc' => 'Adrogue', 'prov' => 'Buenos Aires']],
-    '1838' => [['loc' => 'Burzaco', 'prov' => 'Buenos Aires']],
-    '1842' => [['loc' => 'Monte Grande', 'prov' => 'Buenos Aires']],
-    '1846' => [['loc' => 'Avellaneda', 'prov' => 'Buenos Aires']],
-    '1852' => [['loc' => 'Quilmes', 'prov' => 'Buenos Aires']],
-    '1854' => [['loc' => 'Quilmes Oeste', 'prov' => 'Buenos Aires']],
-    '1856' => [['loc' => 'Bernal', 'prov' => 'Buenos Aires']],
-    '1858' => [['loc' => 'Berazategui', 'prov' => 'Buenos Aires']],
-    '1870' => [['loc' => 'Avellaneda', 'prov' => 'Buenos Aires']],
-    '1872' => [['loc' => 'Sarandi', 'prov' => 'Buenos Aires']],
-    '1878' => [['loc' => 'Quilmes', 'prov' => 'Buenos Aires']],
-    '1884' => [['loc' => 'Berazategui', 'prov' => 'Buenos Aires']],
-    '1888' => [['loc' => 'Florencio Varela', 'prov' => 'Buenos Aires']],
-
-    // GBA Zona Oeste
-    '1650' => [['loc' => 'San Martin', 'prov' => 'Buenos Aires']],
-    '1651' => [['loc' => 'San Andres', 'prov' => 'Buenos Aires']],
-    '1653' => [['loc' => 'Villa Ballester', 'prov' => 'Buenos Aires']],
-    '1655' => [['loc' => 'Jose Leon Suarez', 'prov' => 'Buenos Aires']],
-    '1657' => [['loc' => 'Villa Libertad', 'prov' => 'Buenos Aires']],
-    '1661' => [['loc' => 'Bella Vista', 'prov' => 'Buenos Aires']],
-    '1663' => [['loc' => 'San Miguel', 'prov' => 'Buenos Aires']],
-    '1665' => [['loc' => 'Jose C. Paz', 'prov' => 'Buenos Aires']],
-    '1667' => [['loc' => 'Tortuguitas', 'prov' => 'Buenos Aires']],
-    '1669' => [['loc' => 'Del Viso', 'prov' => 'Buenos Aires']],
-    '1672' => [['loc' => 'San Martin', 'prov' => 'Buenos Aires']],
-    '1674' => [['loc' => 'Caseros', 'prov' => 'Buenos Aires']],
-    '1676' => [['loc' => 'Santos Lugares', 'prov' => 'Buenos Aires']],
-    '1678' => [['loc' => 'Caseros', 'prov' => 'Buenos Aires']],
-    '1682' => [['loc' => 'El Palomar', 'prov' => 'Buenos Aires']],
-    '1684' => [['loc' => 'Hurlingham', 'prov' => 'Buenos Aires']],
-    '1686' => [['loc' => 'William Morris', 'prov' => 'Buenos Aires']],
-    '1688' => [['loc' => 'Ituzaingo', 'prov' => 'Buenos Aires']],
-    '1702' => [['loc' => 'Ciudadela', 'prov' => 'Buenos Aires']],
-    '1704' => [['loc' => 'Ramos Mejia', 'prov' => 'Buenos Aires']],
-    '1706' => [['loc' => 'Haedo', 'prov' => 'Buenos Aires']],
-    '1708' => [['loc' => 'Moron', 'prov' => 'Buenos Aires']],
-    '1712' => [['loc' => 'Castelar', 'prov' => 'Buenos Aires']],
-    '1714' => [['loc' => 'Castelar', 'prov' => 'Buenos Aires']],
-    '1716' => [['loc' => 'La Tablada', 'prov' => 'Buenos Aires']],
-    '1718' => [['loc' => 'San Justo', 'prov' => 'Buenos Aires']],
-    '1720' => [['loc' => 'Isidro Casanova', 'prov' => 'Buenos Aires']],
-    '1722' => [['loc' => 'Merlo', 'prov' => 'Buenos Aires']],
-    '1744' => [['loc' => 'Moreno', 'prov' => 'Buenos Aires']],
-    '1748' => [['loc' => 'General Rodriguez', 'prov' => 'Buenos Aires']],
-    '1752' => [['loc' => 'Lomas del Mirador', 'prov' => 'Buenos Aires']],
-    '1754' => [['loc' => 'San Justo', 'prov' => 'Buenos Aires']],
-    '1756' => [['loc' => 'Gonzalez Catan', 'prov' => 'Buenos Aires']],
-    '1758' => [['loc' => 'Virrey del Pino', 'prov' => 'Buenos Aires']],
-    '1760' => [['loc' => 'Ezeiza', 'prov' => 'Buenos Aires']],
-    '1765' => [['loc' => 'Canning', 'prov' => 'Buenos Aires']],
-
-    // La Plata
-    '1900' => [['loc' => 'La Plata', 'prov' => 'Buenos Aires']],
-    '1901' => [['loc' => 'City Bell', 'prov' => 'Buenos Aires']],
-    '1903' => [['loc' => 'Gonnet', 'prov' => 'Buenos Aires']],
-
-    // Interior principales
-    '2000' => [['loc' => 'Rosario', 'prov' => 'Santa Fe']],
-    '3000' => [['loc' => 'Santa Fe', 'prov' => 'Santa Fe']],
-    '3100' => [['loc' => 'Parana', 'prov' => 'Entre Rios']],
-    '3400' => [['loc' => 'Corrientes', 'prov' => 'Corrientes']],
-    '3500' => [['loc' => 'Resistencia', 'prov' => 'Chaco']],
-    '3600' => [['loc' => 'Formosa', 'prov' => 'Formosa']],
-    '4000' => [['loc' => 'San Miguel de Tucuman', 'prov' => 'Tucuman']],
-    '4200' => [['loc' => 'Santiago del Estero', 'prov' => 'Santiago del Estero']],
-    '4400' => [['loc' => 'San Salvador de Jujuy', 'prov' => 'Jujuy']],
-    '4700' => [['loc' => 'San Fernando del Valle de Catamarca', 'prov' => 'Catamarca']],
-    '5000' => [['loc' => 'Cordoba', 'prov' => 'Cordoba']],
-    '5100' => [['loc' => 'Alta Gracia', 'prov' => 'Cordoba']],
-    '5152' => [['loc' => 'Villa Carlos Paz', 'prov' => 'Cordoba']],
-    '5300' => [['loc' => 'La Rioja', 'prov' => 'La Rioja']],
-    '5400' => [['loc' => 'San Juan', 'prov' => 'San Juan']],
-    '5500' => [['loc' => 'Mendoza', 'prov' => 'Mendoza']],
-    '5600' => [['loc' => 'San Rafael', 'prov' => 'Mendoza']],
-    '5700' => [['loc' => 'San Luis', 'prov' => 'San Luis']],
-    '6300' => [['loc' => 'Santa Rosa', 'prov' => 'La Pampa']],
-    '6700' => [['loc' => 'Lujan de Cuyo', 'prov' => 'Mendoza']],
-    '7600' => [['loc' => 'Mar del Plata', 'prov' => 'Buenos Aires']],
-    '7000' => [['loc' => 'Tandil', 'prov' => 'Buenos Aires']],
-    '7400' => [['loc' => 'Olavarria', 'prov' => 'Buenos Aires']],
-    '7500' => [['loc' => 'Azul', 'prov' => 'Buenos Aires']],
-    '8000' => [['loc' => 'Bahia Blanca', 'prov' => 'Buenos Aires']],
-    '8300' => [['loc' => 'Neuquen', 'prov' => 'Neuquen']],
-    '8324' => [['loc' => 'Cipolletti', 'prov' => 'Rio Negro']],
-    '8332' => [['loc' => 'General Roca', 'prov' => 'Rio Negro']],
-    '8400' => [['loc' => 'San Carlos de Bariloche', 'prov' => 'Rio Negro']],
-    '8500' => [['loc' => 'Viedma', 'prov' => 'Rio Negro']],
-    '9000' => [['loc' => 'Comodoro Rivadavia', 'prov' => 'Chubut']],
-    '9100' => [['loc' => 'Trelew', 'prov' => 'Chubut']],
-    '9103' => [['loc' => 'Rawson', 'prov' => 'Chubut']],
-    '9120' => [['loc' => 'Puerto Madryn', 'prov' => 'Chubut']],
-    '9200' => [['loc' => 'Esquel', 'prov' => 'Chubut']],
-    '9400' => [['loc' => 'Rio Gallegos', 'prov' => 'Santa Cruz']],
-    '9405' => [['loc' => 'El Calafate', 'prov' => 'Santa Cruz']],
-    '9410' => [['loc' => 'Ushuaia', 'prov' => 'Tierra del Fuego']],
-    '9420' => [['loc' => 'Rio Grande', 'prov' => 'Tierra del Fuego']],
-    '3300' => [['loc' => 'Posadas', 'prov' => 'Misiones']],
-    '3370' => [['loc' => 'Puerto Iguazu', 'prov' => 'Misiones']],
-    '4300' => [['loc' => 'Salta', 'prov' => 'Salta']],
-    '6000' => [['loc' => 'Junin', 'prov' => 'Buenos Aires']],
-    '6400' => [['loc' => 'Trenque Lauquen', 'prov' => 'Buenos Aires']],
-    '2300' => [['loc' => 'Rafaela', 'prov' => 'Santa Fe']],
-    '2400' => [['loc' => 'San Francisco', 'prov' => 'Cordoba']],
-    '2600' => [['loc' => 'Venado Tuerto', 'prov' => 'Santa Fe']],
-    '2700' => [['loc' => 'Pergamino', 'prov' => 'Buenos Aires']],
-    '2800' => [['loc' => 'Zarate', 'prov' => 'Buenos Aires']],
-    '2804' => [['loc' => 'Campana', 'prov' => 'Buenos Aires']],
-    '2900' => [['loc' => 'San Nicolas de los Arroyos', 'prov' => 'Buenos Aires']],
-    '6500' => [['loc' => 'Nueve de Julio', 'prov' => 'Buenos Aires']],
-    '6600' => [['loc' => 'Mercedes', 'prov' => 'Buenos Aires']],
-    '6700' => [['loc' => 'Lujan', 'prov' => 'Buenos Aires']],
-    '6720' => [['loc' => 'San Antonio de Areco', 'prov' => 'Buenos Aires']],
+// Mapeo de rangos de CP a provincias
+$rangos = [
+    // CABA: 1000-1099, 1400-1499
+    [1000, 1099, 'CABA'],
+    [1400, 1499, 'CABA'],
+    // Buenos Aires (GBA y provincia)
+    [1600, 1699, 'Buenos Aires'],
+    [1700, 1799, 'Buenos Aires'],
+    [1800, 1899, 'Buenos Aires'],
+    [1900, 1999, 'Buenos Aires'],
+    [2700, 2799, 'Buenos Aires'],
+    [2800, 2899, 'Buenos Aires'],
+    [2900, 2999, 'Buenos Aires'],
+    [6000, 6099, 'Buenos Aires'],
+    [6400, 6499, 'Buenos Aires'],
+    [6500, 6599, 'Buenos Aires'],
+    [6600, 6699, 'Buenos Aires'],
+    [6700, 6799, 'Buenos Aires'],
+    [7000, 7099, 'Buenos Aires'],
+    [7400, 7499, 'Buenos Aires'],
+    [7500, 7599, 'Buenos Aires'],
+    [7600, 7699, 'Buenos Aires'],
+    [8000, 8099, 'Buenos Aires'],
+    // Santa Fe
+    [2000, 2099, 'Santa Fe'],
+    [2100, 2199, 'Santa Fe'],
+    [2200, 2299, 'Santa Fe'],
+    [2300, 2399, 'Santa Fe'],
+    [2600, 2699, 'Santa Fe'],
+    [3000, 3099, 'Santa Fe'],
+    // Cordoba
+    [2400, 2499, 'Cordoba'],
+    [5000, 5199, 'Cordoba'],
+    [5200, 5299, 'Cordoba'],
+    [5800, 5899, 'Cordoba'],
+    // Entre Rios
+    [3100, 3199, 'Entre Rios'],
+    [3200, 3299, 'Entre Rios'],
+    // Corrientes
+    [3400, 3499, 'Corrientes'],
+    // Chaco
+    [3500, 3599, 'Chaco'],
+    // Formosa
+    [3600, 3699, 'Formosa'],
+    // Misiones
+    [3300, 3399, 'Misiones'],
+    // Tucuman
+    [4000, 4199, 'Tucuman'],
+    // Santiago del Estero
+    [4200, 4299, 'Santiago del Estero'],
+    // Salta
+    [4300, 4399, 'Salta'],
+    // Jujuy
+    [4400, 4599, 'Jujuy'],
+    // Catamarca
+    [4700, 4799, 'Catamarca'],
+    // La Rioja
+    [5300, 5399, 'La Rioja'],
+    // San Juan
+    [5400, 5499, 'San Juan'],
+    // Mendoza
+    [5500, 5699, 'Mendoza'],
+    // San Luis
+    [5700, 5799, 'San Luis'],
+    // La Pampa
+    [6300, 6399, 'La Pampa'],
+    // Neuquen
+    [8300, 8399, 'Neuquen'],
+    // Rio Negro
+    [8400, 8599, 'Rio Negro'],
+    // Chubut
+    [9000, 9299, 'Chubut'],
+    // Santa Cruz
+    [9400, 9499, 'Santa Cruz'],
+    // Tierra del Fuego
+    [9410, 9499, 'Tierra del Fuego'],
 ];
 
-$result = $data[$cp] ?? null;
-
-if ($result) {
-    echo json_encode(['ok' => true, 'localidades' => $result]);
-} else {
-    echo json_encode(['ok' => false, 'localidades' => [], 'mensaje' => 'Codigo postal no encontrado. Ingresa tu localidad manualmente.']);
+$provincia = '';
+foreach ($rangos as $r) {
+    if ($cpNum >= $r[0] && $cpNum <= $r[1]) {
+        $provincia = $r[2];
+        break;
+    }
 }
+
+// Intentar Zippopotam para localidades
+$localidades = [];
+$zUrl = "https://api.zippopotam.us/AR/" . urlencode($cp);
+$ctx = stream_context_create(['http' => ['timeout' => 3, 'ignore_errors' => true]]);
+$response = @file_get_contents($zUrl, false, $ctx);
+
+if ($response) {
+    $data = json_decode($response, true);
+    if (!empty($data['places'])) {
+        foreach ($data['places'] as $place) {
+            $localidades[] = $place['place name'];
+        }
+        // Si Zippopotam devolvio provincia, usarla
+        if (!$provincia && !empty($data['places'][0]['state'])) {
+            $provincia = ucwords(strtolower($data['places'][0]['state']));
+        }
+    }
+}
+
+echo json_encode([
+    'ok' => $provincia !== '',
+    'provincia' => $provincia,
+    'localidades' => $localidades,
+]);
