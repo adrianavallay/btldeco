@@ -33,13 +33,16 @@
     }
 
     function getMaxIndex() {
-        return slideCount; // one extra position to show blank space at the end
+        var viewportWidth = viewport.offsetWidth;
+        var totalWidth = slideCount * slideWidth - gap;
+        var max = Math.ceil((totalWidth - viewportWidth) / slideWidth);
+        return Math.max(0, max);
     }
 
     function goTo(index) {
         var maxIndex = getMaxIndex();
         if (index < 0) index = 0;
-        if (index > maxIndex) index = 0;
+        if (index > maxIndex) index = maxIndex;
         currentIndex = index;
         currentTranslate = -currentIndex * slideWidth;
         prevTranslate = currentTranslate;
@@ -51,11 +54,26 @@
         dots.forEach(function (dot, i) {
             dot.classList.toggle('active', i === currentIndex);
         });
+        // Disable arrows at limits
+        var maxIndex = getMaxIndex();
+        if (prevBtn) {
+            prevBtn.style.opacity = currentIndex === 0 ? '0.3' : '1';
+            prevBtn.style.pointerEvents = currentIndex === 0 ? 'none' : 'auto';
+        }
+        if (nextBtn) {
+            nextBtn.style.opacity = currentIndex >= maxIndex ? '0.3' : '1';
+            nextBtn.style.pointerEvents = currentIndex >= maxIndex ? 'none' : 'auto';
+        }
     }
 
     function startAutoplay() {
         stopAutoplay();
         autoplayInterval = setInterval(function () {
+            var maxIndex = getMaxIndex();
+            if (currentIndex >= maxIndex) {
+                stopAutoplay();
+                return;
+            }
             goTo(currentIndex + 1);
         }, autoplayDelay);
     }
