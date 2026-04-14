@@ -2579,12 +2579,12 @@ a.contact-card:hover {
     margin-bottom: 20px;
 }
 .ck-item {
-    display: flex;
-    align-items: center;
+    display: grid;
+    grid-template-columns: 72px 1fr auto auto;
     gap: 16px;
+    align-items: center;
     padding: 18px 0;
     border-bottom: 1px solid var(--border);
-    position: relative;
 }
 .ck-item:last-child { border-bottom: none; }
 .ck-item__img {
@@ -2602,7 +2602,6 @@ a.contact-card:hover {
     object-fit: cover;
 }
 .ck-item__details {
-    flex: 1;
     min-width: 0;
     display: flex;
     flex-direction: column;
@@ -2626,9 +2625,8 @@ a.contact-card:hover {
 }
 .ck-item__controls {
     display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 8px;
+    align-items: center;
+    gap: 16px;
 }
 .ck-item__qty {
     display: flex;
@@ -2639,13 +2637,12 @@ a.contact-card:hover {
     font-weight: 600;
     color: var(--text);
     font-variant-numeric: tabular-nums;
+    min-width: 70px;
+    text-align: right;
 }
 .ck-item__remove {
-    position: absolute;
-    top: 18px;
-    right: -4px;
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2653,9 +2650,8 @@ a.contact-card:hover {
     cursor: pointer;
     border-radius: 50%;
     transition: all 0.2s;
-    opacity: 0;
+    flex-shrink: 0;
 }
-.ck-item:hover .ck-item__remove { opacity: 1; }
 .ck-item__remove:hover {
     color: #DC2626;
     background: rgba(220,38,38,0.08);
@@ -2808,7 +2804,9 @@ a.contact-card:hover {
     .checkout-summary { position: static; }
     .checkout-section { padding: 24px; }
     .checkout-trust { flex-direction: column; gap: 12px; }
-    .ck-item__remove { opacity: 1; }
+    .ck-item { grid-template-columns: 60px 1fr; gap: 12px; }
+    .ck-item__img { width: 60px; height: 60px; }
+    .ck-item__controls { grid-column: 1 / -1; justify-content: space-between; }
     .payment-method { padding: 16px; }
 }
 
