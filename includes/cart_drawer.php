@@ -35,4 +35,4 @@
         <a href="tienda.php" class="cart-continue">Seguir comprando</a>
     </div>
 </div>
-<script src="js/carrito.js?v=2"></script>
+<script src="js/carrito.js?v=7"></script>
