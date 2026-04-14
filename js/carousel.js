@@ -32,9 +32,17 @@
         slideWidth = slides[0].offsetWidth + gap;
     }
 
+    function getMaxIndex() {
+        var viewportWidth = viewport.offsetWidth;
+        var totalWidth = slideCount * slideWidth - gap;
+        var max = Math.ceil((totalWidth - viewportWidth) / slideWidth);
+        return Math.max(0, Math.min(max, slideCount - 1));
+    }
+
     function goTo(index) {
-        if (index < 0) index = slideCount - 1;
-        if (index >= slideCount) index = 0;
+        var maxIndex = getMaxIndex();
+        if (index < 0) index = 0;
+        if (index > maxIndex) index = 0; // loop back to start
         currentIndex = index;
         currentTranslate = -currentIndex * slideWidth;
         prevTranslate = currentTranslate;
