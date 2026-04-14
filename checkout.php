@@ -45,7 +45,7 @@ $flash_success = flash('success');
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css?v=9">
+    <link rel="stylesheet" href="css/styles.css?v=10">
 </head>
 <body>
 
@@ -398,7 +398,7 @@ $flash_success = flash('success');
           .then(function(data) { if (data.ok) location.reload(); });
     }
 
-    // GeoRef API — buscar localidades por codigo postal
+    // Buscar localidades por codigo postal
     var cpTimer = null;
     function buscarLocalidades(cp) {
         clearTimeout(cpTimer);
@@ -415,77 +415,59 @@ $flash_success = flash('success');
         cpTimer = setTimeout(function() {
             loading.style.display = 'block';
 
-            fetch('https://apis.datos.gob.ar/georef/api/localidades?codigo_postal=' + encodeURIComponent(cp) + '&campos=nombre,provincia.nombre&max=50')
+            fetch('cp_api.php?cp=' + encodeURIComponent(cp))
                 .then(function(r) { return r.json(); })
                 .then(function(data) {
                     loading.style.display = 'none';
                     var locs = data.localidades || [];
 
                     if (locs.length === 0) {
-                        // Fallback: buscar por CP como texto en municipios
-                        fetch('https://apis.datos.gob.ar/georef/api/municipios?codigo_postal=' + encodeURIComponent(cp) + '&campos=nombre,provincia.nombre&max=50')
-                            .then(function(r2) { return r2.json(); })
-                            .then(function(data2) {
-                                var muns = data2.municipios || [];
-                                if (muns.length === 0) {
-                                    ciudadSelect.innerHTML = '<option value="" disabled selected>No se encontraron localidades</option>';
-                                    return;
-                                }
-                                renderLocalidades(muns, ciudadSelect, provSelect);
-                            });
+                        // CP no encontrado — permitir ingreso manual
+                        ciudadSelect.outerHTML = '<input type="text" id="ck-ciudad" name="ciudad" required placeholder="Ingresa tu localidad" style="width:100%;padding:12px 16px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);font-family:var(--font-body);font-size:.95rem;color:var(--text);">';
                         return;
                     }
-                    renderLocalidades(locs, ciudadSelect, provSelect);
+
+                    // Restore select if it was replaced
+                    var el = document.getElementById('ck-ciudad');
+                    if (el.tagName !== 'SELECT') {
+                        var newSelect = document.createElement('select');
+                        newSelect.id = 'ck-ciudad';
+                        newSelect.name = 'ciudad';
+                        newSelect.required = true;
+                        el.parentNode.replaceChild(newSelect, el);
+                        ciudadSelect = newSelect;
+                    }
+
+                    var html = '<option value="" disabled selected>Selecciona tu localidad</option>';
+                    locs.forEach(function(l) {
+                        html += '<option value="' + l.loc + '" data-prov="' + l.prov + '">' + l.loc + '</option>';
+                    });
+                    ciudadSelect.innerHTML = html;
+
+                    // Auto-select provincia on localidad change
+                    ciudadSelect.onchange = function() {
+                        var opt = ciudadSelect.options[ciudadSelect.selectedIndex];
+                        var prov = opt.getAttribute('data-prov');
+                        if (prov) {
+                            for (var i = 0; i < provSelect.options.length; i++) {
+                                if (provSelect.options[i].value === prov) {
+                                    provSelect.selectedIndex = i;
+                                    break;
+                                }
+                            }
+                        }
+                    };
+
+                    // Auto-select if only one
+                    if (locs.length === 1) {
+                        ciudadSelect.selectedIndex = 1;
+                        ciudadSelect.onchange();
+                    }
                 })
                 .catch(function() {
                     loading.style.display = 'none';
-                    ciudadSelect.innerHTML = '<option value="" disabled selected>Error al buscar</option>';
                 });
-        }, 500);
-    }
-
-    function renderLocalidades(locs, ciudadSelect, provSelect) {
-        // Unique names
-        var seen = {};
-        var unique = [];
-        locs.forEach(function(l) {
-            var name = l.nombre;
-            if (!seen[name]) {
-                seen[name] = true;
-                unique.push(l);
-            }
-        });
-
-        unique.sort(function(a, b) { return a.nombre.localeCompare(b.nombre); });
-
-        var html = '<option value="" disabled selected>Selecciona tu localidad</option>';
-        unique.forEach(function(l) {
-            html += '<option value="' + l.nombre + '" data-provincia="' + (l.provincia ? l.provincia.nombre : '') + '">' + l.nombre + '</option>';
-        });
-        ciudadSelect.innerHTML = html;
-
-        // Auto-select provincia when localidad changes
-        ciudadSelect.onchange = function() {
-            var selected = ciudadSelect.options[ciudadSelect.selectedIndex];
-            var prov = selected.getAttribute('data-provincia');
-            if (prov && provSelect) {
-                // Match provincia in select
-                for (var i = 0; i < provSelect.options.length; i++) {
-                    if (provSelect.options[i].value.toLowerCase() === prov.toLowerCase() ||
-                        prov.toLowerCase().indexOf(provSelect.options[i].value.toLowerCase()) !== -1 ||
-                        provSelect.options[i].value.toLowerCase().indexOf(prov.toLowerCase()) !== -1) {
-                        provSelect.selectedIndex = i;
-                        break;
-                    }
-                }
-            }
-        };
-
-        // If only one result, auto-select
-        if (unique.length === 1) {
-            ciudadSelect.selectedIndex = 1;
-            ciudadSelect.onchange();
-        }
+        }, 400);
     }
 
     // Payment method selection
