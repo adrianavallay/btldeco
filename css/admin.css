@@ -939,8 +939,18 @@ td img.thumb { width: 48px; height: 48px; object-fit: cover; border-radius: var(
 .totals { text-align: right; font-size: 0.9rem; }
 .totals .total-final { font-weight: 700; font-size: 1.05rem; margin-top: 4px; }
 .totals .discount { color: var(--success); }
-.estado-form { display: flex; gap: 10px; align-items: center; }
+.estado-form { display: flex; flex-direction: column; gap: 10px; }
 .estado-form select { padding: 10px 14px; background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); font-size: 0.88rem; font-family: var(--font-sans); }
+.estado-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.estado-btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 18px; border: 1.5px solid var(--border); border-radius: 8px; background: var(--white); font-family: var(--font-sans); font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all 0.2s; color: var(--text-muted); }
+.estado-btn:hover { border-color: #d1d5db; background: var(--bg); }
+.estado-btn--preparando:hover, .estado-btn--preparando.active { border-color: #8b5cf6; color: #8b5cf6; background: rgba(139,92,246,0.06); }
+.estado-btn--enviado:hover, .estado-btn--enviado.active { border-color: #3b82f6; color: #3b82f6; background: rgba(59,130,246,0.06); }
+.estado-btn--entregado:hover, .estado-btn--entregado.active { border-color: #10b981; color: #10b981; background: rgba(16,185,129,0.06); }
+.estado-btn--cancelado:hover, .estado-btn--cancelado.active { border-color: #ef4444; color: #ef4444; background: rgba(239,68,68,0.06); }
+.reenvio-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn-reenvio { display: inline-flex; align-items: center; gap: 6px; padding: 10px 18px; border: 1.5px solid var(--border); border-radius: 8px; background: var(--white); font-family: var(--font-sans); font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all 0.2s; color: var(--text-muted); }
+.btn-reenvio:hover { border-color: #7c3aed; color: #7c3aed; background: rgba(124,58,237,0.06); }
 .notas-area { width: 100%; padding: 10px 14px; background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); font-size: 0.88rem; font-family: var(--font-sans); resize: vertical; min-height: 60px; margin-bottom: 10px; }
 .notas-display { background: var(--bg); border: 1px solid var(--border-light); border-radius: var(--radius); padding: 12px 16px; font-size: 0.88rem; margin-bottom: 12px; white-space: pre-wrap; }
 .meta-info p { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 4px; }

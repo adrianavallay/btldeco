@@ -81,6 +81,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+    // ── Reenviar email (AJAX) ──
+    if ($action === 'reenviar_email') {
+        $pedido_id = (int)($_POST['pedido_id'] ?? 0);
+        $tipo = $_POST['tipo'] ?? '';
+
+        if ($pedido_id > 0 && in_array($tipo, ['cliente', 'admin'])) {
+            $stmt = $db->prepare("SELECT * FROM pedidos WHERE id = ?");
+            $stmt->execute([$pedido_id]);
+            $pedido = $stmt->fetch();
+
+            if ($pedido) {
+                $stmtItems = $db->prepare("SELECT * FROM pedido_items WHERE pedido_id = ?");
+                $stmtItems->execute([$pedido_id]);
+                $email_items = $stmtItems->fetchAll();
+
+                try {
+                    if ($tipo === 'cliente') {
+                        email_pedido_confirmacion($pedido, $email_items);
+                        json_response(['ok' => true, 'mensaje' => 'Email reenviado a ' . $pedido['email']]);
+                    } else {
+                        email_admin_nuevo_pedido($pedido);
+                        json_response(['ok' => true, 'mensaje' => 'Email reenviado al admin']);
+                    }
+                } catch (Exception $e) {
+                    json_response(['ok' => false, 'mensaje' => 'Error: ' . $e->getMessage()]);
+                }
+            } else {
+                json_response(['ok' => false, 'mensaje' => 'Pedido no encontrado']);
+            }
+        } else {
+            json_response(['ok' => false, 'mensaje' => 'Datos invalidos']);
+        }
+    }
+
     // ── Export CSV ──
     if ($action === 'export_csv') {
         $where = ["1=1"];
@@ -507,10 +541,18 @@ function openPedido(id) {
 
     document.getElementById('modalTitle').textContent = 'Pedido #' + p.id;
 
+    // Image helper
+    function imgSrc(img) {
+        if (!img) return '';
+        if (img.indexOf('http') === 0) return img;
+        return 'uploads/productos/' + img;
+    }
+
     let itemsRows = '';
     (p.items || []).forEach(function(it) {
-        const img = it.imagen_principal
-            ? '<img class="thumb" src="uploads/productos/' + sanitizeHTML(it.imagen_principal) + '" alt="">'
+        const src = imgSrc(it.imagen_principal);
+        const img = src
+            ? '<img class="thumb" src="' + src + '" alt="">'
             : '<div class="thumb" style="display:flex;align-items:center;justify-content:center;color:#52525b;font-size:.6rem;">Sin img</div>';
         const lineTotal = parseFloat(it.precio_unitario) * parseInt(it.cantidad);
         itemsRows += '<tr>' +
@@ -529,12 +571,14 @@ function openPedido(id) {
 
     const notas = p.notas || '';
     const notasDisplay = notas
-        ? '<div class="notas-display">' + sanitizeHTML(notas) + '</div>'
+        ? '<div class="notas-display">' + sanitizeHTML(notas).replace(/\n/g, '<br>') + '</div>'
         : '<p style="color:#52525b;font-size:.83rem;margin-bottom:10px;">Sin notas.</p>';
 
     const mpInfo = p.mp_payment_id
         ? '<div class="info-item"><label>MP Payment ID</label><span>' + sanitizeHTML(p.mp_payment_id) + '</span></div>'
         : '';
+
+    const metodo = (notas === 'transferencia' || notas.indexOf('transferencia') !== -1) ? 'Transferencia' : 'MercadoPago';
 
     const estados = ['pendiente','pagado','preparando','enviado','entregado','cancelado','reembolsado'];
     let estadoOptions = '';
@@ -543,7 +587,6 @@ function openPedido(id) {
     });
 
     const fechaCreacion = p.fecha ? new Date(p.fecha).toLocaleString('es-AR') : '-';
-    const fechaActualizacion = p.updated_at ? new Date(p.updated_at).toLocaleString('es-AR') : '-';
 
     const html = '' +
         '<div class="modal-section">' +
@@ -555,6 +598,8 @@ function openPedido(id) {
                 '<div class="info-item"><label>Direccion</label><span>' + sanitizeHTML(p.direccion || '-') + '</span></div>' +
                 '<div class="info-item"><label>Ciudad</label><span>' + sanitizeHTML(p.ciudad || '-') + '</span></div>' +
                 '<div class="info-item"><label>Provincia</label><span>' + sanitizeHTML(p.provincia || '-') + '</span></div>' +
+                '<div class="info-item"><label>Metodo de pago</label><span>' + metodo + '</span></div>' +
+                '<div class="info-item"><label>Fecha</label><span>' + fechaCreacion + '</span></div>' +
                 mpInfo +
             '</div>' +
         '</div>' +
@@ -575,31 +620,60 @@ function openPedido(id) {
             '<form method="POST" class="estado-form">' +
                 '<input type="hidden" name="action" value="update_estado">' +
                 '<input type="hidden" name="pedido_id" value="' + p.id + '">' +
-                '<select name="nuevo_estado">' + estadoOptions + '</select>' +
-                '<button type="submit" class="btn-save-estado">Guardar estado</button>' +
+                '<div class="estado-btns">' +
+                    '<button type="submit" name="nuevo_estado" value="preparando" class="estado-btn estado-btn--preparando' + (p.estado === 'preparando' ? ' active' : '') + '"><span class="material-symbols-outlined" style="font-size:16px;">inventory_2</span> En proceso</button>' +
+                    '<button type="submit" name="nuevo_estado" value="enviado" class="estado-btn estado-btn--enviado' + (p.estado === 'enviado' ? ' active' : '') + '"><span class="material-symbols-outlined" style="font-size:16px;">local_shipping</span> Enviado</button>' +
+                    '<button type="submit" name="nuevo_estado" value="entregado" class="estado-btn estado-btn--entregado' + (p.estado === 'entregado' ? ' active' : '') + '"><span class="material-symbols-outlined" style="font-size:16px;">check_circle</span> Entregado</button>' +
+                    '<button type="submit" name="nuevo_estado" value="cancelado" class="estado-btn estado-btn--cancelado' + (p.estado === 'cancelado' ? ' active' : '') + '"><span class="material-symbols-outlined" style="font-size:16px;">cancel</span> Cancelado</button>' +
+                '</div>' +
             '</form>' +
+        '</div>' +
+        '<div class="modal-section">' +
+            '<h3>Reenviar emails</h3>' +
+            '<div class="reenvio-btns">' +
+                '<button type="button" class="btn-reenvio" onclick="reenviarEmail(' + p.id + ', \'cliente\')"><span class="material-symbols-outlined" style="font-size:16px;">mail</span> Reenviar al cliente</button>' +
+                '<button type="button" class="btn-reenvio" onclick="reenviarEmail(' + p.id + ', \'admin\')"><span class="material-symbols-outlined" style="font-size:16px;">forward_to_inbox</span> Reenviar al admin</button>' +
+            '</div>' +
+            '<div id="reenvioMsg' + p.id + '" style="margin-top:10px;"></div>' +
         '</div>' +
         '<div class="modal-section">' +
             '<h3>Notas internas</h3>' +
             notasDisplay +
-            '<form method="POST">' +
+            '<form method="POST" style="margin-top:12px;">' +
                 '<input type="hidden" name="action" value="add_nota">' +
                 '<input type="hidden" name="pedido_id" value="' + p.id + '">' +
                 '<textarea name="nota" class="notas-area" placeholder="Agregar nota..."></textarea>' +
                 '<button type="submit" class="btn-add-nota">Agregar nota</button>' +
             '</form>' +
-        '</div>' +
-        '<div class="modal-section meta-info">' +
-            '<p>Creado: <span>' + fechaCreacion + '</span></p>' +
-            '<p>Actualizado: <span>' + fechaActualizacion + '</span></p>' +
         '</div>';
 
     document.getElementById('modalBody').innerHTML = html;
-    document.getElementById('pedidoModal').classList.add('active');
+    document.getElementById('pedidoModal').classList.add('open');
 }
 
 function closePedidoModal() {
-    document.getElementById('pedidoModal').classList.remove('active');
+    document.getElementById('pedidoModal').classList.remove('open');
+}
+
+function reenviarEmail(pedidoId, tipo) {
+    var msgEl = document.getElementById('reenvioMsg' + pedidoId);
+    msgEl.innerHTML = '<span style="color:#71717a;font-size:.82rem;">Enviando...</span>';
+    fetch('admin_pedidos.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'action=reenviar_email&pedido_id=' + pedidoId + '&tipo=' + tipo
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        if (data.ok) {
+            msgEl.innerHTML = '<span style="color:#10b981;font-size:.82rem;">&#10003; ' + data.mensaje + '</span>';
+        } else {
+            msgEl.innerHTML = '<span style="color:#ef4444;font-size:.82rem;">' + (data.mensaje || 'Error') + '</span>';
+        }
+    })
+    .catch(function() {
+        msgEl.innerHTML = '<span style="color:#ef4444;font-size:.82rem;">Error de conexion</span>';
+    });
 }
 
 // Close modal on overlay click
