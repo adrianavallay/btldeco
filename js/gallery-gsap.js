@@ -87,36 +87,6 @@
         });
     });
 
-    // ── Hover: 3D tilt effect ──
-    var allItems = document.querySelectorAll('.gallery__item');
-    allItems.forEach(function (item) {
-        item.addEventListener('mousemove', function (e) {
-            var rect = item.getBoundingClientRect();
-            var x = (e.clientX - rect.left) / rect.width - 0.5;
-            var y = (e.clientY - rect.top) / rect.height - 0.5;
-
-            gsap.to(item, {
-                rotateY: x * 12,
-                rotateX: -y * 8,
-                scale: 1.06,
-                zIndex: 10,
-                boxShadow: '0 20px 50px rgba(0,0,0,0.2)',
-                duration: 0.4,
-                ease: 'power2.out'
-            });
-        });
-
-        item.addEventListener('mouseleave', function () {
-            gsap.to(item, {
-                rotateY: 0,
-                rotateX: 0,
-                scale: 1,
-                zIndex: 1,
-                boxShadow: 'none',
-                duration: 0.5,
-                ease: 'power2.inOut'
-            });
-        });
-    });
+    // Hover handled by CSS (scale 1.25 + overlay)
 
 })();

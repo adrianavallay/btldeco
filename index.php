@@ -38,7 +38,7 @@ if (empty($galRow2)) $galRow2 = $galRow1;
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css?v=21">
+    <link rel="stylesheet" href="css/styles.css?v=22">
 </head>
 <body>
 
@@ -281,9 +281,9 @@ if (empty($galRow2)) $galRow2 = $galRow1;
     <section class="gallery" id="galeria">
         <div class="container">
             <div class="section__header reveal" style="text-align:center;">
-                <span class="section__tag">EXPLORA</span>
-                <h2 class="picks__title">Te puede<br><em>interesar</em></h2>
-                <p class="picks__subtitle">Toca cualquier producto para ver el detalle</p>
+                <span class="section__tag">EXPLORA NUESTRA COLECCION</span>
+                <h2 class="picks__title">Mas productos que<br><em>vas a amar</em></h2>
+                <p class="picks__subtitle">Cada pieza tiene una historia. Descubri la tuya.</p>
             </div>
         </div>
         <!-- Fila 1: scroll izquierda -->
@@ -530,7 +530,7 @@ if (empty($galRow2)) $galRow2 = $galRow1;
     <script src="js/carousel.js?v=16"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
-    <script src="js/gallery-gsap.js?v=2"></script>
+    <script src="js/gallery-gsap.js?v=3"></script>
     <script>
     // Quick View Modal
     function openQuickView(card) {
