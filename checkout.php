@@ -45,7 +45,7 @@ $flash_success = flash('success');
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css?v=3">
+    <link rel="stylesheet" href="css/styles.css?v=4">
 </head>
 <body>
 
@@ -354,7 +354,7 @@ $flash_success = flash('success');
         <p>&copy; 2026 BTLDECO. Todos los derechos reservados.</p>
     </div>
 
-    <script src="js/main.js?v=3"></script>
+    <script src="js/main.js?v=4"></script>
     <script>
     // Checkout cart operations
     function ckUpdateQty(key, qty) {
