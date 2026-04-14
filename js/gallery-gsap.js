@@ -1,6 +1,6 @@
 /* ============================================================
    BTLDECO — Gallery GSAP Animations
-   Parallax tracks only
+   Parallax + reveal all items at once per row
    ============================================================ */
 (function () {
     'use strict';
@@ -55,5 +55,26 @@
             }
         });
     }
+
+    // ── Reveal: all items in each row at once with clip-path ──
+    var wrappers = document.querySelectorAll('.gallery__track-wrapper');
+    wrappers.forEach(function (wrapper) {
+        var items = wrapper.querySelectorAll('.gallery__item');
+
+        gsap.fromTo(items,
+            { clipPath: 'inset(0 100% 0 0)', opacity: 0 },
+            {
+                clipPath: 'inset(0 0% 0 0)',
+                opacity: 1,
+                duration: 1.2,
+                ease: 'power3.inOut',
+                scrollTrigger: {
+                    trigger: wrapper,
+                    start: 'top 85%',
+                    once: true
+                }
+            }
+        );
+    });
 
 })();
