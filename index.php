@@ -38,7 +38,7 @@ if (empty($galRow2)) $galRow2 = $galRow1;
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css?v=35">
+    <link rel="stylesheet" href="css/styles.css?v=36">
 </head>
 <body>
 
@@ -280,13 +280,13 @@ if (empty($galRow2)) $galRow2 = $galRow1;
     <section class="cta-banner reveal">
         <div class="container">
             <div class="cta-banner__inner">
-                <h2 class="cta-banner__title">Descubri toda nuestra <em>coleccion</em></h2>
-                <p class="cta-banner__desc">Toca cualquier producto para ver el detalle y agregalo a tu carrito.</p>
+                <h2 class="cta-banner__title" data-i18n="cta-banner-title">Descubri toda nuestra <em>coleccion</em></h2>
+                <p class="cta-banner__desc" data-i18n="cta-banner-desc">Toca cualquier producto para ver el detalle y agregalo a tu carrito.</p>
                 <div class="cta-banner__scroll">
                     <div class="scroll-mouse">
                         <div class="scroll-mouse__wheel"></div>
                     </div>
-                    <span>SCROLL PARA EXPLORAR</span>
+                    <span data-i18n="cta-banner-scroll">SCROLL PARA EXPLORAR</span>
                 </div>
             </div>
         </div>
@@ -297,9 +297,9 @@ if (empty($galRow2)) $galRow2 = $galRow1;
     <section class="gallery" id="galeria">
         <div class="container">
             <div class="section__header reveal" style="text-align:center;">
-                <span class="section__tag">EXPLORA NUESTRA COLECCION</span>
-                <h2 class="picks__title">Mas productos que<br><em>vas a amar</em></h2>
-                <p class="picks__subtitle">Cada pieza tiene una historia. Descubri la tuya.</p>
+                <span class="section__tag" data-i18n="gal-header-tag">EXPLORA NUESTRA COLECCION</span>
+                <h2 class="picks__title" data-i18n="gal-header-title">Mas productos que<br><em>vas a amar</em></h2>
+                <p class="picks__subtitle" data-i18n="gal-header-sub">Cada pieza tiene una historia. Descubri la tuya.</p>
             </div>
         </div>
         <!-- Fila 1: scroll izquierda -->
@@ -542,7 +542,7 @@ if (empty($galRow2)) $galRow2 = $galRow1;
     </button>
 
     <?php include "includes/cart_drawer.php"; ?>
-    <script src="js/main.js?v=17"></script>
+    <script src="js/main.js?v=18"></script>
     <script src="js/carousel.js?v=17"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>

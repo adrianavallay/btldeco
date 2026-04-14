@@ -63,11 +63,25 @@
 
     // Render cart items
     function renderCart(cart) {
-        var items = cart.items || cart;
+        var rawItems = cart.items || cart;
         var subtotal = 0;
         var html = '';
 
-        if (!items || (Array.isArray(items) && items.length === 0) || (typeof items === 'object' && Object.keys(items).length === 0)) {
+        // Normalize items to array
+        var itemsList = [];
+        if (Array.isArray(rawItems)) {
+            itemsList = rawItems;
+        } else if (rawItems && typeof rawItems === 'object') {
+            Object.keys(rawItems).forEach(function(k) {
+                var it = rawItems[k];
+                if (it && it.nombre) {
+                    if (!it.key) it.key = k;
+                    itemsList.push(it);
+                }
+            });
+        }
+
+        if (itemsList.length === 0) {
             cartEmpty.style.display = 'block';
             cartFooter.style.display = 'none';
             cartItems.innerHTML = '';
@@ -78,9 +92,8 @@
         cartEmpty.style.display = 'none';
         cartFooter.style.display = 'block';
 
-        var keys = Object.keys(items);
-        keys.forEach(function(key) {
-            var item = items[key];
+        itemsList.forEach(function(item) {
+            var itemKey = item.key || (item.producto_id + (item.variante ? '-' + item.variante : ''));
             var itemTotal = item.precio * item.qty;
             subtotal += itemTotal;
 
@@ -89,7 +102,9 @@
                 imgSrc = 'uploads/productos/' + imgSrc;
             }
 
-            html += '<div class="cart-item" data-key="' + key + '">';
+            var safeKey = itemKey.replace(/'/g, "\\'");
+
+            html += '<div class="cart-item">';
             html += '  <div class="cart-item__img">';
             html += '    <img src="' + imgSrc + '" alt="' + (item.nombre || '') + '">';
             html += '  </div>';
@@ -98,12 +113,12 @@
             if (item.variante) html += '<span class="cart-item__variant">' + item.variante + '</span>';
             html += '    <span class="cart-item__price">$' + formatPrice(item.precio) + '</span>';
             html += '    <div class="cart-item__qty">';
-            html += '      <button class="qty-btn" onclick="window.btlCart.update(\'' + key + '\', ' + (item.qty - 1) + ')">−</button>';
+            html += '      <button type="button" class="qty-btn" onclick="window.btlCart.update(\'' + safeKey + '\', ' + (item.qty - 1) + ')">−</button>';
             html += '      <span>' + item.qty + '</span>';
-            html += '      <button class="qty-btn" onclick="window.btlCart.update(\'' + key + '\', ' + (item.qty + 1) + ')">+</button>';
+            html += '      <button type="button" class="qty-btn" onclick="window.btlCart.update(\'' + safeKey + '\', ' + (item.qty + 1) + ')">+</button>';
             html += '    </div>';
             html += '  </div>';
-            html += '  <button class="cart-item__remove" onclick="window.btlCart.remove(\'' + key + '\')">';
+            html += '  <button type="button" class="cart-item__remove" onclick="window.btlCart.remove(\'' + safeKey + '\')">';
             html += '    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
             html += '  </button>';
             html += '</div>';

@@ -101,8 +101,8 @@ try {
 
         <div class="container">
             <div class="tienda__header">
-                <h1 class="tienda__title">Tienda</h1>
-                <p class="tienda__subtitle">Todos nuestros productos de decoracion</p>
+                <h1 class="tienda__title" data-i18n="tienda-title">Tienda</h1>
+                <p class="tienda__subtitle" data-i18n="tienda-sub">Todos nuestros productos de decoracion</p>
             </div>
         </div>
 
