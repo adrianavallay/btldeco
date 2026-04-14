@@ -1,6 +1,6 @@
 /* ============================================================
    BTLDECO — Gallery GSAP Animations
-   Reveal + 3D tilt + parallax tracks
+   Parallax tracks only
    ============================================================ */
 (function () {
     'use strict';
@@ -8,7 +8,6 @@
     if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
     gsap.registerPlugin(ScrollTrigger);
 
-    // Check reduced motion
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
     // ── Header reveal ──
@@ -56,37 +55,5 @@
             }
         });
     }
-
-    // ── Items: clip-path reveal + slight Y offset ──
-    var wrappers = document.querySelectorAll('.gallery__track-wrapper');
-    wrappers.forEach(function (wrapper, wIndex) {
-        var items = wrapper.querySelectorAll('.gallery__item');
-        // Only animate first set (not duplicates)
-        var half = Math.ceil(items.length / 2);
-        var unique = Array.prototype.slice.call(items, 0, half);
-
-        unique.forEach(function (item, i) {
-            gsap.fromTo(item,
-                {
-                    clipPath: 'inset(0 100% 0 0)',
-                    opacity: 0
-                },
-                {
-                    clipPath: 'inset(0 0% 0 0)',
-                    opacity: 1,
-                    duration: 1.2,
-                    delay: i * 0.1,
-                    ease: 'power3.inOut',
-                    scrollTrigger: {
-                        trigger: wrapper,
-                        start: 'top 85%',
-                        once: true
-                    }
-                }
-            );
-        });
-    });
-
-    // Hover handled by CSS (scale 1.25 + overlay)
 
 })();
