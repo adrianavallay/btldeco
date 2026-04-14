@@ -35,7 +35,7 @@
     function getMaxIndex() {
         var viewportWidth = viewport.offsetWidth;
         var totalWidth = slideCount * slideWidth - gap;
-        var max = Math.ceil((totalWidth - viewportWidth) / slideWidth);
+        var max = Math.ceil((totalWidth - viewportWidth) / slideWidth) + 1;
         return Math.max(0, max);
     }
 
