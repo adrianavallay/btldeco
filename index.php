@@ -38,7 +38,7 @@ if (empty($galRow2)) $galRow2 = $galRow1;
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css?v=28">
+    <link rel="stylesheet" href="css/styles.css?v=29">
 </head>
 <body>
 
@@ -281,8 +281,8 @@ if (empty($galRow2)) $galRow2 = $galRow1;
         <div class="container">
             <div class="cta-banner__inner">
                 <div class="cta-banner__text">
-                    <h2 class="cta-banner__title">Tu hogar merece<br><em>algo unico</em></h2>
-                    <p class="cta-banner__desc">Piezas de diseño que no vas a encontrar en otro lado. Fabricacion artesanal, envio a todo el pais.</p>
+                    <h2 class="cta-banner__title">Descubri toda<br>nuestra <em>coleccion</em></h2>
+                    <p class="cta-banner__desc">Seguí scrolleando y explora nuestros productos. Toca cualquiera para ver el detalle y agregalo a tu carrito.</p>
                 </div>
                 <div class="cta-banner__actions">
                     <a href="tienda.php" class="btn btn--primary btn--lg">
