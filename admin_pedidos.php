@@ -57,6 +57,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+    // ── Delete pedido ──
+    if ($action === 'delete_pedido') {
+        $pedido_id = (int)($_POST['pedido_id'] ?? 0);
+        if ($pedido_id > 0) {
+            $db->prepare("DELETE FROM pedido_items WHERE pedido_id = ?")->execute([$pedido_id]);
+            $db->prepare("DELETE FROM pedidos WHERE id = ?")->execute([$pedido_id]);
+            $flash_ok = "Pedido #{$pedido_id} eliminado.";
+        }
+    }
+
     // ── Add nota ──
     if ($action === 'add_nota') {
         $pedido_id = (int)($_POST['pedido_id'] ?? 0);
@@ -230,7 +240,7 @@ $qs_base = $qs_parts ? implode('&', $qs_parts) . '&' : '';
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pedidos — Admin</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
-<link rel="stylesheet" href="css/admin.css?v=32">
+<link rel="stylesheet" href="css/admin.css?v=33">
 </head>
 <body>
 <?php $admin_page = 'pedidos'; ?>
@@ -440,8 +450,13 @@ $qs_base = $qs_parts ? implode('&', $qs_parts) . '&' : '';
               <td style="text-align:center;"><?= (int)$p['items_count'] ?></td>
               <td><?= price((float)$p['total']) ?></td>
               <td><?= estado_badge($p['estado']) ?></td>
-              <td>
+              <td style="display:flex;gap:6px;">
                 <button class="btn-ver" onclick="openPedido(<?= $p['id'] ?>)">Ver</button>
+                <form method="POST" style="display:inline;" onsubmit="return confirm('¿Eliminar pedido #<?= $p['id'] ?>? Esta accion no se puede deshacer.')">
+                  <input type="hidden" name="action" value="delete_pedido">
+                  <input type="hidden" name="pedido_id" value="<?= $p['id'] ?>">
+                  <button type="submit" class="btn-ver" style="color:#ef4444;border-color:rgba(239,68,68,0.3);">Eliminar</button>
+                </form>
               </td>
             </tr>
             <?php endforeach; ?>
