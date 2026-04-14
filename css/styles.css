@@ -1289,7 +1289,7 @@ button { cursor: pointer; border: none; background: none; font: inherit; color: 
    GALLERY — DUAL CAROUSEL
    ============================================================ */
 .gallery {
-    padding: var(--section-pad) 0;
+    padding: calc(var(--section-pad) / 2) 0 var(--section-pad);
     overflow-x: clip;
     overflow-y: visible;
     background: var(--bg);
