@@ -202,7 +202,7 @@ $periodo_label = $periodo_labels[$periodo] ?? 'Este mes';
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Reportes — Admin</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
-<link rel="stylesheet" href="css/admin.css?v=20">
+<link rel="stylesheet" href="css/admin.css?v=30">
 </head>
 <body>
 <?php $admin_page = 'reportes'; ?>
