@@ -1239,7 +1239,8 @@ button { cursor: pointer; border: none; background: none; font: inherit; color: 
    ============================================================ */
 .gallery {
     padding: var(--section-pad) 0;
-    overflow: hidden;
+    overflow-x: clip;
+    overflow-y: visible;
     background: var(--bg);
 }
 .gallery .section__header { margin-bottom: 48px; }
@@ -1247,8 +1248,7 @@ button { cursor: pointer; border: none; background: none; font: inherit; color: 
 .gallery__track-wrapper {
     position: relative;
     margin-bottom: 40px;
-    overflow: clip;
-    overflow-clip-margin: 80px;
+    overflow: visible;
 }
 .gallery__track {
     display: flex;
@@ -1284,6 +1284,7 @@ button { cursor: pointer; border: none; background: none; font: inherit; color: 
     position: relative;
     border: 1px solid var(--border);
     transition: all 0.45s var(--ease);
+    background: transparent;
 }
 .gallery__item img {
     width: 100%;
@@ -1293,11 +1294,12 @@ button { cursor: pointer; border: none; background: none; font: inherit; color: 
 }
 .gallery__item:hover {
     transform: scale(1.35);
-    z-index: 10;
+    z-index: 50;
     border-color: transparent;
     border-radius: var(--radius-xl);
     box-shadow: 0 20px 60px rgba(0,0,0,0.35);
     transition: all 0.45s var(--ease);
+    background: none;
 }
 .gallery__item:hover img {
     transform: scale(1.08);
