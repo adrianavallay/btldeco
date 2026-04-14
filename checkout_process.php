@@ -60,12 +60,35 @@ if ($cupon) {
 }
 $total = max(0, round($subtotal - $descuento, 2));
 
-// ── Insert pedido ─────────────────────────────────────────
+// ── Insert or update cliente ──────────────────────────────
 try {
     $db = pdo();
     $db->beginTransaction();
 
+    // Check if client exists by email, create or update
     $cliente_id = is_cliente() ? cliente_id() : null;
+
+    if (!$cliente_id) {
+        $stmtCli = $db->prepare("SELECT id FROM clientes WHERE email = ?");
+        $stmtCli->execute([$email]);
+        $existingCli = $stmtCli->fetch();
+
+        if ($existingCli) {
+            $cliente_id = (int) $existingCli['id'];
+            // Update info with latest data
+            $db->prepare("UPDATE clientes SET nombre = ?, telefono = ?, direccion = ?, ciudad = ?, provincia = ?, ultimo_acceso = NOW() WHERE id = ?")
+               ->execute([$nombre, $telefono, $direccion, $ciudad, $provincia, $cliente_id]);
+        } else {
+            // Create new client (no password, guest checkout)
+            $db->prepare("INSERT INTO clientes (nombre, email, password, telefono, direccion, ciudad, provincia, activo, fecha_registro, ultimo_acceso) VALUES (?, ?, '', ?, ?, ?, ?, 1, NOW(), NOW())")
+               ->execute([$nombre, $email, $telefono, $direccion, $ciudad, $provincia]);
+            $cliente_id = (int) $db->lastInsertId();
+        }
+    } else {
+        // Update existing logged-in client with latest address
+        $db->prepare("UPDATE clientes SET telefono = ?, direccion = ?, ciudad = ?, provincia = ?, ultimo_acceso = NOW() WHERE id = ?")
+           ->execute([$telefono, $direccion, $ciudad, $provincia, $cliente_id]);
+    }
 
     $stmt = $db->prepare("
         INSERT INTO pedidos (cliente_id, nombre, email, telefono, direccion, ciudad, provincia, subtotal, descuento, total, cupon_codigo, estado)
