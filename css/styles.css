@@ -1322,6 +1322,15 @@ button { cursor: pointer; border: none; background: none; font: inherit; color: 
     font-weight: 600;
     color: #fff;
     letter-spacing: 0.02em;
+    display: block;
+}
+.gallery__item-overlay small {
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #D97706;
+    margin-top: 4px;
+    display: block;
 }
 
 /* ============================================================

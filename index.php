@@ -13,17 +13,20 @@ try {
     $featured = [];
 }
 
-// Fetch recent products (not featured, for "te puede interesar")
+// Fetch all active products for gallery + picks
 try {
-    $recent = pdo()->query("SELECT p.*, c.nombre AS categoria_nombre, c.slug AS categoria_slug
-                            FROM productos p
-                            LEFT JOIN categorias c ON p.categoria_id = c.id
-                            WHERE p.estado = 'activo'
-                            ORDER BY p.fecha_creacion DESC
-                            LIMIT 8")->fetchAll();
+    $allProducts = pdo()->query("SELECT p.*, c.nombre AS categoria_nombre, c.slug AS categoria_slug
+                                 FROM productos p
+                                 LEFT JOIN categorias c ON p.categoria_id = c.id
+                                 WHERE p.estado = 'activo'
+                                 ORDER BY p.fecha_creacion DESC")->fetchAll();
 } catch (Exception $e) {
-    $recent = [];
+    $allProducts = [];
 }
+// Split for gallery rows
+$galRow1 = array_slice($allProducts, 0, min(8, count($allProducts)));
+$galRow2 = array_slice($allProducts, min(8, count($allProducts)) > 0 ? 4 : 0, min(8, count($allProducts)));
+if (empty($galRow2)) $galRow2 = $galRow1;
 ?>
 <!DOCTYPE html>
 <html lang="es" data-theme="light">
@@ -35,7 +38,7 @@ try {
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css?v=20">
+    <link rel="stylesheet" href="css/styles.css?v=21">
 </head>
 <body>
 
@@ -273,24 +276,39 @@ try {
         <?php endif; ?>
     </section>
 
-    <!-- TE PUEDE INTERESAR -->
-    <?php if (!empty($recent)): ?>
-    <section class="section picks" id="picks">
+    <!-- GALERIA DE PRODUCTOS (desde DB) -->
+    <?php if (!empty($allProducts)): ?>
+    <section class="gallery" id="galeria">
         <div class="container">
-            <div class="picks__header reveal">
+            <div class="section__header reveal" style="text-align:center;">
+                <span class="section__tag">EXPLORA</span>
                 <h2 class="picks__title">Te puede<br><em>interesar</em></h2>
-                <p class="picks__subtitle">Explora nuestras piezas mas recientes. Toca para ver el detalle.</p>
+                <p class="picks__subtitle">Toca cualquier producto para ver el detalle</p>
             </div>
-
-            <div class="picks__grid">
-                <?php foreach ($recent as $rp): ?>
-                <div class="picks__card reveal" onclick="openQuickView(this)" data-id="<?= $rp['id'] ?>" data-slug="<?= sanitize($rp['slug']) ?>" data-name="<?= sanitize($rp['nombre']) ?>" data-price="<?= ($rp['precio_oferta'] && $rp['precio_oferta'] < $rp['precio']) ? $rp['precio_oferta'] : $rp['precio'] ?>" data-price-fmt="<?= price(($rp['precio_oferta'] && $rp['precio_oferta'] < $rp['precio']) ? $rp['precio_oferta'] : $rp['precio']) ?>" data-cat="<?= sanitize($rp['categoria_nombre'] ?? '') ?>" data-desc="<?= sanitize($rp['descripcion_corta'] ?: substr($rp['descripcion'], 0, 200)) ?>" data-img="<?= img_url($rp['imagen_principal']) ?>">
-                    <div class="picks__card-img">
-                        <img src="<?= img_url($rp['imagen_principal']) ?>" alt="<?= sanitize($rp['nombre']) ?>" loading="lazy">
+        </div>
+        <!-- Fila 1: scroll izquierda -->
+        <div class="gallery__track-wrapper">
+            <div class="gallery__track gallery__track--left" id="galleryTrack1">
+                <?php foreach (array_merge($galRow1, $galRow1) as $gp): ?>
+                <div class="gallery__item" onclick="openQuickView(this)" data-id="<?= $gp['id'] ?>" data-slug="<?= sanitize($gp['slug']) ?>" data-name="<?= sanitize($gp['nombre']) ?>" data-price-fmt="<?= price(($gp['precio_oferta'] && $gp['precio_oferta'] < $gp['precio']) ? $gp['precio_oferta'] : $gp['precio']) ?>" data-cat="<?= sanitize($gp['categoria_nombre'] ?? '') ?>" data-desc="<?= sanitize($gp['descripcion_corta'] ?: substr($gp['descripcion'] ?? '', 0, 200)) ?>" data-img="<?= img_url($gp['imagen_principal']) ?>">
+                    <img src="<?= img_url($gp['imagen_principal']) ?>" alt="<?= sanitize($gp['nombre']) ?>" loading="lazy">
+                    <div class="gallery__item-overlay">
+                        <span><?= sanitize($gp['nombre']) ?></span>
+                        <small><?= price(($gp['precio_oferta'] && $gp['precio_oferta'] < $gp['precio']) ? $gp['precio_oferta'] : $gp['precio']) ?></small>
                     </div>
-                    <div class="picks__card-info">
-                        <span class="picks__card-name"><?= sanitize($rp['nombre']) ?></span>
-                        <span class="picks__card-price"><?= price(($rp['precio_oferta'] && $rp['precio_oferta'] < $rp['precio']) ? $rp['precio_oferta'] : $rp['precio']) ?></span>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+        <!-- Fila 2: scroll derecha -->
+        <div class="gallery__track-wrapper">
+            <div class="gallery__track gallery__track--right" id="galleryTrack2">
+                <?php foreach (array_merge($galRow2, $galRow2) as $gp): ?>
+                <div class="gallery__item" onclick="openQuickView(this)" data-id="<?= $gp['id'] ?>" data-slug="<?= sanitize($gp['slug']) ?>" data-name="<?= sanitize($gp['nombre']) ?>" data-price-fmt="<?= price(($gp['precio_oferta'] && $gp['precio_oferta'] < $gp['precio']) ? $gp['precio_oferta'] : $gp['precio']) ?>" data-cat="<?= sanitize($gp['categoria_nombre'] ?? '') ?>" data-desc="<?= sanitize($gp['descripcion_corta'] ?: substr($gp['descripcion'] ?? '', 0, 200)) ?>" data-img="<?= img_url($gp['imagen_principal']) ?>">
+                    <img src="<?= img_url($gp['imagen_principal']) ?>" alt="<?= sanitize($gp['nombre']) ?>" loading="lazy">
+                    <div class="gallery__item-overlay">
+                        <span><?= sanitize($gp['nombre']) ?></span>
+                        <small><?= price(($gp['precio_oferta'] && $gp['precio_oferta'] < $gp['precio']) ? $gp['precio_oferta'] : $gp['precio']) ?></small>
                     </div>
                 </div>
                 <?php endforeach; ?>
@@ -314,182 +332,18 @@ try {
                 <span class="qv-price" id="qvPrice"></span>
                 <p class="qv-desc" id="qvDesc"></p>
                 <div class="qv-actions">
-                    <button class="btn btn--primary btn--lg" id="qvCartBtn" style="flex:1;">
+                    <button class="btn btn--primary btn--lg" id="qvCartBtn">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
-                        AÑADIR AL CARRITO
+                        AÑADIR
                     </button>
-                    <a class="btn btn--outline btn--lg" id="qvLink" href="" style="flex:1;justify-content:center;">
-                        VER PRODUCTO
+                    <a class="btn btn--outline btn--lg" id="qvLink" href="">
+                        VER DETALLE
                     </a>
                 </div>
             </div>
         </div>
     </div>
     <?php endif; ?>
-
-    <!-- GALERIA DUAL CAROUSEL -->
-    <section class="gallery" id="galeria">
-        <div class="container">
-            <div class="section__header reveal" style="text-align:center;">
-                <span class="section__tag" data-i18n="gal-tag">NUESTROS TRABAJOS</span>
-                <h2 class="section__title" data-i18n="gal-title">Galeria de<br>productos</h2>
-            </div>
-        </div>
-        <!-- Fila 1: scroll izquierda -->
-        <div class="gallery__track-wrapper">
-            <div class="gallery__track gallery__track--left" id="galleryTrack1">
-                <div class="gallery__item" data-product="Maceta Hexa">
-                    <img src="https://images.unsplash.com/photo-1485955900006-10f4d324d411?w=600&h=450&fit=crop" alt="Maceta Hexa" loading="lazy">
-                    <div class="gallery__item-overlay"><span>Maceta Hexa</span></div>
-                </div>
-                <div class="gallery__item" data-product="Figura Ondas">
-                    <img src="https://images.unsplash.com/photo-1602028915047-37269d1a73f7?w=600&h=450&fit=crop" alt="Figura Ondas" loading="lazy">
-                    <div class="gallery__item-overlay"><span>Figura Ondas</span></div>
-                </div>
-                <div class="gallery__item" data-product="Portavela Moon">
-                    <img src="https://images.unsplash.com/photo-1603204077167-2fa0397f49de?w=600&h=450&fit=crop" alt="Portavela Moon" loading="lazy">
-                    <div class="gallery__item-overlay"><span>Portavela Moon</span></div>
-                </div>
-                <div class="gallery__item" data-product="Organizador Cubic">
-                    <img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=600&h=450&fit=crop" alt="Organizador Cubic" loading="lazy">
-                    <div class="gallery__item-overlay"><span>Organizador Cubic</span></div>
-                </div>
-                <div class="gallery__item" data-product="Florero Spiral">
-                    <img src="https://images.unsplash.com/photo-1578500494198-246f612d3b3d?w=600&h=450&fit=crop" alt="Florero Spiral" loading="lazy">
-                    <div class="gallery__item-overlay"><span>Florero Spiral</span></div>
-                </div>
-                <div class="gallery__item" data-product="Lampara Geo">
-                    <img src="https://images.unsplash.com/photo-1507473885765-e6ed057ab6fe?w=600&h=450&fit=crop" alt="Lampara Geo" loading="lazy">
-                    <div class="gallery__item-overlay"><span>Lampara Geo</span></div>
-                </div>
-                <div class="gallery__item" data-product="Bandeja Cloud">
-                    <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600&h=450&fit=crop" alt="Bandeja Cloud" loading="lazy">
-                    <div class="gallery__item-overlay"><span>Bandeja Cloud</span></div>
-                </div>
-                <div class="gallery__item" data-product="Maceta Drop">
-                    <img src="https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?w=600&h=450&fit=crop" alt="Maceta Drop" loading="lazy">
-                    <div class="gallery__item-overlay"><span>Maceta Drop</span></div>
-                </div>
-                <!-- Duplicados para loop infinito -->
-                <div class="gallery__item" data-product="Maceta Hexa">
-                    <img src="https://images.unsplash.com/photo-1485955900006-10f4d324d411?w=600&h=450&fit=crop" alt="Maceta Hexa" loading="lazy">
-                    <div class="gallery__item-overlay"><span>Maceta Hexa</span></div>
-                </div>
-                <div class="gallery__item" data-product="Figura Ondas">
-                    <img src="https://images.unsplash.com/photo-1602028915047-37269d1a73f7?w=600&h=450&fit=crop" alt="Figura Ondas" loading="lazy">
-                    <div class="gallery__item-overlay"><span>Figura Ondas</span></div>
-                </div>
-                <div class="gallery__item" data-product="Portavela Moon">
-                    <img src="https://images.unsplash.com/photo-1603204077167-2fa0397f49de?w=600&h=450&fit=crop" alt="Portavela Moon" loading="lazy">
-                    <div class="gallery__item-overlay"><span>Portavela Moon</span></div>
-                </div>
-                <div class="gallery__item" data-product="Organizador Cubic">
-                    <img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=600&h=450&fit=crop" alt="Organizador Cubic" loading="lazy">
-                    <div class="gallery__item-overlay"><span>Organizador Cubic</span></div>
-                </div>
-                <div class="gallery__item" data-product="Florero Spiral">
-                    <img src="https://images.unsplash.com/photo-1578500494198-246f612d3b3d?w=600&h=450&fit=crop" alt="Florero Spiral" loading="lazy">
-                    <div class="gallery__item-overlay"><span>Florero Spiral</span></div>
-                </div>
-                <div class="gallery__item" data-product="Lampara Geo">
-                    <img src="https://images.unsplash.com/photo-1507473885765-e6ed057ab6fe?w=600&h=450&fit=crop" alt="Lampara Geo" loading="lazy">
-                    <div class="gallery__item-overlay"><span>Lampara Geo</span></div>
-                </div>
-                <div class="gallery__item" data-product="Bandeja Cloud">
-                    <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600&h=450&fit=crop" alt="Bandeja Cloud" loading="lazy">
-                    <div class="gallery__item-overlay"><span>Bandeja Cloud</span></div>
-                </div>
-                <div class="gallery__item" data-product="Maceta Drop">
-                    <img src="https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?w=600&h=450&fit=crop" alt="Maceta Drop" loading="lazy">
-                    <div class="gallery__item-overlay"><span>Maceta Drop</span></div>
-                </div>
-            </div>
-        </div>
-        <!-- Fila 2: scroll derecha -->
-        <div class="gallery__track-wrapper">
-            <div class="gallery__track gallery__track--right" id="galleryTrack2">
-                <div class="gallery__item" data-product="Letra Deco A">
-                    <img src="https://images.unsplash.com/photo-1513519245088-0e12902e35ca?w=600&h=450&fit=crop" alt="Letra Deco A" loading="lazy">
-                    <div class="gallery__item-overlay"><span>Letra Deco A</span></div>
-                </div>
-                <div class="gallery__item" data-product="Maceta Bauhaus">
-                    <img src="https://images.unsplash.com/photo-1501004318855-e73a3fc04086?w=600&h=450&fit=crop" alt="Maceta Bauhaus" loading="lazy">
-                    <div class="gallery__item-overlay"><span>Maceta Bauhaus</span></div>
-                </div>
-                <div class="gallery__item" data-product="Escultura Twist">
-                    <img src="https://images.unsplash.com/photo-1544967082-d9d25d867d66?w=600&h=450&fit=crop" alt="Escultura Twist" loading="lazy">
-                    <div class="gallery__item-overlay"><span>Escultura Twist</span></div>
-                </div>
-                <div class="gallery__item" data-product="Difusor Minimal">
-                    <img src="https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?w=600&h=450&fit=crop" alt="Difusor Minimal" loading="lazy">
-                    <div class="gallery__item-overlay"><span>Difusor Minimal</span></div>
-                </div>
-                <div class="gallery__item" data-product="Porta Retrato Arc">
-                    <img src="https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?w=600&h=450&fit=crop" alt="Porta Retrato Arc" loading="lazy">
-                    <div class="gallery__item-overlay"><span>Porta Retrato Arc</span></div>
-                </div>
-                <div class="gallery__item" data-product="Reloj de Pared">
-                    <img src="https://images.unsplash.com/photo-1563861826100-9cb868fdbe1c?w=600&h=450&fit=crop" alt="Reloj de Pared" loading="lazy">
-                    <div class="gallery__item-overlay"><span>Reloj de Pared</span></div>
-                </div>
-                <div class="gallery__item" data-product="Maceta Vertex">
-                    <img src="https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=600&h=450&fit=crop" alt="Maceta Vertex" loading="lazy">
-                    <div class="gallery__item-overlay"><span>Maceta Vertex</span></div>
-                </div>
-                <div class="gallery__item" data-product="Cuenco Zen">
-                    <img src="https://images.unsplash.com/photo-1493552832785-8ae4e09e480f?w=600&h=450&fit=crop" alt="Cuenco Zen" loading="lazy">
-                    <div class="gallery__item-overlay"><span>Cuenco Zen</span></div>
-                </div>
-                <!-- Duplicados para loop infinito -->
-                <div class="gallery__item" data-product="Letra Deco A">
-                    <img src="https://images.unsplash.com/photo-1513519245088-0e12902e35ca?w=600&h=450&fit=crop" alt="Letra Deco A" loading="lazy">
-                    <div class="gallery__item-overlay"><span>Letra Deco A</span></div>
-                </div>
-                <div class="gallery__item" data-product="Maceta Bauhaus">
-                    <img src="https://images.unsplash.com/photo-1501004318855-e73a3fc04086?w=600&h=450&fit=crop" alt="Maceta Bauhaus" loading="lazy">
-                    <div class="gallery__item-overlay"><span>Maceta Bauhaus</span></div>
-                </div>
-                <div class="gallery__item" data-product="Escultura Twist">
-                    <img src="https://images.unsplash.com/photo-1544967082-d9d25d867d66?w=600&h=450&fit=crop" alt="Escultura Twist" loading="lazy">
-                    <div class="gallery__item-overlay"><span>Escultura Twist</span></div>
-                </div>
-                <div class="gallery__item" data-product="Difusor Minimal">
-                    <img src="https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?w=600&h=450&fit=crop" alt="Difusor Minimal" loading="lazy">
-                    <div class="gallery__item-overlay"><span>Difusor Minimal</span></div>
-                </div>
-                <div class="gallery__item" data-product="Porta Retrato Arc">
-                    <img src="https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?w=600&h=450&fit=crop" alt="Porta Retrato Arc" loading="lazy">
-                    <div class="gallery__item-overlay"><span>Porta Retrato Arc</span></div>
-                </div>
-                <div class="gallery__item" data-product="Reloj de Pared">
-                    <img src="https://images.unsplash.com/photo-1563861826100-9cb868fdbe1c?w=600&h=450&fit=crop" alt="Reloj de Pared" loading="lazy">
-                    <div class="gallery__item-overlay"><span>Reloj de Pared</span></div>
-                </div>
-                <div class="gallery__item" data-product="Maceta Vertex">
-                    <img src="https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=600&h=450&fit=crop" alt="Maceta Vertex" loading="lazy">
-                    <div class="gallery__item-overlay"><span>Maceta Vertex</span></div>
-                </div>
-                <div class="gallery__item" data-product="Cuenco Zen">
-                    <img src="https://images.unsplash.com/photo-1493552832785-8ae4e09e480f?w=600&h=450&fit=crop" alt="Cuenco Zen" loading="lazy">
-                    <div class="gallery__item-overlay"><span>Cuenco Zen</span></div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- EXPANDED PRODUCT VIEW -->
-    <div class="gallery-expand" id="galleryExpand">
-        <button class="gallery-expand__close" id="galleryExpandClose">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-        <div class="gallery-expand__content">
-            <img class="gallery-expand__img" id="galleryExpandImg" src="" alt="">
-            <div class="gallery-expand__info">
-                <span class="gallery-expand__name" id="galleryExpandName"></span>
-                <a href="#contacto" class="btn btn--primary btn--sm" data-i18n="gal-consult" onclick="document.getElementById('galleryExpand').classList.remove('active');document.body.style.overflow='';">CONSULTAR</a>
-            </div>
-        </div>
-    </div>
 
     <!-- NOSOTROS / POR QUE BTLDECO -->
     <section class="section about dark-section" id="nosotros">
