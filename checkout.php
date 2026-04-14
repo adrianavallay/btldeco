@@ -45,7 +45,7 @@ $flash_success = flash('success');
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css?v=7">
+    <link rel="stylesheet" href="css/styles.css?v=8">
 </head>
 <body>
 
@@ -199,11 +199,31 @@ $flash_success = flash('success');
                                 </div>
                             </div>
 
-                            <div class="form-group">
-                                <label for="ck-direccion">Direccion *</label>
-                                <input type="text" id="ck-direccion" name="direccion" required
-                                       value="<?= sanitize($cliente['direccion'] ?? '') ?>"
-                                       placeholder="Calle, numero, piso, depto">
+                            <div class="form-row">
+                                <div class="form-group" style="flex:2;">
+                                    <label for="ck-direccion">Direccion *</label>
+                                    <input type="text" id="ck-direccion" name="direccion" required
+                                           value="<?= sanitize($cliente['direccion'] ?? '') ?>"
+                                           placeholder="Calle">
+                                </div>
+                                <div class="form-group" style="flex:1;">
+                                    <label for="ck-numero">Numero *</label>
+                                    <input type="text" id="ck-numero" name="numero" required
+                                           placeholder="1234">
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="ck-piso">Piso / Depto <span style="color:var(--text-muted);font-weight:400;text-transform:none;">(opcional)</span></label>
+                                    <input type="text" id="ck-piso" name="piso_depto"
+                                           placeholder="Ej: 3ro B">
+                                </div>
+                                <div class="form-group">
+                                    <label for="ck-cp">Codigo postal</label>
+                                    <input type="text" id="ck-cp" name="codigo_postal"
+                                           placeholder="Ej: 1414">
+                                </div>
                             </div>
 
                             <div class="form-row">
@@ -354,7 +374,7 @@ $flash_success = flash('success');
         <p>&copy; 2026 BTLDECO. Todos los derechos reservados.</p>
     </div>
 
-    <script src="js/main.js?v=7"></script>
+    <script src="js/main.js?v=8"></script>
     <script>
     // Checkout cart operations
     function ckUpdateQty(key, qty) {

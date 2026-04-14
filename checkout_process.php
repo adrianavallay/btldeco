@@ -15,14 +15,22 @@ if (!hash_equals(csrf_token(), $csrf)) {
 }
 
 // ── Validate required fields ──────────────────────────────
-$nombre    = trim($_POST['nombre'] ?? '');
-$email     = trim($_POST['email'] ?? '');
-$telefono  = trim($_POST['telefono'] ?? '');
-$direccion = trim($_POST['direccion'] ?? '');
-$ciudad    = trim($_POST['ciudad'] ?? '');
-$provincia = trim($_POST['provincia'] ?? '');
+$nombre      = trim($_POST['nombre'] ?? '');
+$email       = trim($_POST['email'] ?? '');
+$telefono    = trim($_POST['telefono'] ?? '');
+$calle       = trim($_POST['direccion'] ?? '');
+$numero      = trim($_POST['numero'] ?? '');
+$piso_depto  = trim($_POST['piso_depto'] ?? '');
+$codigo_postal = trim($_POST['codigo_postal'] ?? '');
+$ciudad      = trim($_POST['ciudad'] ?? '');
+$provincia   = trim($_POST['provincia'] ?? '');
 
-if ($nombre === '' || $email === '' || $direccion === '' || $ciudad === '' || $provincia === '') {
+// Build full address
+$direccion = $calle . ' ' . $numero;
+if ($piso_depto !== '') $direccion .= ', ' . $piso_depto;
+if ($codigo_postal !== '') $direccion .= ' (CP ' . $codigo_postal . ')';
+
+if ($nombre === '' || $email === '' || $calle === '' || $numero === '' || $ciudad === '' || $provincia === '') {
     flash('error', 'Completá todos los campos obligatorios.');
     redirect('checkout.php');
 }
