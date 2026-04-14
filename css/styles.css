@@ -1239,7 +1239,7 @@ button { cursor: pointer; border: none; background: none; font: inherit; color: 
    ============================================================ */
 .cta-banner {
     padding: 0;
-    margin-bottom: 40px;
+    margin-bottom: 0;
 }
 .cta-banner__inner {
     background: var(--bg-elevated);
