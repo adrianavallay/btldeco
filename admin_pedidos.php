@@ -230,7 +230,7 @@ $qs_base = $qs_parts ? implode('&', $qs_parts) . '&' : '';
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pedidos — Admin</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
-<link rel="stylesheet" href="css/admin.css?v=30">
+<link rel="stylesheet" href="css/admin.css?v=31">
 </head>
 <body>
 <?php $admin_page = 'pedidos'; ?>
@@ -614,6 +614,18 @@ function openPedido(id) {
                 discountHTML +
                 '<p class="total-final">Total: ' + formatPrice(p.total) + '</p>' +
             '</div>' +
+        '</div>' +
+        '<div class="modal-section">' +
+            '<h3>Estado del pago</h3>' +
+            '<form method="POST" class="estado-form">' +
+                '<input type="hidden" name="action" value="update_estado">' +
+                '<input type="hidden" name="pedido_id" value="' + p.id + '">' +
+                '<div class="estado-btns">' +
+                    '<button type="submit" name="nuevo_estado" value="pagado" class="estado-btn estado-btn--pagado' + (p.estado === 'pagado' ? ' active' : '') + '"><span class="material-symbols-outlined" style="font-size:16px;">paid</span> Pagado</button>' +
+                    '<button type="submit" name="nuevo_estado" value="pendiente" class="estado-btn estado-btn--pendiente' + (p.estado === 'pendiente' ? ' active' : '') + '"><span class="material-symbols-outlined" style="font-size:16px;">schedule</span> Pendiente</button>' +
+                    '<button type="submit" name="nuevo_estado" value="reembolsado" class="estado-btn estado-btn--reboto' + (p.estado === 'reembolsado' ? ' active' : '') + '"><span class="material-symbols-outlined" style="font-size:16px;">money_off</span> Reboto</button>' +
+                '</div>' +
+            '</form>' +
         '</div>' +
         '<div class="modal-section">' +
             '<h3>Estado del pedido</h3>' +
