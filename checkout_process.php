@@ -149,9 +149,23 @@ try {
     error_log("Email error on pedido #{$pedido_id}: " . $e->getMessage());
 }
 
+// ── Payment method ────────────────────────────────────────
+$metodo_pago = trim($_POST['metodo_pago'] ?? 'mercadopago');
+
+// Save payment method in pedido notes
+try {
+    pdo()->prepare("UPDATE pedidos SET notas = ? WHERE id = ?")->execute([$metodo_pago, $pedido_id]);
+} catch (Exception $e) {}
+
+// If transfer, skip MP and go to gracias
+if ($metodo_pago === 'transferencia') {
+    $_SESSION['cart'] = [];
+    unset($_SESSION['cupon']);
+    redirect("gracias.php?id={$pedido_id}&metodo=transferencia");
+}
+
 // ── MercadoPago ───────────────────────────────────────────
 if (MP_ACCESS_TOKEN === 'MP_ACCESS_TOKEN_AQUI' || MP_ACCESS_TOKEN === '') {
-    // Placeholder token — skip MP, redirect to gracias page (testing mode)
     $_SESSION['cart'] = [];
     unset($_SESSION['cupon']);
     redirect("gracias.php?id={$pedido_id}");

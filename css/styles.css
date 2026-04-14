@@ -2829,6 +2829,192 @@ a.contact-card:hover {
     .payment-method { padding: 16px; }
 }
 
+/* ============================================================
+   GRACIAS PAGE (Order Confirmation)
+   ============================================================ */
+.gracias-page {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    padding: 120px 0 60px;
+}
+.gracias-card {
+    max-width: 640px;
+    margin: 0 auto;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    padding: 48px 40px;
+    text-align: center;
+}
+.gracias-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: rgba(22,163,74,0.08);
+    border: 2px solid rgba(22,163,74,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
+    animation: scaleIn 0.5s var(--ease-spring);
+}
+@keyframes scaleIn {
+    0% { transform: scale(0); opacity: 0; }
+    60% { transform: scale(1.1); }
+    100% { transform: scale(1); opacity: 1; }
+}
+.gracias-title {
+    font-family: var(--font-heading);
+    font-size: clamp(1.6rem, 3vw, 2rem);
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 8px;
+}
+.gracias-order-id {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+}
+.gracias-subtitle {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    margin-bottom: 32px;
+    line-height: 1.6;
+}
+
+/* Transfer section */
+.gracias-transfer {
+    margin: 28px 0;
+    text-align: center;
+}
+.gracias-transfer__intro {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+.gracias-transfer__amount {
+    display: block;
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 24px;
+}
+.gracias-transfer__details {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    text-align: left;
+}
+.gracias-transfer__details .transfer-details__row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.85rem;
+}
+.gracias-transfer__details .transfer-details__row:last-child { border-bottom: none; }
+.gracias-transfer__details .transfer-details__row span { color: var(--text-muted); }
+.gracias-transfer__details .transfer-details__row strong { color: var(--text); font-weight: 600; }
+
+/* Order summary */
+.gracias-summary {
+    text-align: left;
+    margin: 32px 0;
+    border-top: 1px solid var(--border);
+    padding-top: 24px;
+}
+.gracias-summary h3 {
+    font-family: var(--font-heading);
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 16px;
+}
+.gracias-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+}
+.gracias-item:last-of-type { border-bottom: none; }
+.gracias-item__left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.gracias-item__img {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+}
+.gracias-item__img img { width: 100%; height: 100%; object-fit: cover; }
+.gracias-item__name { font-size: 0.88rem; font-weight: 500; color: var(--text); display: block; }
+.gracias-item__variant { font-size: 0.7rem; color: var(--text-muted); display: block; }
+.gracias-item__qty { font-size: 0.78rem; color: var(--text-muted); display: block; }
+.gracias-item__price { font-size: 0.9rem; font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }
+
+.gracias-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+}
+.gracias-row--discount { color: #16A34A; }
+.gracias-row--total {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text);
+    border-top: 1px solid var(--border);
+    padding-top: 14px;
+    margin-top: 8px;
+}
+.gracias-row--total span:last-child { color: var(--accent); }
+
+/* Shipping info */
+.gracias-shipping {
+    text-align: left;
+    margin-bottom: 32px;
+    padding: 20px 24px;
+    background: var(--bg-elevated);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+}
+.gracias-shipping h3 {
+    font-family: var(--font-heading);
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 8px;
+}
+.gracias-shipping p {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+/* Actions */
+.gracias-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 600px) {
+    .gracias-card { padding: 32px 20px; }
+    .gracias-actions { flex-direction: column; }
+    .gracias-actions .btn { width: 100%; justify-content: center; }
+}
+
 /* Cart responsive */
 @media (max-width: 480px) {
     .cart-drawer { width: 100vw; }

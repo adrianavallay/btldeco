@@ -1,334 +1,149 @@
 <?php
 require_once __DIR__ . '/config.php';
 
-// ---------------------------------------------------------------------------
-// 1. Get pedido by ID
-// ---------------------------------------------------------------------------
 $pedido_id = (int) ($_GET['id'] ?? 0);
-if ($pedido_id <= 0) {
-    redirect(SITE_URL . '/');
+$metodo = $_GET['metodo'] ?? '';
+
+$pedido = null;
+$items = [];
+if ($pedido_id > 0) {
+    try {
+        $stmt = pdo()->prepare("SELECT * FROM pedidos WHERE id = ?");
+        $stmt->execute([$pedido_id]);
+        $pedido = $stmt->fetch();
+
+        $stmtItems = pdo()->prepare("SELECT pi.*, p.imagen_principal FROM pedido_items pi LEFT JOIN productos p ON pi.producto_id = p.id WHERE pi.pedido_id = ?");
+        $stmtItems->execute([$pedido_id]);
+        $items = $stmtItems->fetchAll();
+    } catch (Exception $e) {}
 }
 
-$stmt = pdo()->prepare("SELECT * FROM pedidos WHERE id = ? LIMIT 1");
-$stmt->execute([$pedido_id]);
-$pedido = $stmt->fetch();
-
-if (!$pedido) {
-    redirect(SITE_URL . '/');
-}
-
-// ---------------------------------------------------------------------------
-// 2. Get pedido items with product images
-// ---------------------------------------------------------------------------
-$stmtItems = pdo()->prepare("
-    SELECT pi.*, p.imagen_principal
-    FROM pedido_items pi
-    LEFT JOIN productos p ON pi.producto_id = p.id
-    WHERE pi.pedido_id = ?
-");
-$stmtItems->execute([$pedido_id]);
-$items = $stmtItems->fetchAll();
-
-$cartCount = cart_count();
-
-// ---------------------------------------------------------------------------
-// 3. Status badge mapping
-// ---------------------------------------------------------------------------
-$estado_labels = [
-    'pendiente'   => ['label' => 'Pendiente',   'color' => '#f59e0b'],
-    'pagado'      => ['label' => 'Pagado',      'color' => '#22c55e'],
-    'preparando'  => ['label' => 'Preparando',  'color' => '#3b82f6'],
-    'enviado'     => ['label' => 'Enviado',     'color' => '#8b5cf6'],
-    'entregado'   => ['label' => 'Entregado',   'color' => '#22c55e'],
-    'cancelado'   => ['label' => 'Cancelado',   'color' => '#ef4444'],
-    'reembolsado' => ['label' => 'Reembolsado', 'color' => '#71717a'],
-];
-$estado_info = $estado_labels[$pedido['estado']] ?? ['label' => ucfirst($pedido['estado']), 'color' => '#71717a'];
-
-$page_title = 'Gracias por tu compra';
-include __DIR__ . '/includes/header.php';
+if ($pedido && $pedido['notas'] === 'transferencia') $metodo = 'transferencia';
 ?>
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pedido confirmado — BTLDECO</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css?v=6">
+</head>
+<body>
 
-<style>
-    .gracias-card {
-      max-width: 680px;
-      margin: 0 auto;
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 48px 40px;
-      text-align: center;
-    }
-    @media (max-width: 600px) {
-      .gracias-card { padding: 32px 20px; }
-    }
-
-    /* Checkmark icon */
-    .check-icon {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      background: rgba(34, 197, 94, 0.12);
-      border: 3px solid #22c55e;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 24px;
-      animation: scaleIn .4s ease;
-    }
-    .check-icon::after {
-      content: '';
-      display: block;
-      width: 24px;
-      height: 40px;
-      border-right: 4px solid #22c55e;
-      border-bottom: 4px solid #22c55e;
-      transform: rotate(45deg) translateY(-4px);
-    }
-    @keyframes scaleIn {
-      0% { transform: scale(0); opacity: 0; }
-      60% { transform: scale(1.15); }
-      100% { transform: scale(1); opacity: 1; }
-    }
-
-    .gracias-card h1 {
-      font-family: 'Sora', sans-serif;
-      font-size: 1.8rem;
-      margin-bottom: 8px;
-      color: var(--text);
-    }
-    .gracias-card .subtitle {
-      color: var(--text-muted);
-      font-size: .95rem;
-      margin-bottom: 32px;
-    }
-
-    /* Order table */
-    .order-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 24px;
-      text-align: left;
-    }
-    .order-table th {
-      font-size: .75rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: .04em;
-      color: var(--text-muted);
-      padding: 10px 8px;
-      border-bottom: 1px solid var(--border);
-    }
-    .order-table td {
-      padding: 12px 8px;
-      font-size: .88rem;
-      color: var(--text);
-      border-bottom: 1px solid rgba(255,255,255,.05);
-      vertical-align: middle;
-    }
-    .order-table .item-img {
-      width: 44px;
-      height: 44px;
-      object-fit: cover;
-      border-radius: 8px;
-      background: var(--bg-body);
-    }
-    .order-table .item-cell {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    /* Totals */
-    .order-totals {
-      text-align: right;
-      margin-bottom: 28px;
-      font-size: .9rem;
-    }
-    .order-totals .row {
-      display: flex;
-      justify-content: flex-end;
-      gap: 24px;
-      padding: 6px 8px;
-      color: var(--text-muted);
-    }
-    .order-totals .row span:last-child {
-      min-width: 100px;
-      text-align: right;
-      color: var(--text);
-    }
-    .order-totals .row--total {
-      font-weight: 700;
-      font-size: 1.05rem;
-      border-top: 1px solid var(--border);
-      padding-top: 12px;
-      margin-top: 6px;
-    }
-    .order-totals .row--total span:last-child {
-      color: var(--accent-light);
-    }
-    .order-totals .row--discount span:last-child {
-      color: #22c55e;
-    }
-
-    /* Customer info */
-    .customer-info {
-      display: flex;
-      justify-content: center;
-      gap: 32px;
-      flex-wrap: wrap;
-      margin-bottom: 28px;
-      font-size: .88rem;
-      color: var(--text-muted);
-    }
-    .customer-info strong {
-      color: var(--text);
-      font-weight: 600;
-    }
-
-    /* Status badge */
-    .status-badge {
-      display: inline-block;
-      padding: 6px 16px;
-      border-radius: 20px;
-      font-size: .78rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: .04em;
-      margin-bottom: 28px;
-    }
-
-    /* Buttons */
-    .gracias-actions {
-      display: flex;
-      justify-content: center;
-      gap: 14px;
-      flex-wrap: wrap;
-    }
-    .gracias-actions .btn-primary {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 12px 28px;
-      background: var(--accent);
-      color: #fff;
-      font-weight: 600;
-      font-size: .9rem;
-      border: none;
-      border-radius: 10px;
-      text-decoration: none;
-      cursor: pointer;
-      transition: background .2s, transform .15s;
-    }
-    .gracias-actions .btn-primary:hover {
-      background: var(--accent-light);
-      transform: translateY(-1px);
-    }
-    .gracias-actions .btn-secondary {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 12px 28px;
-      background: transparent;
-      color: var(--accent-light);
-      font-weight: 600;
-      font-size: .9rem;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      text-decoration: none;
-      cursor: pointer;
-      transition: border-color .2s, transform .15s;
-    }
-    .gracias-actions .btn-secondary:hover {
-      border-color: var(--accent-light);
-      transform: translateY(-1px);
-    }
-  </style>
-
-<!-- ═══════════ MAIN CONTENT ═══════════ -->
-<section class="container" style="padding-top:120px;padding-bottom:80px;min-height:80vh;display:flex;align-items:center;justify-content:center;">
-  <div class="gracias-card fade-in">
-
-    <!-- Checkmark -->
-    <div class="check-icon"></div>
-
-    <h1>&iexcl;Gracias por tu compra!</h1>
-    <p class="subtitle">Tu pedido <strong>#<?= (int) $pedido['id'] ?></strong> fue registrado con &eacute;xito</p>
-
-    <!-- Status badge -->
-    <span class="status-badge"
-          style="background:<?= $estado_info['color'] ?>20;color:<?= $estado_info['color'] ?>;border:1px solid <?= $estado_info['color'] ?>40;">
-      <?= sanitize($estado_info['label']) ?>
-    </span>
-
-    <!-- Order items table -->
-    <?php if (!empty($items)): ?>
-    <table class="order-table">
-      <thead>
-        <tr>
-          <th>Producto</th>
-          <th style="text-align:center">Cant.</th>
-          <th style="text-align:right">Precio</th>
-        </tr>
-      </thead>
-      <tbody>
-        <?php foreach ($items as $item): ?>
-          <?php
-            $img = sanitize($item['imagen_principal'] ?: 'uploads/productos/placeholder.png');
-            $nombre = sanitize($item['nombre_producto']);
-            $variante = $item['variante'] ? ' (' . sanitize($item['variante']) . ')' : '';
-          ?>
-          <tr>
-            <td>
-              <div class="item-cell">
-                <img src="<?= $img ?>" alt="<?= $nombre ?>" class="item-img" loading="lazy">
-                <span><?= $nombre ?><?= $variante ?></span>
-              </div>
-            </td>
-            <td style="text-align:center"><?= (int) $item['cantidad'] ?></td>
-            <td style="text-align:right"><?= price((float) $item['precio_unitario'] * (int) $item['cantidad']) ?></td>
-          </tr>
-        <?php endforeach; ?>
-      </tbody>
-    </table>
-    <?php endif; ?>
-
-    <!-- Totals -->
-    <div class="order-totals">
-      <div class="row">
-        <span>Subtotal</span>
-        <span><?= price((float) $pedido['subtotal']) ?></span>
-      </div>
-      <?php if ((float) $pedido['descuento'] > 0): ?>
-        <div class="row row--discount">
-          <span>Descuento<?= $pedido['cupon_codigo'] ? ' (' . sanitize($pedido['cupon_codigo']) . ')' : '' ?></span>
-          <span>-<?= price((float) $pedido['descuento']) ?></span>
+    <nav class="navbar" id="navbar">
+        <div class="container navbar__inner">
+            <a href="index.php" class="navbar__logo">BTLDECO<span class="logo-dot"></span></a>
+            <ul class="navbar__links" id="navLinks">
+                <li><a href="index.php">Inicio</a></li>
+                <li><a href="tienda.php">Tienda</a></li>
+                <li><a href="index.php#galeria">Galeria</a></li>
+                <li><a href="index.php#nosotros">Nosotros</a></li>
+                <li><a href="index.php#contacto">Contacto</a></li>
+            </ul>
+            <div class="navbar__actions">
+                <a href="tienda.php" class="btn btn--primary btn--sm">TIENDA</a>
+                <button class="theme-toggle" id="themeToggle" aria-label="Cambiar tema">
+                    <svg class="theme-toggle__sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                    <svg class="theme-toggle__moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+                </button>
+                <button class="navbar__toggle" id="navToggle" aria-label="Menu">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
         </div>
-      <?php endif; ?>
-      <div class="row row--total">
-        <span>Total</span>
-        <span><?= price((float) $pedido['total']) ?></span>
-      </div>
+    </nav>
+
+    <main class="gracias-page">
+        <div class="container">
+            <div class="gracias-card">
+                <div class="gracias-icon">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                        <polyline points="22 4 12 14.01 9 11.01"/>
+                    </svg>
+                </div>
+
+                <h1 class="gracias-title">¡Gracias por tu compra!</h1>
+
+                <?php if ($pedido): ?>
+                <p class="gracias-order-id">Pedido <strong>#<?= $pedido_id ?></strong></p>
+
+                    <?php if ($metodo === 'transferencia'): ?>
+                    <div class="gracias-transfer">
+                        <p class="gracias-transfer__intro">Realiza la transferencia por el monto total:</p>
+                        <span class="gracias-transfer__amount"><?= price($pedido['total']) ?></span>
+
+                        <div class="gracias-transfer__details">
+                            <div class="transfer-details__row"><span>Banco</span><strong>Banco Galicia</strong></div>
+                            <div class="transfer-details__row"><span>Titular</span><strong>BTLDECO SRL</strong></div>
+                            <div class="transfer-details__row"><span>CBU</span><strong>0070000000000000000</strong></div>
+                            <div class="transfer-details__row"><span>Alias</span><strong>BTLDECO.PAGOS</strong></div>
+                        </div>
+
+                        <a href="https://wa.me/5491162743425?text=<?= urlencode('Hola! Realice la transferencia del pedido #' . $pedido_id . ' por ' . price($pedido['total'])) ?>" target="_blank" class="btn btn--primary btn--lg btn--full" style="margin-top:24px;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.611.611l4.458-1.495A11.952 11.952 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.37 0-4.567-.68-6.434-1.852l-.448-.29-2.648.888.888-2.648-.29-.448A9.96 9.96 0 012 12C2 6.486 6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"/></svg>
+                            ENVIAR COMPROBANTE POR WHATSAPP
+                        </a>
+                    </div>
+                    <?php else: ?>
+                    <p class="gracias-subtitle">Tu pago fue procesado correctamente. Te enviaremos un email con los detalles.</p>
+                    <?php endif; ?>
+
+                    <!-- Order items -->
+                    <div class="gracias-summary">
+                        <h3>Detalle del pedido</h3>
+                        <?php foreach ($items as $item): ?>
+                        <div class="gracias-item">
+                            <div class="gracias-item__left">
+                                <div class="gracias-item__img">
+                                    <img src="<?= img_url($item['imagen_principal'] ?? '') ?>" alt="">
+                                </div>
+                                <div>
+                                    <span class="gracias-item__name"><?= sanitize($item['nombre_producto']) ?></span>
+                                    <?php if ($item['variante']): ?><span class="gracias-item__variant"><?= sanitize($item['variante']) ?></span><?php endif; ?>
+                                    <span class="gracias-item__qty">x<?= $item['cantidad'] ?></span>
+                                </div>
+                            </div>
+                            <span class="gracias-item__price"><?= price($item['precio_unitario'] * $item['cantidad']) ?></span>
+                        </div>
+                        <?php endforeach; ?>
+
+                        <?php if ($pedido['descuento'] > 0): ?>
+                        <div class="gracias-row gracias-row--discount">
+                            <span>Descuento</span><span>-<?= price($pedido['descuento']) ?></span>
+                        </div>
+                        <?php endif; ?>
+                        <div class="gracias-row gracias-row--total">
+                            <span>Total</span><span><?= price($pedido['total']) ?></span>
+                        </div>
+                    </div>
+
+                    <div class="gracias-shipping">
+                        <h3>Envio a</h3>
+                        <p><?= sanitize($pedido['nombre']) ?></p>
+                        <p><?= sanitize($pedido['direccion']) ?>, <?= sanitize($pedido['ciudad']) ?></p>
+                        <p><?= sanitize($pedido['provincia']) ?></p>
+                    </div>
+
+                <?php else: ?>
+                <p class="gracias-subtitle">Tu pedido fue registrado. Te contactaremos pronto.</p>
+                <?php endif; ?>
+
+                <div class="gracias-actions">
+                    <a href="tienda.php" class="btn btn--primary btn--lg">SEGUIR COMPRANDO</a>
+                    <a href="index.php" class="btn btn--outline btn--lg">VOLVER AL INICIO</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="contact__bottom" style="padding:20px 24px;margin-top:40px;">
+        <p>&copy; 2026 BTLDECO. Todos los derechos reservados.</p>
     </div>
 
-    <!-- Customer info -->
-    <div class="customer-info">
-      <?php if ($pedido['nombre']): ?>
-        <div><strong>Nombre:</strong> <?= sanitize($pedido['nombre']) ?></div>
-      <?php endif; ?>
-      <?php if ($pedido['email']): ?>
-        <div><strong>Email:</strong> <?= sanitize($pedido['email']) ?></div>
-      <?php endif; ?>
-    </div>
-
-    <!-- Action buttons -->
-    <div class="gracias-actions">
-      <a href="<?= SITE_URL ?>/" class="btn-primary">&#128722; Volver a la tienda</a>
-      <?php if (is_cliente()): ?>
-        <a href="<?= url_pagina('mis-pedidos') ?>" class="btn-secondary">Ver mis pedidos</a>
-      <?php endif; ?>
-    </div>
-  </div>
-</section>
-
-<?php include __DIR__ . '/includes/footer.php'; ?>
+    <script src="js/main.js?v=6"></script>
+</body>
+</html>
