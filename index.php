@@ -543,7 +543,7 @@ if (empty($galRow2)) $galRow2 = $galRow1;
 
     <?php include "includes/cart_drawer.php"; ?>
     <script src="js/main.js?v=17"></script>
-    <script src="js/carousel.js?v=16"></script>
+    <script src="js/carousel.js?v=17"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
     <script src="js/gallery-gsap.js?v=3"></script>

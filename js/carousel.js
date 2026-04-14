@@ -66,17 +66,8 @@
         }
     }
 
-    function startAutoplay() {
-        stopAutoplay();
-        autoplayInterval = setInterval(function () {
-            var maxIndex = getMaxIndex();
-            if (currentIndex >= maxIndex) {
-                stopAutoplay();
-                return;
-            }
-            goTo(currentIndex + 1);
-        }, autoplayDelay);
-    }
+    function startAutoplay() {}
+
 
     function stopAutoplay() {
         if (autoplayInterval) {
