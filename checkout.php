@@ -45,7 +45,7 @@ $flash_success = flash('success');
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css?v=11">
+    <link rel="stylesheet" href="css/styles.css?v=12">
 </head>
 <body>
 
@@ -222,10 +222,7 @@ $flash_success = flash('success');
                                 <div class="form-group">
                                     <label for="ck-cp">Codigo postal</label>
                                     <input type="text" id="ck-cp" name="codigo_postal"
-                                           placeholder="Ej: 1414" maxlength="8"
-                                           oninput="buscarLocalidades(this.value)">
-                                    <span id="cpLoading" style="display:none;font-size:.75rem;color:var(--text-muted);margin-top:4px;">Buscando...</span>
-                                    <span id="cpResult" style="display:none;font-size:.75rem;color:#16A34A;margin-top:4px;"></span>
+                                           placeholder="Ej: 1414" maxlength="8">
                                 </div>
                             </div>
 
@@ -234,14 +231,12 @@ $flash_success = flash('success');
                                     <label for="ck-ciudad">Localidad / Barrio *</label>
                                     <input type="text" id="ck-ciudad" name="ciudad" required
                                            value="<?= sanitize($cliente['ciudad'] ?? '') ?>"
-                                           placeholder="Tu barrio o localidad"
-                                           list="localidades-list" autocomplete="off">
-                                    <datalist id="localidades-list"></datalist>
+                                           placeholder="Tu barrio o localidad">
                                 </div>
                                 <div class="form-group">
                                     <label for="ck-provincia">Provincia *</label>
                                     <select id="ck-provincia" name="provincia" required>
-                                        <option value="" disabled <?= empty($cliente['provincia'] ?? '') ? 'selected' : '' ?>>Se completa con el CP</option>
+                                        <option value="" disabled <?= empty($cliente['provincia'] ?? '') ? 'selected' : '' ?>>Selecciona tu provincia</option>
                                         <?php
                                         $provincias = ['Buenos Aires','CABA','Catamarca','Chaco','Chubut','Cordoba','Corrientes','Entre Rios','Formosa','Jujuy','La Pampa','La Rioja','Mendoza','Misiones','Neuquen','Rio Negro','Salta','San Juan','San Luis','Santa Cruz','Santa Fe','Santiago del Estero','Tierra del Fuego','Tucuman'];
                                         foreach ($provincias as $prov):
@@ -396,62 +391,6 @@ $flash_success = flash('success');
             body: new URLSearchParams({ key: key })
         }).then(function(r) { return r.json(); })
           .then(function(data) { if (data.ok) location.reload(); });
-    }
-
-    // Buscar provincia y sugerencias por codigo postal
-    var cpTimer = null;
-    function buscarLocalidades(cp) {
-        clearTimeout(cpTimer);
-        var provSelect = document.getElementById('ck-provincia');
-        var ciudadInput = document.getElementById('ck-ciudad');
-        var datalist = document.getElementById('localidades-list');
-        var loading = document.getElementById('cpLoading');
-        var cpResult = document.getElementById('cpResult');
-
-        cp = cp.trim();
-        if (cp.length < 4) {
-            cpResult.style.display = 'none';
-            datalist.innerHTML = '';
-            return;
-        }
-
-        cpTimer = setTimeout(function() {
-            loading.style.display = 'block';
-            cpResult.style.display = 'none';
-
-            fetch('cp_api.php?cp=' + encodeURIComponent(cp))
-                .then(function(r) { return r.json(); })
-                .then(function(data) {
-                    loading.style.display = 'none';
-
-                    // Auto-select provincia
-                    if (data.provincia) {
-                        for (var i = 0; i < provSelect.options.length; i++) {
-                            if (provSelect.options[i].value === data.provincia) {
-                                provSelect.selectedIndex = i;
-                                break;
-                            }
-                        }
-                        cpResult.textContent = '✓ ' + data.provincia;
-                        cpResult.style.display = 'block';
-                    }
-
-                    // Populate datalist with suggestions
-                    var html = '';
-                    (data.localidades || []).forEach(function(loc) {
-                        html += '<option value="' + loc + '">';
-                    });
-                    datalist.innerHTML = html;
-
-                    // If one localidad, auto-fill
-                    if (data.localidades && data.localidades.length === 1) {
-                        ciudadInput.value = data.localidades[0];
-                    }
-                })
-                .catch(function() {
-                    loading.style.display = 'none';
-                });
-        }, 400);
     }
 
     // Payment method selection
