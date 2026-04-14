@@ -12,6 +12,18 @@ try {
 } catch (Exception $e) {
     $featured = [];
 }
+
+// Fetch recent products (not featured, for "te puede interesar")
+try {
+    $recent = pdo()->query("SELECT p.*, c.nombre AS categoria_nombre, c.slug AS categoria_slug
+                            FROM productos p
+                            LEFT JOIN categorias c ON p.categoria_id = c.id
+                            WHERE p.estado = 'activo'
+                            ORDER BY p.fecha_creacion DESC
+                            LIMIT 8")->fetchAll();
+} catch (Exception $e) {
+    $recent = [];
+}
 ?>
 <!DOCTYPE html>
 <html lang="es" data-theme="light">
@@ -23,7 +35,7 @@ try {
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css?v=19">
+    <link rel="stylesheet" href="css/styles.css?v=20">
 </head>
 <body>
 
@@ -260,6 +272,60 @@ try {
         </div>
         <?php endif; ?>
     </section>
+
+    <!-- TE PUEDE INTERESAR -->
+    <?php if (!empty($recent)): ?>
+    <section class="section picks" id="picks">
+        <div class="container">
+            <div class="picks__header reveal">
+                <h2 class="picks__title">Te puede<br><em>interesar</em></h2>
+                <p class="picks__subtitle">Explora nuestras piezas mas recientes. Toca para ver el detalle.</p>
+            </div>
+
+            <div class="picks__grid">
+                <?php foreach ($recent as $rp): ?>
+                <div class="picks__card reveal" onclick="openQuickView(this)" data-id="<?= $rp['id'] ?>" data-slug="<?= sanitize($rp['slug']) ?>" data-name="<?= sanitize($rp['nombre']) ?>" data-price="<?= ($rp['precio_oferta'] && $rp['precio_oferta'] < $rp['precio']) ? $rp['precio_oferta'] : $rp['precio'] ?>" data-price-fmt="<?= price(($rp['precio_oferta'] && $rp['precio_oferta'] < $rp['precio']) ? $rp['precio_oferta'] : $rp['precio']) ?>" data-cat="<?= sanitize($rp['categoria_nombre'] ?? '') ?>" data-desc="<?= sanitize($rp['descripcion_corta'] ?: substr($rp['descripcion'], 0, 200)) ?>" data-img="<?= img_url($rp['imagen_principal']) ?>">
+                    <div class="picks__card-img">
+                        <img src="<?= img_url($rp['imagen_principal']) ?>" alt="<?= sanitize($rp['nombre']) ?>" loading="lazy">
+                    </div>
+                    <div class="picks__card-info">
+                        <span class="picks__card-name"><?= sanitize($rp['nombre']) ?></span>
+                        <span class="picks__card-price"><?= price(($rp['precio_oferta'] && $rp['precio_oferta'] < $rp['precio']) ? $rp['precio_oferta'] : $rp['precio']) ?></span>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick View Modal -->
+    <div class="qv-overlay" id="qvOverlay"></div>
+    <div class="qv-modal" id="qvModal">
+        <button class="qv-close" id="qvClose">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+        <div class="qv-body">
+            <div class="qv-img">
+                <img id="qvImg" src="" alt="">
+            </div>
+            <div class="qv-info">
+                <span class="qv-cat" id="qvCat"></span>
+                <h3 class="qv-name" id="qvName"></h3>
+                <span class="qv-price" id="qvPrice"></span>
+                <p class="qv-desc" id="qvDesc"></p>
+                <div class="qv-actions">
+                    <button class="btn btn--primary btn--lg" id="qvCartBtn" style="flex:1;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
+                        AÑADIR AL CARRITO
+                    </button>
+                    <a class="btn btn--outline btn--lg" id="qvLink" href="" style="flex:1;justify-content:center;">
+                        VER PRODUCTO
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
 
     <!-- GALERIA DUAL CAROUSEL -->
     <section class="gallery" id="galeria">
@@ -611,5 +677,33 @@ try {
     <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
     <script src="js/gallery-gsap.js?v=2"></script>
+    <script>
+    // Quick View Modal
+    function openQuickView(card) {
+        var modal = document.getElementById('qvModal');
+        var overlay = document.getElementById('qvOverlay');
+        document.getElementById('qvImg').src = card.dataset.img;
+        document.getElementById('qvCat').textContent = card.dataset.cat;
+        document.getElementById('qvName').textContent = card.dataset.name;
+        document.getElementById('qvPrice').textContent = card.dataset.priceFmt;
+        document.getElementById('qvDesc').textContent = card.dataset.desc;
+        document.getElementById('qvLink').href = 'producto_detalle.php?slug=' + card.dataset.slug;
+        document.getElementById('qvCartBtn').onclick = function() {
+            window.btlCart.add(parseInt(card.dataset.id));
+            closeQuickView();
+        };
+        modal.classList.add('active');
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeQuickView() {
+        document.getElementById('qvModal').classList.remove('active');
+        document.getElementById('qvOverlay').classList.remove('active');
+        document.body.style.overflow = '';
+    }
+    document.getElementById('qvOverlay').addEventListener('click', closeQuickView);
+    document.getElementById('qvClose').addEventListener('click', closeQuickView);
+    document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeQuickView(); });
+    </script>
 </body>
 </html>
