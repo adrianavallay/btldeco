@@ -1,5 +1,6 @@
 /* ============================================================
-   BTLDECO — Gallery GSAP ScrollTrigger Animations
+   BTLDECO — Gallery GSAP Animations
+   Reveal + 3D tilt + parallax tracks
    ============================================================ */
 (function () {
     'use strict';
@@ -7,98 +8,114 @@
     if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
     gsap.registerPlugin(ScrollTrigger);
 
-    // ── Section header: fade in + slide up ──
+    // Check reduced motion
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    // ── Header reveal ──
     var galHeader = document.querySelector('.gallery .section__header');
     if (galHeader) {
         gsap.from(galHeader, {
-            y: 60,
+            y: 40,
             opacity: 0,
-            duration: 1,
-            ease: 'power3.out',
+            duration: 0.8,
+            ease: 'power2.out',
             scrollTrigger: {
-                trigger: galHeader,
-                start: 'top 85%',
-                toggleActions: 'play none none none'
+                trigger: '.gallery',
+                start: 'top 80%',
+                once: true
             }
         });
     }
 
-    // ── Track 1 (left): parallax speed boost on scroll ──
+    // ── Parallax: tracks move faster on scroll ──
     var track1 = document.getElementById('galleryTrack1');
+    var track2 = document.getElementById('galleryTrack2');
+
     if (track1) {
-        // Speed up the CSS animation via translateX on scroll
         gsap.to(track1, {
-            x: '-=200',
+            x: '-=300',
             ease: 'none',
             scrollTrigger: {
-                trigger: track1.closest('.gallery__track-wrapper'),
+                trigger: '.gallery',
                 start: 'top bottom',
                 end: 'bottom top',
-                scrub: 1.5
+                scrub: 0.8
             }
         });
     }
 
-    // ── Track 2 (right): parallax opposite direction ──
-    var track2 = document.getElementById('galleryTrack2');
     if (track2) {
         gsap.to(track2, {
-            x: '+=200',
+            x: '+=300',
             ease: 'none',
             scrollTrigger: {
-                trigger: track2.closest('.gallery__track-wrapper'),
+                trigger: '.gallery',
                 start: 'top bottom',
                 end: 'bottom top',
-                scrub: 1.5
+                scrub: 0.8
             }
         });
     }
 
-    // ── Gallery items: scale + fade in staggered on scroll ──
-    var items = document.querySelectorAll('.gallery__item');
-    if (items.length > 0) {
-        // Only animate unique items (first half, not duplicates)
-        var uniqueCount = Math.ceil(items.length / 2);
-        var uniqueItems = Array.prototype.slice.call(items, 0, uniqueCount);
+    // ── Items: clip-path reveal + slight Y offset ──
+    var wrappers = document.querySelectorAll('.gallery__track-wrapper');
+    wrappers.forEach(function (wrapper, wIndex) {
+        var items = wrapper.querySelectorAll('.gallery__item');
+        // Only animate first set (not duplicates)
+        var half = Math.ceil(items.length / 2);
+        var unique = Array.prototype.slice.call(items, 0, half);
 
-        ScrollTrigger.batch(uniqueItems, {
-            onEnter: function (batch) {
-                gsap.fromTo(batch,
-                    { scale: 0.85, opacity: 0.3 },
-                    { scale: 1, opacity: 1, duration: 0.8, stagger: 0.08, ease: 'power2.out', overwrite: true }
-                );
-            },
-            start: 'top 90%'
-        });
-    }
-
-    // ── Gallery section: subtle background color shift on scroll ──
-    var gallerySection = document.querySelector('.gallery');
-    if (gallerySection) {
-        gsap.fromTo(gallerySection,
-            { '--gallery-glow': 0 },
-            {
-                '--gallery-glow': 1,
-                ease: 'none',
-                scrollTrigger: {
-                    trigger: gallerySection,
-                    start: 'top 60%',
-                    end: 'bottom 40%',
-                    scrub: 2
+        unique.forEach(function (item, i) {
+            gsap.fromTo(item,
+                {
+                    clipPath: 'inset(0 100% 0 0)',
+                    opacity: 0
+                },
+                {
+                    clipPath: 'inset(0 0% 0 0)',
+                    opacity: 1,
+                    duration: 1.2,
+                    delay: i * 0.1,
+                    ease: 'power3.inOut',
+                    scrollTrigger: {
+                        trigger: wrapper,
+                        start: 'top 85%',
+                        once: true
+                    }
                 }
-            }
-        );
-    }
-
-    // ── Expand overlay: items scale up more on hover with GSAP ──
-    items.forEach(function (item) {
-        item.addEventListener('mouseenter', function () {
-            gsap.to(item, { scale: 1.12, zIndex: 5, duration: 0.4, ease: 'power2.out' });
-            gsap.to(item.querySelector('.gallery__item-overlay'), { opacity: 1, duration: 0.3 });
+            );
         });
+    });
+
+    // ── Hover: 3D tilt effect ──
+    var allItems = document.querySelectorAll('.gallery__item');
+    allItems.forEach(function (item) {
+        item.addEventListener('mousemove', function (e) {
+            var rect = item.getBoundingClientRect();
+            var x = (e.clientX - rect.left) / rect.width - 0.5;
+            var y = (e.clientY - rect.top) / rect.height - 0.5;
+
+            gsap.to(item, {
+                rotateY: x * 12,
+                rotateX: -y * 8,
+                scale: 1.06,
+                zIndex: 10,
+                boxShadow: '0 20px 50px rgba(0,0,0,0.2)',
+                duration: 0.4,
+                ease: 'power2.out'
+            });
+        });
+
         item.addEventListener('mouseleave', function () {
-            gsap.to(item, { scale: 1, zIndex: 1, duration: 0.35, ease: 'power2.inOut' });
-            gsap.to(item.querySelector('.gallery__item-overlay'), { opacity: 0, duration: 0.25 });
+            gsap.to(item, {
+                rotateY: 0,
+                rotateX: 0,
+                scale: 1,
+                zIndex: 1,
+                boxShadow: 'none',
+                duration: 0.5,
+                ease: 'power2.inOut'
+            });
         });
     });
 

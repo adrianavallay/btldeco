@@ -1057,8 +1057,8 @@ button { cursor: pointer; border: none; background: none; font: inherit; color: 
 
 .gallery__item {
     flex-shrink: 0;
-    width: 320px;
-    height: 240px;
+    width: 400px;
+    height: 320px;
     border-radius: var(--radius-xl);
     overflow: hidden;
     cursor: pointer;
@@ -1066,9 +1066,12 @@ button { cursor: pointer; border: none; background: none; font: inherit; color: 
     border: 1px solid var(--border);
     transition: all 0.45s var(--ease);
 }
+.gallery__item {
+    transform-style: preserve-3d;
+    perspective: 800px;
+}
 .gallery__item:hover {
     border-color: var(--accent);
-    box-shadow: 0 16px 48px rgba(217, 119, 6, 0.15);
 }
 .gallery__item img {
     width: 100%;
@@ -1495,7 +1498,7 @@ a.contact-card:hover {
 }
 
 @media (max-width: 768px) {
-    .gallery__item { width: 260px; height: 195px; }
+    .gallery__item { width: 300px; height: 240px; }
     .navbar__links { display: none; }
     .navbar__inner {
         border-radius: 20px;
