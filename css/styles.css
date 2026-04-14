@@ -2631,6 +2631,15 @@ a.contact-card:hover {
 .ck-item__qty {
     display: flex;
     align-items: center;
+    gap: 0;
+}
+.ck-item__qty .qty-btn {
+    width: 36px;
+    height: 36px;
+}
+.ck-item__qty span {
+    width: 44px;
+    height: 36px;
 }
 .ck-item__total {
     font-size: 0.95rem;
