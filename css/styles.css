@@ -1244,6 +1244,9 @@ button { cursor: pointer; border: none; background: none; font: inherit; color: 
 .cta-banner__inner {
     text-align: center;
     padding: 48px 24px 32px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
 }
 .cta-banner__title {
     font-family: var(--font-heading);
