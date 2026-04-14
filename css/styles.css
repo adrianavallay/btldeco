@@ -2640,6 +2640,16 @@ a.contact-card:hover {
 .ck-item__qty span {
     width: 44px;
     height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text);
+    background: var(--bg);
 }
 .ck-item__total {
     font-size: 0.95rem;
