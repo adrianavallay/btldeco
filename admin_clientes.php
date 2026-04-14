@@ -64,6 +64,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'toggl
     redirect($back);
 }
 
+// ── POST: Export contactos (nombre, email, telefono) ──
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'export_contactos') {
+    header('Content-Type: text/csv; charset=utf-8');
+    header('Content-Disposition: attachment; filename="contactos_btldeco_' . date('Y-m-d') . '.csv"');
+    $out = fopen('php://output', 'w');
+    fprintf($out, chr(0xEF) . chr(0xBB) . chr(0xBF));
+    fputcsv($out, ['Nombre', 'Email', 'Teléfono']);
+    $rows = $db->query("SELECT nombre, email, telefono FROM clientes WHERE activo = 1 ORDER BY nombre ASC")->fetchAll();
+    foreach ($rows as $r) {
+        fputcsv($out, [$r['nombre'], $r['email'], $r['telefono']]);
+    }
+    fclose($out);
+    exit;
+}
+
 // ── POST: Export CSV ──
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'export_csv') {
     header('Content-Type: text/csv; charset=utf-8');
@@ -305,7 +320,11 @@ $qs_base = $qs_parts ? '&' . implode('&', $qs_parts) : '';
     </select>
     <button type="submit" class="btn-ver">Filtrar</button>
   </form>
-  <form method="POST">
+  <form method="POST" style="display:inline;">
+    <input type="hidden" name="action" value="export_contactos">
+    <button type="submit" class="btn-export" style="background:linear-gradient(135deg,#10b981,#059669);border-color:#10b981;">&#128222; Exportar Contactos</button>
+  </form>
+  <form method="POST" style="display:inline;">
     <input type="hidden" name="action" value="export_csv">
     <button type="submit" class="btn-export">&#11015; Exportar CSV</button>
   </form>
