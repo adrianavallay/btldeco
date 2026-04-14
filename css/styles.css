@@ -1069,8 +1069,6 @@ button { cursor: pointer; border: none; background: none; font: inherit; color: 
 .gallery__item:hover {
     border-color: var(--accent);
     box-shadow: 0 16px 48px rgba(217, 119, 6, 0.15);
-    transform: scale(1.08);
-    z-index: 2;
 }
 .gallery__item img {
     width: 100%;
