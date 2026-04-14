@@ -38,7 +38,7 @@ if (empty($galRow2)) $galRow2 = $galRow1;
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css?v=27">
+    <link rel="stylesheet" href="css/styles.css?v=28">
 </head>
 <body>
 
@@ -274,6 +274,27 @@ if (empty($galRow2)) $galRow2 = $galRow1;
             Proximamente productos destacados
         </div>
         <?php endif; ?>
+    </section>
+
+    <!-- CTA BANNER -->
+    <section class="cta-banner reveal">
+        <div class="container">
+            <div class="cta-banner__inner">
+                <div class="cta-banner__text">
+                    <h2 class="cta-banner__title">Tu hogar merece<br><em>algo unico</em></h2>
+                    <p class="cta-banner__desc">Piezas de diseño que no vas a encontrar en otro lado. Fabricacion artesanal, envio a todo el pais.</p>
+                </div>
+                <div class="cta-banner__actions">
+                    <a href="tienda.php" class="btn btn--primary btn--lg">
+                        COMPRAR AHORA
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </a>
+                    <a href="https://wa.me/5491162743425" target="_blank" class="btn btn--outline btn--lg">
+                        CONSULTAR
+                    </a>
+                </div>
+            </div>
+        </div>
     </section>
 
     <!-- GALERIA DE PRODUCTOS (desde DB) -->

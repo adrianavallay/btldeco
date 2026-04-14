@@ -1235,6 +1235,56 @@ button { cursor: pointer; border: none; background: none; font: inherit; color: 
 }
 
 /* ============================================================
+   CTA BANNER
+   ============================================================ */
+.cta-banner {
+    padding: 0;
+}
+.cta-banner__inner {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    padding: 56px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 40px;
+}
+.cta-banner__title {
+    font-family: var(--font-heading);
+    font-size: clamp(1.8rem, 3.5vw, 2.4rem);
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.15;
+}
+.cta-banner__title em {
+    font-style: italic;
+    color: var(--accent);
+}
+.cta-banner__desc {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    margin-top: 12px;
+    max-width: 420px;
+}
+.cta-banner__actions {
+    display: flex;
+    gap: 12px;
+    flex-shrink: 0;
+}
+@media (max-width: 768px) {
+    .cta-banner__inner {
+        flex-direction: column;
+        text-align: center;
+        padding: 40px 28px;
+    }
+    .cta-banner__desc { margin-left: auto; margin-right: auto; }
+    .cta-banner__actions { flex-direction: column; width: 100%; }
+    .cta-banner__actions .btn { width: 100%; justify-content: center; }
+}
+
+/* ============================================================
    GALLERY — DUAL CAROUSEL
    ============================================================ */
 .gallery {
