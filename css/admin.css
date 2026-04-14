@@ -941,16 +941,69 @@ td img.thumb { width: 48px; height: 48px; object-fit: cover; border-radius: var(
 .totals .discount { color: var(--success); }
 .estado-form { display: flex; flex-direction: column; gap: 10px; }
 .estado-form select { padding: 10px 14px; background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); font-size: 0.88rem; font-family: var(--font-sans); }
-.estado-btns { display: flex; gap: 8px; flex-wrap: wrap; }
-.estado-btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 18px; border: 1.5px solid var(--border); border-radius: 8px; background: var(--white); font-family: var(--font-sans); font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all 0.2s; color: var(--text-muted); }
-.estado-btn:hover { border-color: #d1d5db; background: var(--bg); }
-.estado-btn--preparando:hover, .estado-btn--preparando.active { border-color: #8b5cf6; color: #8b5cf6; background: rgba(139,92,246,0.06); }
-.estado-btn--enviado:hover, .estado-btn--enviado.active { border-color: #3b82f6; color: #3b82f6; background: rgba(59,130,246,0.06); }
-.estado-btn--entregado:hover, .estado-btn--entregado.active { border-color: #10b981; color: #10b981; background: rgba(16,185,129,0.06); }
-.estado-btn--cancelado:hover, .estado-btn--cancelado.active { border-color: #ef4444; color: #ef4444; background: rgba(239,68,68,0.06); }
-.reenvio-btns { display: flex; gap: 8px; flex-wrap: wrap; }
-.btn-reenvio { display: inline-flex; align-items: center; gap: 6px; padding: 10px 18px; border: 1.5px solid var(--border); border-radius: 8px; background: var(--white); font-family: var(--font-sans); font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all 0.2s; color: var(--text-muted); }
-.btn-reenvio:hover { border-color: #7c3aed; color: #7c3aed; background: rgba(124,58,237,0.06); }
+/* Estado buttons — pill style matching backend */
+.estado-btns { display: flex; gap: 10px; flex-wrap: wrap; }
+.estado-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 11px 22px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    background: var(--white);
+    font-family: var(--font-sans);
+    font-size: 0.82rem; font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s;
+    color: var(--text-muted);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.estado-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+.estado-btn--preparando { border-color: rgba(139,92,246,0.25); }
+.estado-btn--preparando:hover, .estado-btn--preparando.active {
+    border-color: #8b5cf6; color: #fff;
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    box-shadow: 0 4px 16px rgba(139,92,246,0.3);
+}
+.estado-btn--enviado { border-color: rgba(59,130,246,0.25); }
+.estado-btn--enviado:hover, .estado-btn--enviado.active {
+    border-color: #3b82f6; color: #fff;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    box-shadow: 0 4px 16px rgba(59,130,246,0.3);
+}
+.estado-btn--entregado { border-color: rgba(16,185,129,0.25); }
+.estado-btn--entregado:hover, .estado-btn--entregado.active {
+    border-color: #10b981; color: #fff;
+    background: linear-gradient(135deg, #10b981, #059669);
+    box-shadow: 0 4px 16px rgba(16,185,129,0.3);
+}
+.estado-btn--cancelado { border-color: rgba(239,68,68,0.25); }
+.estado-btn--cancelado:hover, .estado-btn--cancelado.active {
+    border-color: #ef4444; color: #fff;
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    box-shadow: 0 4px 16px rgba(239,68,68,0.3);
+}
+
+/* Reenviar email buttons */
+.reenvio-btns { display: flex; gap: 10px; flex-wrap: wrap; }
+.btn-reenvio {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 11px 22px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    background: var(--white);
+    font-family: var(--font-sans);
+    font-size: 0.82rem; font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s;
+    color: var(--text-muted);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.btn-reenvio:hover {
+    border-color: var(--primary);
+    color: #fff;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dim));
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(112,42,225,0.25);
+}
 .notas-area { width: 100%; padding: 10px 14px; background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); font-size: 0.88rem; font-family: var(--font-sans); resize: vertical; min-height: 60px; margin-bottom: 10px; }
 .notas-display { background: var(--bg); border: 1px solid var(--border-light); border-radius: var(--radius); padding: 12px 16px; font-size: 0.88rem; margin-bottom: 12px; white-space: pre-wrap; }
 .meta-info p { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 4px; }

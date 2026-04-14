@@ -493,7 +493,7 @@ $qs_base = $qs_parts ? implode('&', $qs_parts) . '&' : '';
 <!-- ============ PEDIDO DETAIL MODAL ============ -->
 <div class="modal-overlay" id="pedidoModal">
   <div class="modal">
-    <div class="modal-header">
+    <div class="modal-head">
       <h2 id="modalTitle">Pedido #</h2>
       <button class="modal-close" onclick="closePedidoModal()">&times;</button>
     </div>
