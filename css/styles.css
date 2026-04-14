@@ -1246,10 +1246,9 @@ button { cursor: pointer; border: none; background: none; font: inherit; color: 
 
 .gallery__track-wrapper {
     position: relative;
-    margin-bottom: 20px;
-    overflow: hidden;
-    mask-image: linear-gradient(90deg, transparent 0%, black 6%, black 94%, transparent 100%);
-    -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 6%, black 94%, transparent 100%);
+    margin-bottom: 40px;
+    overflow: clip;
+    overflow-clip-margin: 80px;
 }
 .gallery__track {
     display: flex;
