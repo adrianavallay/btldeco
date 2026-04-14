@@ -45,7 +45,7 @@ $flash_success = flash('success');
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css?v=8">
+    <link rel="stylesheet" href="css/styles.css?v=9">
 </head>
 <body>
 
@@ -222,21 +222,26 @@ $flash_success = flash('success');
                                 <div class="form-group">
                                     <label for="ck-cp">Codigo postal</label>
                                     <input type="text" id="ck-cp" name="codigo_postal"
-                                           placeholder="Ej: 1414">
+                                           placeholder="Ej: 1414" maxlength="8"
+                                           oninput="buscarLocalidades(this.value)">
+                                    <span id="cpLoading" style="display:none;font-size:.75rem;color:var(--text-muted);margin-top:4px;">Buscando...</span>
                                 </div>
                             </div>
 
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label for="ck-ciudad">Ciudad *</label>
-                                    <input type="text" id="ck-ciudad" name="ciudad" required
-                                           value="<?= sanitize($cliente['ciudad'] ?? '') ?>"
-                                           placeholder="Tu ciudad">
+                                    <label for="ck-ciudad">Localidad *</label>
+                                    <select id="ck-ciudad" name="ciudad" required>
+                                        <option value="" disabled selected>Ingresa el codigo postal</option>
+                                        <?php if (!empty($cliente['ciudad'])): ?>
+                                        <option value="<?= sanitize($cliente['ciudad']) ?>" selected><?= sanitize($cliente['ciudad']) ?></option>
+                                        <?php endif; ?>
+                                    </select>
                                 </div>
                                 <div class="form-group">
                                     <label for="ck-provincia">Provincia *</label>
                                     <select id="ck-provincia" name="provincia" required>
-                                        <option value="" disabled <?= empty($cliente['provincia'] ?? '') ? 'selected' : '' ?>>Selecciona tu provincia</option>
+                                        <option value="" disabled <?= empty($cliente['provincia'] ?? '') ? 'selected' : '' ?>>Se completa con el CP</option>
                                         <?php
                                         $provincias = ['Buenos Aires','CABA','Catamarca','Chaco','Chubut','Cordoba','Corrientes','Entre Rios','Formosa','Jujuy','La Pampa','La Rioja','Mendoza','Misiones','Neuquen','Rio Negro','Salta','San Juan','San Luis','Santa Cruz','Santa Fe','Santiago del Estero','Tierra del Fuego','Tucuman'];
                                         foreach ($provincias as $prov):
@@ -391,6 +396,96 @@ $flash_success = flash('success');
             body: new URLSearchParams({ key: key })
         }).then(function(r) { return r.json(); })
           .then(function(data) { if (data.ok) location.reload(); });
+    }
+
+    // GeoRef API — buscar localidades por codigo postal
+    var cpTimer = null;
+    function buscarLocalidades(cp) {
+        clearTimeout(cpTimer);
+        var ciudadSelect = document.getElementById('ck-ciudad');
+        var provSelect = document.getElementById('ck-provincia');
+        var loading = document.getElementById('cpLoading');
+
+        cp = cp.trim();
+        if (cp.length < 4) {
+            ciudadSelect.innerHTML = '<option value="" disabled selected>Ingresa el codigo postal</option>';
+            return;
+        }
+
+        cpTimer = setTimeout(function() {
+            loading.style.display = 'block';
+
+            fetch('https://apis.datos.gob.ar/georef/api/localidades?codigo_postal=' + encodeURIComponent(cp) + '&campos=nombre,provincia.nombre&max=50')
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    loading.style.display = 'none';
+                    var locs = data.localidades || [];
+
+                    if (locs.length === 0) {
+                        // Fallback: buscar por CP como texto en municipios
+                        fetch('https://apis.datos.gob.ar/georef/api/municipios?codigo_postal=' + encodeURIComponent(cp) + '&campos=nombre,provincia.nombre&max=50')
+                            .then(function(r2) { return r2.json(); })
+                            .then(function(data2) {
+                                var muns = data2.municipios || [];
+                                if (muns.length === 0) {
+                                    ciudadSelect.innerHTML = '<option value="" disabled selected>No se encontraron localidades</option>';
+                                    return;
+                                }
+                                renderLocalidades(muns, ciudadSelect, provSelect);
+                            });
+                        return;
+                    }
+                    renderLocalidades(locs, ciudadSelect, provSelect);
+                })
+                .catch(function() {
+                    loading.style.display = 'none';
+                    ciudadSelect.innerHTML = '<option value="" disabled selected>Error al buscar</option>';
+                });
+        }, 500);
+    }
+
+    function renderLocalidades(locs, ciudadSelect, provSelect) {
+        // Unique names
+        var seen = {};
+        var unique = [];
+        locs.forEach(function(l) {
+            var name = l.nombre;
+            if (!seen[name]) {
+                seen[name] = true;
+                unique.push(l);
+            }
+        });
+
+        unique.sort(function(a, b) { return a.nombre.localeCompare(b.nombre); });
+
+        var html = '<option value="" disabled selected>Selecciona tu localidad</option>';
+        unique.forEach(function(l) {
+            html += '<option value="' + l.nombre + '" data-provincia="' + (l.provincia ? l.provincia.nombre : '') + '">' + l.nombre + '</option>';
+        });
+        ciudadSelect.innerHTML = html;
+
+        // Auto-select provincia when localidad changes
+        ciudadSelect.onchange = function() {
+            var selected = ciudadSelect.options[ciudadSelect.selectedIndex];
+            var prov = selected.getAttribute('data-provincia');
+            if (prov && provSelect) {
+                // Match provincia in select
+                for (var i = 0; i < provSelect.options.length; i++) {
+                    if (provSelect.options[i].value.toLowerCase() === prov.toLowerCase() ||
+                        prov.toLowerCase().indexOf(provSelect.options[i].value.toLowerCase()) !== -1 ||
+                        provSelect.options[i].value.toLowerCase().indexOf(prov.toLowerCase()) !== -1) {
+                        provSelect.selectedIndex = i;
+                        break;
+                    }
+                }
+            }
+        };
+
+        // If only one result, auto-select
+        if (unique.length === 1) {
+            ciudadSelect.selectedIndex = 1;
+            ciudadSelect.onchange();
+        }
     }
 
     // Payment method selection
