@@ -38,7 +38,7 @@ if (empty($galRow2)) $galRow2 = $galRow1;
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css?v=34">
+    <link rel="stylesheet" href="css/styles.css?v=35">
 </head>
 <body>
 
@@ -283,7 +283,9 @@ if (empty($galRow2)) $galRow2 = $galRow1;
                 <h2 class="cta-banner__title">Descubri toda nuestra <em>coleccion</em></h2>
                 <p class="cta-banner__desc">Toca cualquier producto para ver el detalle y agregalo a tu carrito.</p>
                 <div class="cta-banner__scroll">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+                    <div class="scroll-mouse">
+                        <div class="scroll-mouse__wheel"></div>
+                    </div>
                     <span>SCROLL PARA EXPLORAR</span>
                 </div>
             </div>
