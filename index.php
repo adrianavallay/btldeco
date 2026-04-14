@@ -38,7 +38,7 @@ if (empty($galRow2)) $galRow2 = $galRow1;
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css?v=32">
+    <link rel="stylesheet" href="css/styles.css?v=33">
 </head>
 <body>
 
@@ -280,18 +280,11 @@ if (empty($galRow2)) $galRow2 = $galRow1;
     <section class="cta-banner reveal">
         <div class="container">
             <div class="cta-banner__inner">
-                <div class="cta-banner__text">
-                    <h2 class="cta-banner__title">Descubri toda<br>nuestra <em>coleccion</em></h2>
-                    <p class="cta-banner__desc">Seguí scrolleando y explora nuestros productos. Toca cualquiera para ver el detalle y agregalo a tu carrito.</p>
-                </div>
-                <div class="cta-banner__actions">
-                    <a href="tienda.php" class="btn btn--primary btn--lg">
-                        COMPRAR AHORA
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                    </a>
-                    <a href="https://wa.me/5491162743425" target="_blank" class="btn btn--outline btn--lg">
-                        CONSULTAR
-                    </a>
+                <h2 class="cta-banner__title">Descubri toda nuestra <em>coleccion</em></h2>
+                <p class="cta-banner__desc">Toca cualquier producto para ver el detalle y agregalo a tu carrito.</p>
+                <div class="cta-banner__scroll">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+                    <span>SCROLL PARA EXPLORAR</span>
                 </div>
             </div>
         </div>
