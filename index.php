@@ -23,7 +23,7 @@ try {
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css?v=7">
+    <link rel="stylesheet" href="css/styles.css?v=13">
 </head>
 <body>
 
@@ -196,47 +196,69 @@ try {
         </div>
     </section>
 
-    <!-- PRODUCTOS -->
-    <section class="section products" id="productos">
+    <!-- PRODUCTOS — CAROUSEL -->
+    <section class="section products-carousel" id="productos">
         <div class="container">
-            <div class="section__header reveal">
-                <span class="section__tag" data-i18n="prod-tag">NUESTROS PRODUCTOS</span>
-                <h2 class="section__title" data-i18n="prod-title">Diseño que decora,<br>detalle que enamora</h2>
-                <p class="section__subtitle" data-i18n="prod-sub">Cada pieza esta pensada para aportar personalidad y calidez a tus ambientes.</p>
+            <div class="pc-header reveal">
+                <div class="pc-header__text">
+                    <span class="section__tag" data-i18n="prod-tag">NUESTROS PRODUCTOS</span>
+                    <h2 class="section__title" data-i18n="prod-title">Diseño que decora,<br>detalle que enamora</h2>
+                </div>
+                <div class="pc-header__nav">
+                    <button class="pc-arrow pc-arrow--prev" id="pcPrev" aria-label="Anterior">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                    </button>
+                    <button class="pc-arrow pc-arrow--next" id="pcNext" aria-label="Siguiente">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </button>
+                </div>
             </div>
+        </div>
 
-            <div class="products__grid">
-                <?php if (!empty($featured)): ?>
-                    <?php foreach ($featured as $fp): ?>
-                    <div class="product-card reveal">
-                        <a href="producto_detalle.php?slug=<?= urlencode($fp['slug']) ?>">
-                            <div class="product-card__image">
+        <?php if (!empty($featured)): ?>
+        <div class="pc-viewport" id="pcViewport">
+            <div class="pc-track" id="pcTrack">
+                <?php foreach ($featured as $i => $fp): ?>
+                <div class="pc-slide" style="--i:<?= $i ?>">
+                    <div class="pc-card">
+                        <a href="producto_detalle.php?slug=<?= urlencode($fp['slug']) ?>" class="pc-card__link">
+                            <div class="pc-card__img">
                                 <img src="<?= img_url($fp['imagen_principal']) ?>" alt="<?= sanitize($fp['nombre']) ?>" loading="lazy">
-                                <span class="product-card__badge"><?= sanitize($fp['categoria_nombre'] ?? 'DESTACADO') ?></span>
-                            </div>
-                            <div class="product-card__body">
-                                <h3><?= sanitize($fp['nombre']) ?></h3>
-                                <p><?= sanitize($fp['descripcion_corta'] ?: substr($fp['descripcion'], 0, 100)) ?></p>
-                                <div class="product-card__footer">
-                                    <span class="product-card__price"><?= price(($fp['precio_oferta'] && $fp['precio_oferta'] < $fp['precio']) ? $fp['precio_oferta'] : $fp['precio']) ?></span>
-                                </div>
+                                <span class="pc-card__cat"><?= sanitize($fp['categoria_nombre'] ?? '') ?></span>
                             </div>
                         </a>
-                        <div style="padding:0 24px 20px;">
-                            <button class="btn--add-cart btn--full" onclick="window.btlCart.add(<?= $fp['id'] ?>)" style="width:100%;justify-content:center;">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
-                                AÑADIR AL CARRITO
+                        <div class="pc-card__body">
+                            <a href="producto_detalle.php?slug=<?= urlencode($fp['slug']) ?>" class="pc-card__name"><?= sanitize($fp['nombre']) ?></a>
+                            <span class="pc-card__price"><?= price(($fp['precio_oferta'] && $fp['precio_oferta'] < $fp['precio']) ? $fp['precio_oferta'] : $fp['precio']) ?></span>
+                            <button class="pc-card__cart" onclick="window.btlCart.add(<?= $fp['id'] ?>)">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
                             </button>
                         </div>
                     </div>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted);">
-                        Proximamente productos destacados
-                    </div>
-                <?php endif; ?>
+                </div>
+                <?php endforeach; ?>
             </div>
         </div>
+
+        <!-- Dots -->
+        <div class="pc-dots" id="pcDots">
+            <?php foreach ($featured as $i => $fp): ?>
+            <button class="pc-dot <?= $i === 0 ? 'active' : '' ?>" data-index="<?= $i ?>" aria-label="Producto <?= $i + 1 ?>"></button>
+            <?php endforeach; ?>
+        </div>
+
+        <!-- CTA -->
+        <div class="container" style="text-align:center;margin-top:40px;">
+            <a href="tienda.php" class="btn btn--primary btn--lg reveal">
+                VER TODA LA TIENDA
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+        </div>
+        <?php else: ?>
+        <div class="container" style="text-align:center;padding:60px 24px;color:var(--text-muted);">
+            Proximamente productos destacados
+        </div>
+        <?php endif; ?>
     </section>
 
     <!-- GALERIA DUAL CAROUSEL -->
@@ -584,6 +606,7 @@ try {
     </button>
 
     <?php include "includes/cart_drawer.php"; ?>
-    <script src="js/main.js?v=7"></script>
+    <script src="js/main.js?v=13"></script>
+    <script src="js/carousel.js?v=13"></script>
 </body>
 </html>
