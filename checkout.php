@@ -183,7 +183,7 @@ $flash_success = flash('success');
                                 <label for="ck-nombre"><?= t("full_name") ?> *</label>
                                 <input type="text" id="ck-nombre" name="nombre" required
                                        value="<?= sanitize($cliente['nombre'] ?? '') ?>"
-                                       placeholder="Tu nombre completo">
+                                       placeholder="<?= t("ph_name") ?>">
                             </div>
 
                             <div class="form-row">
@@ -191,13 +191,13 @@ $flash_success = flash('success');
                                     <label for="ck-email"><?= t("email") ?> *</label>
                                     <input type="email" id="ck-email" name="email" required
                                            value="<?= sanitize($cliente['email'] ?? ($_SESSION['cliente_email'] ?? '')) ?>"
-                                           placeholder="tu@email.com">
+                                           placeholder="<?= t("ph_email") ?>">
                                 </div>
                                 <div class="form-group">
                                     <label for="ck-telefono"><?= t("phone") ?></label>
                                     <input type="tel" id="ck-telefono" name="telefono"
                                            value="<?= sanitize($cliente['telefono'] ?? '') ?>"
-                                           placeholder="+54 11 1234-5678">
+                                           placeholder="<?= t("ph_phone_full") ?>">
                                 </div>
                             </div>
 
@@ -206,12 +206,12 @@ $flash_success = flash('success');
                                     <label for="ck-direccion"><?= t("address") ?> *</label>
                                     <input type="text" id="ck-direccion" name="direccion" required
                                            value="<?= sanitize($cliente['direccion'] ?? '') ?>"
-                                           placeholder="Calle">
+                                           placeholder="<?= t("ph_address") ?>">
                                 </div>
                                 <div class="form-group" style="flex:1;">
                                     <label for="ck-numero"><?= t("number") ?> *</label>
                                     <input type="text" id="ck-numero" name="numero" required
-                                           placeholder="1234">
+                                           placeholder="<?= t("ph_number") ?>">
                                 </div>
                             </div>
 
@@ -219,12 +219,12 @@ $flash_success = flash('success');
                                 <div class="form-group">
                                     <label for="ck-piso"><?= t("floor_apt") ?> <span style="color:var(--text-muted);font-weight:400;text-transform:none;"><?= t("floor_apt_opt") ?></span></label>
                                     <input type="text" id="ck-piso" name="piso_depto"
-                                           placeholder="Ej: 3ro B">
+                                           placeholder="<?= t("ph_floor") ?>">
                                 </div>
                                 <div class="form-group">
                                     <label for="ck-cp"><?= t("zip_code") ?></label>
                                     <input type="text" id="ck-cp" name="codigo_postal"
-                                           placeholder="Ej: 1414" maxlength="8">
+                                           placeholder="<?= t("ph_zip") ?>" maxlength="8">
                                 </div>
                             </div>
 
@@ -233,7 +233,7 @@ $flash_success = flash('success');
                                     <label for="ck-ciudad"><?= t("city") ?> *</label>
                                     <input type="text" id="ck-ciudad" name="ciudad" required
                                            value="<?= sanitize($cliente['ciudad'] ?? '') ?>"
-                                           placeholder="Tu barrio o localidad">
+                                           placeholder="<?= t("ph_city") ?>">
                                 </div>
                                 <div class="form-group">
                                     <label for="ck-provincia"><?= t("province") ?> *</label>

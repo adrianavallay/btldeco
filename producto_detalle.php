@@ -293,11 +293,11 @@ $waText = urlencode('Hola! Me interesa el producto: ' . $p['nombre'] . ' (' . pr
                 </div>
                 <form class="contact__form">
                     <div class="form-row">
-                        <div class="form-group"><label for="name"><?= t("name_label") ?></label><input type="text" id="name" placeholder="Tu nombre completo" required></div>
-                        <div class="form-group"><label for="phone"><?= t("phone_label") ?></label><input type="tel" id="phone" placeholder="+54 11 ..."></div>
+                        <div class="form-group"><label for="name"><?= t("name_label") ?></label><input type="text" id="name" placeholder="<?= t("ph_name") ?>" required></div>
+                        <div class="form-group"><label for="phone"><?= t("phone_label") ?></label><input type="tel" id="phone" placeholder="<?= t("ph_phone") ?>"></div>
                     </div>
-                    <div class="form-group"><label for="email"><?= t("email_label") ?></label><input type="email" id="email" placeholder="tu@email.com" required></div>
-                    <div class="form-group"><label for="message"><?= t("message_label") ?></label><textarea id="message" rows="4" placeholder="Contanos que te gustaria..."></textarea></div>
+                    <div class="form-group"><label for="email"><?= t("email_label") ?></label><input type="email" id="email" placeholder="<?= t("ph_email") ?>" required></div>
+                    <div class="form-group"><label for="message"><?= t("message_label") ?></label><textarea id="message" rows="4" placeholder="<?= t("ph_message") ?>"></textarea></div>
                     <button type="submit" class="btn btn--primary btn--lg btn--full"><?= t("send_message") ?></button>
                 </form>
             </div>

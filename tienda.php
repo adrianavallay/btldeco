@@ -204,11 +204,11 @@ try {
                 </div>
                 <form class="contact__form">
                     <div class="form-row">
-                        <div class="form-group"><label for="name"><?= t("name_label") ?></label><input type="text" id="name" placeholder="Tu nombre completo" required></div>
-                        <div class="form-group"><label for="phone"><?= t("phone_label") ?></label><input type="tel" id="phone" placeholder="+54 11 ..."></div>
+                        <div class="form-group"><label for="name"><?= t("name_label") ?></label><input type="text" id="name" placeholder="<?= t("ph_name") ?>" required></div>
+                        <div class="form-group"><label for="phone"><?= t("phone_label") ?></label><input type="tel" id="phone" placeholder="<?= t("ph_phone") ?>"></div>
                     </div>
                     <div class="form-row">
-                        <div class="form-group"><label for="email"><?= t("email_label") ?></label><input type="email" id="email" placeholder="tu@email.com" required></div>
+                        <div class="form-group"><label for="email"><?= t("email_label") ?></label><input type="email" id="email" placeholder="<?= t("ph_email") ?>" required></div>
                         <div class="form-group">
                             <label for="product"><?= t("product_label") ?></label>
                             <select id="product">
@@ -218,7 +218,7 @@ try {
                             </select>
                         </div>
                     </div>
-                    <div class="form-group"><label for="message"><?= t("message_label") ?></label><textarea id="message" rows="4" placeholder="Contanos que te gustaria..."></textarea></div>
+                    <div class="form-group"><label for="message"><?= t("message_label") ?></label><textarea id="message" rows="4" placeholder="<?= t("ph_message") ?>"></textarea></div>
                     <button type="submit" class="btn btn--primary btn--lg btn--full"><?= t("send_message") ?> <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
                 </form>
             </div>
