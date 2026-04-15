@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/lang.php';
 
 // --- Fetch categories ---
 try {
@@ -61,14 +62,14 @@ try {
         <div class="container navbar__inner">
             <a href="index.php" class="navbar__logo">BTLDECO<span class="logo-dot"></span></a>
             <ul class="navbar__links" id="navLinks">
-                <li><a href="index.php">Inicio</a></li>
-                <li><a href="tienda.php" class="active">Tienda</a></li>
-                <li><a href="index.php#galeria">Galeria</a></li>
-                <li><a href="index.php#nosotros">Nosotros</a></li>
-                <li><a href="#contacto">Contacto</a></li>
+                <li><a href="index.php"><?= t('home') ?></a></li>
+                <li><a href="tienda.php" class="active"><?= t('shop') ?></a></li>
+                <li><a href="index.php#galeria"><?= t('gallery') ?></a></li>
+                <li><a href="index.php#nosotros"><?= t('about') ?></a></li>
+                <li><a href="#contacto"><?= t('contact') ?></a></li>
             </ul>
             <div class="navbar__actions">
-                <a href="tienda.php" class="btn btn--primary btn--sm">TIENDA</a>
+                <a href="tienda.php" class="btn btn--primary btn--sm"><?= t('shop_btn') ?></a>
                 <div class="lang-switch" id="langSwitch">
                     <button class="lang-switch__btn active" data-lang="es">ES</button>
                     <button class="lang-switch__btn" data-lang="en">EN</button>
@@ -93,16 +94,16 @@ try {
     <main class="tienda">
         <div class="container">
             <nav class="breadcrumb">
-                <a href="index.php">Inicio</a>
+                <a href="index.php"><?= t('breadcrumb_home') ?></a>
                 <span class="breadcrumb__sep">/</span>
-                <span>Tienda</span>
+                <span><?= t('breadcrumb_shop') ?></span>
             </nav>
         </div>
 
         <div class="container">
             <div class="tienda__header">
-                <h1 class="tienda__title" data-i18n="tienda-title">Tienda</h1>
-                <p class="tienda__subtitle" data-i18n="tienda-sub">Todos nuestros productos de decoracion</p>
+                <h1 class="tienda__title"><?= t('shop_title') ?></h1>
+                <p class="tienda__subtitle"><?= t('shop_subtitle') ?></p>
             </div>
         </div>
 
@@ -110,7 +111,7 @@ try {
         <div class="container">
             <div class="tienda__toolbar">
                 <div class="tienda__filters">
-                    <a href="tienda.php" class="filter-pill <?= $cat_filter === '' ? 'active' : '' ?>">Todos</a>
+                    <a href="tienda.php" class="filter-pill <?= $cat_filter === '' ? 'active' : '' ?>"><?= t('filter_all') ?></a>
                     <?php foreach ($cats as $cat): ?>
                         <a href="tienda.php?cat=<?= urlencode($cat['slug']) ?>" class="filter-pill <?= $cat_filter === $cat['slug'] ? 'active' : '' ?>">
                             <?= sanitize($cat['nombre']) ?>
@@ -119,11 +120,11 @@ try {
                 </div>
                 <div class="tienda__sort">
                     <select class="sort-select" onchange="window.location='tienda.php?cat=<?= urlencode($cat_filter) ?>&sort='+this.value">
-                        <option value="recientes" <?= $sort === 'recientes' ? 'selected' : '' ?>>Mas recientes</option>
-                        <option value="precio_asc" <?= $sort === 'precio_asc' ? 'selected' : '' ?>>Precio: menor a mayor</option>
-                        <option value="precio_desc" <?= $sort === 'precio_desc' ? 'selected' : '' ?>>Precio: mayor a menor</option>
-                        <option value="nombre" <?= $sort === 'nombre' ? 'selected' : '' ?>>Nombre: A-Z</option>
-                        <option value="vendidos" <?= $sort === 'vendidos' ? 'selected' : '' ?>>Mas vendidos</option>
+                        <option value="recientes" <?= $sort === 'recientes' ? 'selected' : '' ?>><?= t('sort_recent') ?></option>
+                        <option value="precio_asc" <?= $sort === 'precio_asc' ? 'selected' : '' ?>><?= t('sort_price_asc') ?></option>
+                        <option value="precio_desc" <?= $sort === 'precio_desc' ? 'selected' : '' ?>><?= t('sort_price_desc') ?></option>
+                        <option value="nombre" <?= $sort === 'nombre' ? 'selected' : '' ?>><?= t('sort_name') ?></option>
+                        <option value="vendidos" <?= $sort === 'vendidos' ? 'selected' : '' ?>><?= t('sort_sold') ?></option>
                     </select>
                 </div>
             </div>
@@ -133,9 +134,9 @@ try {
         <div class="container">
             <?php if (empty($productos)): ?>
                 <div class="tienda__empty">
-                    <p>No hay productos disponibles<?= $cat_filter ? ' en esta categoria' : '' ?>.</p>
+                    <p><?= $cat_filter ? t('no_products_cat') : t('no_products') ?>.</p>
                     <?php if ($cat_filter): ?>
-                        <a href="tienda.php" class="btn btn--outline" style="margin-top:16px;">Ver todos los productos</a>
+                        <a href="tienda.php" class="btn btn--outline" style="margin-top:16px;"><?= t('view_all') ?></a>
                     <?php endif; ?>
                 </div>
             <?php else: ?>
@@ -145,9 +146,9 @@ try {
                             <a href="producto_detalle.php?slug=<?= urlencode($p['slug']) ?>" class="tienda-card__link">
                                 <div class="tienda-card__image">
                                     <?php if ($p['precio_oferta'] && $p['precio_oferta'] < $p['precio']): ?>
-                                        <span class="tienda-card__badge">OFERTA</span>
+                                        <span class="tienda-card__badge"><?= t('offer') ?></span>
                                     <?php elseif ($p['destacado']): ?>
-                                        <span class="tienda-card__badge tienda-card__badge--new">DESTACADO</span>
+                                        <span class="tienda-card__badge tienda-card__badge--new"><?= t('featured') ?></span>
                                     <?php endif; ?>
                                     <img src="<?= img_url($p['imagen_principal']) ?>" alt="<?= sanitize($p['nombre']) ?>" loading="lazy">
                                 </div>
@@ -166,10 +167,10 @@ try {
                             <?php if ($p['stock'] > 0): ?>
                             <button class="btn--add-cart" onclick="event.stopPropagation(); window.btlCart.add(<?= $p['id'] ?>)">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
-                                AÑADIR AL CARRITO
+                                <?= t('add_to_cart') ?>
                             </button>
                             <?php else: ?>
-                            <span class="btn--add-cart" style="opacity:0.5;cursor:default;">AGOTADO</span>
+                            <span class="btn--add-cart" style="opacity:0.5;cursor:default;"><?= t('sold_out') ?></span>
                             <?php endif; ?>
                         </div>
                     <?php endforeach; ?>

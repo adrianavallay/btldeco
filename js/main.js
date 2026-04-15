@@ -535,6 +535,7 @@
         });
         document.documentElement.lang = lang === 'es' ? 'es' : 'en';
         localStorage.setItem(LANG_KEY, lang);
+        document.cookie = 'btl-lang=' + lang + ';path=/;max-age=31536000';
         if (langSwitch) {
             langSwitch.setAttribute('data-active', lang);
             langBtns.forEach((btn) => {
@@ -559,6 +560,9 @@
             if (lang !== currentLang) {
                 currentLang = lang;
                 applyLang(lang);
+                // Reload PHP pages to apply server-side translations
+                var isPhpPage = window.location.pathname.match(/\.(php)$/);
+                if (isPhpPage) { location.reload(); return; }
             }
         });
     });
