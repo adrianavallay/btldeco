@@ -184,13 +184,13 @@ try {
         <div class="container">
             <div class="contact__grid">
                 <div class="contact__info">
-                    <span class="section__tag">CONTACTO</span>
-                    <h2 class="section__title">Hablemos de<br>tu pedido</h2>
-                    <p class="contact__desc">Respondemos en menos de 24hs. Tambien podes escribirnos directo por WhatsApp.</p>
+                    <span class="section__tag"><?= t("contact") ?></span>
+                    <h2 class="section__title"><?= t("contact_title") ?></h2>
+                    <p class="contact__desc"><?= t("contact_desc") ?></p>
                     <div class="contact__cards">
                         <a href="mailto:hola@btldeco.com.ar" class="contact-card">
                             <div class="contact-card__icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
-                            <div><span class="contact-card__label">EMAIL</span><span class="contact-card__value">hola@btldeco.com.ar</span></div>
+                            <div><span class="contact-card__label"><?= t("email_label") ?></span><span class="contact-card__value">hola@btldeco.com.ar</span></div>
                         </a>
                         <a href="https://wa.me/5491162743425" target="_blank" class="contact-card">
                             <div class="contact-card__icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg></div>
@@ -198,31 +198,31 @@ try {
                         </a>
                         <div class="contact-card">
                             <div class="contact-card__icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
-                            <div><span class="contact-card__label">UBICACION</span><span class="contact-card__value">Buenos Aires, Argentina</span></div>
+                            <div><span class="contact-card__label"><?= t("location") ?></span><span class="contact-card__value">Buenos Aires, Argentina</span></div>
                         </div>
                     </div>
                 </div>
                 <form class="contact__form">
                     <div class="form-row">
-                        <div class="form-group"><label for="name">NOMBRE</label><input type="text" id="name" placeholder="Tu nombre completo" required></div>
-                        <div class="form-group"><label for="phone">TELEFONO</label><input type="tel" id="phone" placeholder="+54 11 ..."></div>
+                        <div class="form-group"><label for="name"><?= t("name_label") ?></label><input type="text" id="name" placeholder="Tu nombre completo" required></div>
+                        <div class="form-group"><label for="phone"><?= t("phone_label") ?></label><input type="tel" id="phone" placeholder="+54 11 ..."></div>
                     </div>
                     <div class="form-row">
-                        <div class="form-group"><label for="email">EMAIL</label><input type="email" id="email" placeholder="tu@email.com" required></div>
+                        <div class="form-group"><label for="email"><?= t("email_label") ?></label><input type="email" id="email" placeholder="tu@email.com" required></div>
                         <div class="form-group">
-                            <label for="product">PRODUCTO</label>
+                            <label for="product"><?= t("product_label") ?></label>
                             <select id="product">
-                                <option value="" disabled selected>Selecciona un producto</option>
-                                <option>Pedido personalizado</option>
-                                <option>Consulta general</option>
+                                <option value="" disabled selected><?= t("select_product") ?></option>
+                                <option><?= t("custom_order") ?></option>
+                                <option><?= t("general_inquiry") ?></option>
                             </select>
                         </div>
                     </div>
-                    <div class="form-group"><label for="message">MENSAJE</label><textarea id="message" rows="4" placeholder="Contanos que te gustaria..."></textarea></div>
-                    <button type="submit" class="btn btn--primary btn--lg btn--full">ENVIAR MENSAJE <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+                    <div class="form-group"><label for="message"><?= t("message_label") ?></label><textarea id="message" rows="4" placeholder="Contanos que te gustaria..."></textarea></div>
+                    <button type="submit" class="btn btn--primary btn--lg btn--full"><?= t("send_message") ?> <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
                 </form>
             </div>
-            <div class="contact__bottom"><p>&copy; 2026 BTLDECO. Todos los derechos reservados.</p></div>
+            <div class="contact__bottom"><p><?= t("copyright") ?></p></div>
         </div>
     </section>
 

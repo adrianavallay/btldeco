@@ -1,5 +1,6 @@
 <?php
-require_once __DIR__ . '/config.php';
+require_once __DIR__ . "/config.php";
+require_once __DIR__ . "/lang.php";
 
 $pedido_id = (int) ($_GET['id'] ?? 0);
 $metodo = $_GET['metodo'] ?? '';
@@ -37,14 +38,14 @@ if ($pedido && $pedido['notas'] === 'transferencia') $metodo = 'transferencia';
         <div class="container navbar__inner">
             <a href="index.php" class="navbar__logo">BTLDECO<span class="logo-dot"></span></a>
             <ul class="navbar__links" id="navLinks">
-                <li><a href="index.php">Inicio</a></li>
-                <li><a href="tienda.php">Tienda</a></li>
-                <li><a href="index.php#galeria">Galeria</a></li>
-                <li><a href="index.php#nosotros">Nosotros</a></li>
-                <li><a href="index.php#contacto">Contacto</a></li>
+                <li><a href="index.php"><?= t("home") ?></a></li>
+                <li><a href="tienda.php"><?= t("shop") ?></a></li>
+                <li><a href="index.php#galeria"><?= t("gallery") ?></a></li>
+                <li><a href="index.php#nosotros"><?= t("about") ?></a></li>
+                <li><a href="index.php#contacto"><?= t("contact") ?></a></li>
             </ul>
             <div class="navbar__actions">
-                <a href="tienda.php" class="btn btn--primary btn--sm">TIENDA</a>
+                <a href="tienda.php" class="btn btn--primary btn--sm"><?= t("shop_btn") ?></a>
                 <button class="theme-toggle" id="themeToggle" aria-label="Cambiar tema">
                     <svg class="theme-toggle__sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
                     <svg class="theme-toggle__moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
@@ -133,7 +134,7 @@ if ($pedido && $pedido['notas'] === 'transferencia') $metodo = 'transferencia';
                 <?php endif; ?>
 
                 <div class="gracias-actions">
-                    <a href="tienda.php" class="btn btn--primary btn--lg">SEGUIR COMPRANDO</a>
+                    <a href="tienda.php" class="btn btn--primary btn--lg"><?= t("back_to_shop") ?></a>
                     <a href="index.php" class="btn btn--outline btn--lg">VOLVER AL INICIO</a>
                 </div>
             </div>
@@ -141,7 +142,7 @@ if ($pedido && $pedido['notas'] === 'transferencia') $metodo = 'transferencia';
     </main>
 
     <div class="contact__bottom" style="padding:20px 24px;margin-top:40px;">
-        <p>&copy; 2026 BTLDECO. Todos los derechos reservados.</p>
+        <p><?= t("copyright") ?></p>
     </div>
 
     <script src="js/main.js?v=7"></script>

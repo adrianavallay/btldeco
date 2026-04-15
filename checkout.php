@@ -373,7 +373,7 @@ $flash_success = flash('success');
 
     <!-- FOOTER -->
     <div class="contact__bottom" style="padding:20px 24px;margin-top:40px;">
-        <p>&copy; 2026 BTLDECO. Todos los derechos reservados.</p>
+        <p><?= t("copyright") ?></p>
     </div>
 
     <script src="js/main.js?v=8"></script>
