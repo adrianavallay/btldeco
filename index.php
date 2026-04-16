@@ -548,7 +548,7 @@ if (empty($galRow2)) $galRow2 = $galRow1;
     <script src="js/carousel.js?v=17"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
-    <script src="js/gallery-gsap.js?v=9"></script>
+    <script src="js/gallery-gsap.js?v=10"></script>
     <script>
     // Quick View Modal
     function openQuickView(card) {
