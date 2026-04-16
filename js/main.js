@@ -545,8 +545,8 @@
     }
 
     const savedLang = localStorage.getItem(LANG_KEY);
-    let currentLang = 'es';
-    if (savedLang) {
+    let currentLang = "es";
+    if (false) {
         currentLang = savedLang;
     } else {
         const browserLang = (navigator.language || navigator.userLanguage || 'es').slice(0, 2);

@@ -5,7 +5,7 @@
  */
 
 function current_lang(): string {
-    return $_COOKIE['btl-lang'] ?? $_SESSION['btl-lang'] ?? 'es';
+    return "es";
 }
 
 function cat_name(array $item): string {
