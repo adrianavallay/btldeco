@@ -102,7 +102,7 @@
         if (contactSection) {
             ScrollTrigger.create({
                 trigger: aboutSection,
-                start: 'top 20%',
+                start: 'top 0%',
                 end: function () {
                     return '+=' + contactSection.offsetHeight;
                 },
