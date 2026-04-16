@@ -8,6 +8,13 @@ function current_lang(): string {
     return $_COOKIE['btl-lang'] ?? $_SESSION['btl-lang'] ?? 'es';
 }
 
+function cat_name(array $item): string {
+    if (current_lang() === 'en' && !empty($item['categoria_nombre_en'])) {
+        return $item['categoria_nombre_en'];
+    }
+    return $item['categoria_nombre'] ?? '';
+}
+
 function t(string $key): string {
     static $strings = null;
     if ($strings === null) {

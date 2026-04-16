@@ -4,7 +4,7 @@ require_once __DIR__ . '/lang.php';
 
 // --- Fetch categories ---
 try {
-    $cats = pdo()->query("SELECT id, nombre, slug FROM categorias WHERE activa = 1 ORDER BY orden, nombre")->fetchAll();
+    $cats = pdo()->query("SELECT id, nombre, nombre_en, slug FROM categorias WHERE activa = 1 ORDER BY orden, nombre")->fetchAll();
 } catch (Exception $e) {
     $cats = [];
 }
@@ -31,7 +31,7 @@ $orderBy = match ($sort) {
 
 // --- Fetch products ---
 try {
-    $sql = "SELECT p.*, c.nombre AS categoria_nombre, c.slug AS categoria_slug
+    $sql = "SELECT p.*, c.nombre AS categoria_nombre, c.nombre_en AS categoria_nombre_en, c.slug AS categoria_slug
             FROM productos p
             LEFT JOIN categorias c ON p.categoria_id = c.id
             $where
@@ -112,9 +112,11 @@ try {
             <div class="tienda__toolbar">
                 <div class="tienda__filters">
                     <a href="tienda.php" class="filter-pill <?= $cat_filter === '' ? 'active' : '' ?>"><?= t('filter_all') ?></a>
-                    <?php foreach ($cats as $cat): ?>
+                    <?php foreach ($cats as $cat):
+                        $catName = (current_lang() === 'en' && !empty($cat['nombre_en'])) ? $cat['nombre_en'] : $cat['nombre'];
+                    ?>
                         <a href="tienda.php?cat=<?= urlencode($cat['slug']) ?>" class="filter-pill <?= $cat_filter === $cat['slug'] ? 'active' : '' ?>">
-                            <?= sanitize($cat['nombre']) ?>
+                            <?= sanitize($catName) ?>
                         </a>
                     <?php endforeach; ?>
                 </div>

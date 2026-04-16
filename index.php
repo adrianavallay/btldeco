@@ -1,9 +1,10 @@
 <?php
 require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/lang.php';
 
 // Fetch featured products (destacados)
 try {
-    $featured = pdo()->query("SELECT p.*, c.nombre AS categoria_nombre, c.slug AS categoria_slug
+    $featured = pdo()->query("SELECT p.*, c.nombre AS categoria_nombre, c.nombre_en AS categoria_nombre_en, c.slug AS categoria_slug
                               FROM productos p
                               LEFT JOIN categorias c ON p.categoria_id = c.id
                               WHERE p.estado = 'activo' AND p.destacado = 1
@@ -15,7 +16,7 @@ try {
 
 // Fetch all active products for gallery + picks
 try {
-    $allProducts = pdo()->query("SELECT p.*, c.nombre AS categoria_nombre, c.slug AS categoria_slug
+    $allProducts = pdo()->query("SELECT p.*, c.nombre AS categoria_nombre, c.nombre_en AS categoria_nombre_en, c.slug AS categoria_slug
                                  FROM productos p
                                  LEFT JOIN categorias c ON p.categoria_id = c.id
                                  WHERE p.estado = 'activo'
@@ -306,7 +307,7 @@ if (empty($galRow2)) $galRow2 = $galRow1;
         <div class="gallery__track-wrapper">
             <div class="gallery__track gallery__track--left" id="galleryTrack1">
                 <?php foreach (array_merge($galRow1, $galRow1) as $gp): ?>
-                <div class="gallery__item" onclick="openQuickView(this)" data-id="<?= $gp['id'] ?>" data-slug="<?= sanitize($gp['slug']) ?>" data-name="<?= sanitize($gp['nombre']) ?>" data-price-fmt="<?= price(($gp['precio_oferta'] && $gp['precio_oferta'] < $gp['precio']) ? $gp['precio_oferta'] : $gp['precio']) ?>" data-cat="<?= sanitize($gp['categoria_nombre'] ?? '') ?>" data-desc="<?= sanitize($gp['descripcion_corta'] ?: substr($gp['descripcion'] ?? '', 0, 200)) ?>" data-img="<?= img_url($gp['imagen_principal']) ?>">
+                <div class="gallery__item" onclick="openQuickView(this)" data-id="<?= $gp['id'] ?>" data-slug="<?= sanitize($gp['slug']) ?>" data-name="<?= sanitize($gp['nombre']) ?>" data-price-fmt="<?= price(($gp['precio_oferta'] && $gp['precio_oferta'] < $gp['precio']) ? $gp['precio_oferta'] : $gp['precio']) ?>" data-cat="<?= sanitize(cat_name($gp)) ?>" data-desc="<?= sanitize($gp['descripcion_corta'] ?: substr($gp['descripcion'] ?? '', 0, 200)) ?>" data-img="<?= img_url($gp['imagen_principal']) ?>">
                     <img src="<?= img_url($gp['imagen_principal']) ?>" alt="<?= sanitize($gp['nombre']) ?>" loading="lazy">
                     <div class="gallery__item-overlay">
                         <span><?= sanitize($gp['nombre']) ?></span>
@@ -320,7 +321,7 @@ if (empty($galRow2)) $galRow2 = $galRow1;
         <div class="gallery__track-wrapper">
             <div class="gallery__track gallery__track--right" id="galleryTrack2">
                 <?php foreach (array_merge($galRow2, $galRow2) as $gp): ?>
-                <div class="gallery__item" onclick="openQuickView(this)" data-id="<?= $gp['id'] ?>" data-slug="<?= sanitize($gp['slug']) ?>" data-name="<?= sanitize($gp['nombre']) ?>" data-price-fmt="<?= price(($gp['precio_oferta'] && $gp['precio_oferta'] < $gp['precio']) ? $gp['precio_oferta'] : $gp['precio']) ?>" data-cat="<?= sanitize($gp['categoria_nombre'] ?? '') ?>" data-desc="<?= sanitize($gp['descripcion_corta'] ?: substr($gp['descripcion'] ?? '', 0, 200)) ?>" data-img="<?= img_url($gp['imagen_principal']) ?>">
+                <div class="gallery__item" onclick="openQuickView(this)" data-id="<?= $gp['id'] ?>" data-slug="<?= sanitize($gp['slug']) ?>" data-name="<?= sanitize($gp['nombre']) ?>" data-price-fmt="<?= price(($gp['precio_oferta'] && $gp['precio_oferta'] < $gp['precio']) ? $gp['precio_oferta'] : $gp['precio']) ?>" data-cat="<?= sanitize(cat_name($gp)) ?>" data-desc="<?= sanitize($gp['descripcion_corta'] ?: substr($gp['descripcion'] ?? '', 0, 200)) ?>" data-img="<?= img_url($gp['imagen_principal']) ?>">
                     <img src="<?= img_url($gp['imagen_principal']) ?>" alt="<?= sanitize($gp['nombre']) ?>" loading="lazy">
                     <div class="gallery__item-overlay">
                         <span><?= sanitize($gp['nombre']) ?></span>

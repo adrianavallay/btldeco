@@ -7,7 +7,7 @@ if (!$slug) { redirect('tienda.php'); }
 
 // Fetch product
 try {
-    $stmt = pdo()->prepare("SELECT p.*, c.nombre AS categoria_nombre, c.slug AS categoria_slug
+    $stmt = pdo()->prepare("SELECT p.*, c.nombre AS categoria_nombre, c.nombre_en AS categoria_nombre_en, c.slug AS categoria_slug
                             FROM productos p
                             LEFT JOIN categorias c ON p.categoria_id = c.id
                             WHERE p.slug = ? AND p.estado = 'activo'");
@@ -129,7 +129,7 @@ $waText = urlencode('Hola! Me interesa el producto: ' . $p['nombre'] . ' (' . pr
                 <a href="tienda.php"><?= t("breadcrumb_shop") ?></a>
                 <span class="breadcrumb__sep">/</span>
                 <?php if ($p['categoria_nombre']): ?>
-                    <a href="tienda.php?cat=<?= urlencode($p['categoria_slug']) ?>"><?= sanitize($p['categoria_nombre']) ?></a>
+                    <a href="tienda.php?cat=<?= urlencode($p['categoria_slug']) ?>"><?= sanitize(cat_name($p)) ?></a>
                     <span class="breadcrumb__sep">/</span>
                 <?php endif; ?>
                 <span><?= sanitize($p['nombre']) ?></span>
@@ -158,7 +158,7 @@ $waText = urlencode('Hola! Me interesa el producto: ' . $p['nombre'] . ' (' . pr
                 <!-- Info -->
                 <div class="producto__info">
                     <?php if ($p['categoria_nombre']): ?>
-                        <span class="producto__category"><?= sanitize($p['categoria_nombre']) ?></span>
+                        <span class="producto__category"><?= sanitize(cat_name($p)) ?></span>
                     <?php endif; ?>
                     <h1 class="producto__name"><?= sanitize($p['nombre']) ?></h1>
 
