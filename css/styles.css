@@ -1854,10 +1854,11 @@ a.contact-card:hover {
     .about__features { grid-template-columns: 1fr 1fr; }
 }
 
-@media (max-width: 1400px) {
-    .gallery__item { width: 300px; height: 230px; }
+@media (max-width: 1440px) {
+    .gallery__item { width: 280px; height: 220px; }
     .gallery__track { gap: 14px; }
     .gallery .section__header { margin-bottom: 36px; }
+    .gallery__track-wrapper { margin-bottom: 28px; }
 }
 @media (max-width: 768px) {
     .gallery__item { width: 260px; height: 200px; }
