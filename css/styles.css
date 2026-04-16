@@ -1618,6 +1618,7 @@ button { cursor: pointer; border: none; background: none; font: inherit; color: 
     background: var(--bg-elevated);
     position: relative;
     overflow: hidden;
+    z-index: 8;
 }
 .cta-block {
     text-align: center;

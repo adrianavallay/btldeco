@@ -96,20 +96,19 @@
         });
     }
 
-    // ── Pin About: stays fixed, Contact slides over it ──
-    if (aboutSection) {
-        var contactSection = document.querySelector('.contact');
-        if (contactSection) {
-            ScrollTrigger.create({
-                trigger: aboutSection,
-                start: 'top -50%',
-                end: function () {
-                    return '+=' + contactSection.offsetHeight;
-                },
-                pin: true,
-                pinSpacing: false
-            });
-        }
+    // ── Pin CTA section: stays fixed, Contact slides over it ──
+    var ctaSection = document.querySelector('.cta-section');
+    var contactSection = document.querySelector('.contact');
+    if (ctaSection && contactSection) {
+        ScrollTrigger.create({
+            trigger: ctaSection,
+            start: 'top 20%',
+            end: function () {
+                return '+=' + contactSection.offsetHeight;
+            },
+            pin: true,
+            pinSpacing: false
+        });
     }
 
     // About header
