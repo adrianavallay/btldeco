@@ -286,7 +286,12 @@
 
     setTheme('light');
 
-    // Theme toggle disabled — always light mode
+    if (themeToggle) {
+        themeToggle.addEventListener('click', () => {
+            const current = html.getAttribute('data-theme') || 'light';
+            setTheme(current === 'light' ? 'dark' : 'light');
+        });
+    }
 
     // =========================================================
     // i18n LANGUAGE TOGGLE
