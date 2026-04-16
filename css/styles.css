@@ -1313,13 +1313,11 @@ button { cursor: pointer; border: none; background: none; font: inherit; color: 
    GALLERY — DUAL CAROUSEL
    ============================================================ */
 .gallery {
-    padding: calc(var(--section-pad) / 2) 0 var(--section-pad);
+    padding: calc(var(--section-pad) / 2) 0 calc(var(--section-pad) / 2);
     overflow-x: clip;
     overflow-y: visible;
     background: var(--bg);
-    position: sticky;
-    top: 0;
-    z-index: 1;
+    margin-bottom: calc(var(--section-pad) / 2);
 }
 .gallery .section__header { margin-bottom: 48px; }
 
