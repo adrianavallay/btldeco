@@ -1317,6 +1317,9 @@ button { cursor: pointer; border: none; background: none; font: inherit; color: 
     overflow-x: clip;
     overflow-y: visible;
     background: var(--bg);
+    position: sticky;
+    top: 0;
+    z-index: 1;
 }
 .gallery .section__header { margin-bottom: 48px; }
 
@@ -1492,6 +1495,8 @@ button { cursor: pointer; border: none; background: none; font: inherit; color: 
     background: #F0E9E0;
     position: relative;
     overflow: hidden;
+    z-index: 5;
+    box-shadow: 0 -20px 60px rgba(0,0,0,0.1);
 }
 /* Linen texture */
 .about-v2__texture {

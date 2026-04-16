@@ -39,7 +39,7 @@ if (empty($galRow2)) $galRow2 = $galRow1;
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css?v=41">
+    <link rel="stylesheet" href="css/styles.css?v=42">
 </head>
 <body>
 
@@ -368,7 +368,7 @@ if (empty($galRow2)) $galRow2 = $galRow1;
 
             <div class="about-v2__content" id="aboutGrid">
                 <div class="about-v2__story">
-                    <p>Somos un estudio de diseño argentino que transforma ideas en objetos reales. Cada pieza combina tecnologia de impresion 3D con terminaciones hechas a mano.</p>
+                    <p>Somos un estudio de diseño que transforma ideas en objetos reales. Cada pieza combina tecnologia de impresion 3D con terminaciones hechas a mano.</p>
                     <p>Nos apasiona el detalle. Desde la eleccion del material hasta el acabado final, cada producto pasa por un control de calidad que garantiza que llegue perfecto a tu hogar.</p>
                     <a href="tienda.php" class="btn btn--primary btn--lg" style="margin-top:24px;">VER PRODUCTOS <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
                 </div>
