@@ -77,4 +77,59 @@
         );
     });
 
+    // ══════════════════════════════════════════
+    // ABOUT V2 — SCROLL ANIMATIONS
+    // ══════════════════════════════════════════
+
+    // Header: fade up
+    var aboutHeader = document.getElementById('aboutHeader');
+    if (aboutHeader) {
+        gsap.from(aboutHeader.children, {
+            y: 50,
+            opacity: 0,
+            duration: 0.9,
+            stagger: 0.15,
+            ease: 'power3.out',
+            scrollTrigger: {
+                trigger: aboutHeader,
+                start: 'top 80%',
+                once: true
+            }
+        });
+    }
+
+    // Stats: count up + fade in
+    var aboutStats = document.getElementById('aboutStats');
+    if (aboutStats) {
+        gsap.from(aboutStats.children, {
+            y: 30,
+            opacity: 0,
+            duration: 0.7,
+            stagger: 0.1,
+            ease: 'power2.out',
+            scrollTrigger: {
+                trigger: aboutStats,
+                start: 'top 85%',
+                once: true
+            }
+        });
+    }
+
+    // Cards: stagger from bottom
+    var aboutGrid = document.getElementById('aboutGrid');
+    if (aboutGrid) {
+        gsap.from(aboutGrid.querySelectorAll('.about-v2__card'), {
+            y: 60,
+            opacity: 0,
+            duration: 0.8,
+            stagger: 0.12,
+            ease: 'power3.out',
+            scrollTrigger: {
+                trigger: aboutGrid,
+                start: 'top 85%',
+                once: true
+            }
+        });
+    }
+
 })();
