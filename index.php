@@ -39,7 +39,7 @@ if (empty($galRow2)) $galRow2 = $galRow1;
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css?v=47">
+    <link rel="stylesheet" href="css/styles.css?v=48">
 </head>
 <body>
 
@@ -50,7 +50,7 @@ if (empty($galRow2)) $galRow2 = $galRow1;
             <ul class="navbar__links" id="navLinks">
                 <li><a href="#inicio" data-i18n="nav-inicio">Inicio</a></li>
                 <li><a href="#productos" data-i18n="nav-productos">Productos</a></li>
-                <li><a href="#galeria" data-i18n="nav-galeria">Galeria</a></li>
+                <li><a href="#galeria" data-i18n="nav-galeria">Coleccion</a></li>
                 <li><a href="#nosotros" data-i18n="nav-nosotros">Nosotros</a></li>
                 <li><a href="#contacto" data-i18n="nav-contacto">Contacto</a></li>
             </ul>

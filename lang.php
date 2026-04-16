@@ -23,7 +23,8 @@ function t(string $key): string {
                 // Nav
                 'home' => 'Inicio',
                 'shop' => 'Tienda',
-                'gallery' => 'Galeria',
+                'gallery' => 'Coleccion',
+                'collection' => 'Coleccion',
                 'about' => 'Nosotros',
                 'contact' => 'Contacto',
                 'shop_btn' => 'TIENDA',
@@ -139,7 +140,8 @@ function t(string $key): string {
             'en' => [
                 'home' => 'Home',
                 'shop' => 'Shop',
-                'gallery' => 'Gallery',
+                'gallery' => 'Collection',
+                'collection' => 'Collection',
                 'about' => 'About',
                 'contact' => 'Contact',
                 'shop_btn' => 'SHOP',

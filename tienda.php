@@ -64,7 +64,7 @@ try {
             <ul class="navbar__links" id="navLinks">
                 <li><a href="index.php"><?= t('home') ?></a></li>
                 <li><a href="tienda.php" class="active"><?= t('shop') ?></a></li>
-                <li><a href="index.php#galeria"><?= t('gallery') ?></a></li>
+                <li><a href="index.php#galeria"><?= t('collection') ?></a></li>
                 <li><a href="index.php#nosotros"><?= t('about') ?></a></li>
                 <li><a href="#contacto"><?= t('contact') ?></a></li>
             </ul>
