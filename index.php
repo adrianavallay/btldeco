@@ -39,7 +39,7 @@ if (empty($galRow2)) $galRow2 = $galRow1;
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css?v=40">
+    <link rel="stylesheet" href="css/styles.css?v=41">
 </head>
 <body>
 
@@ -357,81 +357,59 @@ if (empty($galRow2)) $galRow2 = $galRow1;
     </div>
     <?php endif; ?>
 
-    <!-- NOSOTROS / POR QUE BTLDECO -->
+    <!-- NOSOTROS -->
     <section class="section about-v2" id="nosotros">
-        <!-- Subtle grain texture overlay -->
         <div class="about-v2__texture"></div>
-        <!-- Decorative gold line -->
-        <div class="about-v2__accent-line"></div>
-
         <div class="container">
-            <!-- Header centered -->
             <div class="about-v2__header" id="aboutHeader">
-                <span class="about-v2__tag" data-i18n="about-tag">SOBRE BTLDECO</span>
-                <h2 class="about-v2__title" data-i18n="about-title">Diseño argentino,<br><em>fabricacion artesanal</em></h2>
-                <p class="about-v2__subtitle" data-i18n="about-desc">Combinamos tecnologia de impresion 3D con acabados manuales para crear piezas decorativas unicas. Cada producto esta pensado para aportar caracter y calidez a tus espacios.</p>
+                <span class="about-v2__tag">BTLDECO</span>
+                <h2 class="about-v2__title">Donde el diseño se<br>encuentra con <em>lo artesanal</em></h2>
             </div>
 
-            <!-- Stats row -->
-            <div class="about-v2__stats" id="aboutStats">
-                <div class="about-v2__stat">
-                    <span class="about-v2__stat-number" data-count="500">0</span>
-                    <span class="about-v2__stat-label">Piezas entregadas</span>
+            <div class="about-v2__content" id="aboutGrid">
+                <div class="about-v2__story">
+                    <p>Somos un estudio de diseño argentino que transforma ideas en objetos reales. Cada pieza combina tecnologia de impresion 3D con terminaciones hechas a mano.</p>
+                    <p>Nos apasiona el detalle. Desde la eleccion del material hasta el acabado final, cada producto pasa por un control de calidad que garantiza que llegue perfecto a tu hogar.</p>
+                    <a href="tienda.php" class="btn btn--primary btn--lg" style="margin-top:24px;">VER PRODUCTOS <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
                 </div>
-                <div class="about-v2__stat-sep"></div>
-                <div class="about-v2__stat">
-                    <span class="about-v2__stat-number" data-count="50">0</span>
-                    <span class="about-v2__stat-label">Diseños unicos</span>
-                </div>
-                <div class="about-v2__stat-sep"></div>
-                <div class="about-v2__stat">
-                    <span class="about-v2__stat-number">48<small>hs</small></span>
-                    <span class="about-v2__stat-label">Entrega promedio</span>
-                </div>
-                <div class="about-v2__stat-sep"></div>
-                <div class="about-v2__stat">
-                    <span class="about-v2__stat-number" data-count="98">0</span><span class="about-v2__stat-pct">%</span>
-                    <span class="about-v2__stat-label">Clientes satisfechos</span>
-                </div>
-            </div>
 
-            <!-- Feature cards -->
-            <div class="about-v2__grid" id="aboutGrid">
-                <div class="about-v2__card">
-                    <div class="about-v2__card-num">01</div>
-                    <div class="about-v2__card-icon">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                <div class="about-v2__values">
+                    <div class="about-v2__value">
+                        <span class="about-v2__value-icon">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                        </span>
+                        <div>
+                            <h3>Diseño propio</h3>
+                            <p>No revendemos. Cada pieza es creada por nosotros desde cero.</p>
+                        </div>
                     </div>
-                    <h3 data-i18n="about-f1-t">Diseño Original</h3>
-                    <p data-i18n="about-f1-d">Cada pieza nace de un proceso creativo propio. No revendemos, creamos.</p>
-                    <div class="about-v2__card-line"></div>
-                </div>
-                <div class="about-v2__card">
-                    <div class="about-v2__card-num">02</div>
-                    <div class="about-v2__card-icon">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    <div class="about-v2__value">
+                        <span class="about-v2__value-icon">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        </span>
+                        <div>
+                            <h3>Calidad garantizada</h3>
+                            <p>Control pieza por pieza. Acabados a mano, sin apuro.</p>
+                        </div>
                     </div>
-                    <h3 data-i18n="about-f2-t">Calidad Premium</h3>
-                    <p data-i18n="about-f2-d">Terminaciones a mano, control pieza por pieza. Sin defectos, sin apuro.</p>
-                    <div class="about-v2__card-line"></div>
-                </div>
-                <div class="about-v2__card">
-                    <div class="about-v2__card-num">03</div>
-                    <div class="about-v2__card-icon">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    <div class="about-v2__value">
+                        <span class="about-v2__value-icon">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                        </span>
+                        <div>
+                            <h3>Envio seguro</h3>
+                            <p>Packaging a medida. Envios a todo el pais con seguimiento.</p>
+                        </div>
                     </div>
-                    <h3 data-i18n="about-f3-t">Envios Seguros</h3>
-                    <p data-i18n="about-f3-d">Packaging protector a medida. Envios a todo el pais con seguimiento.</p>
-                    <div class="about-v2__card-line"></div>
-                </div>
-                <div class="about-v2__card">
-                    <div class="about-v2__card-num">04</div>
-                    <div class="about-v2__card-icon">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <div class="about-v2__value">
+                        <span class="about-v2__value-icon">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        </span>
+                        <div>
+                            <h3>Entrega en 48hs</h3>
+                            <p>Produccion agil. Tu pedido listo en 48 horas habiles.</p>
+                        </div>
                     </div>
-                    <h3 data-i18n="about-f4-t">Entrega Rapida</h3>
-                    <p data-i18n="about-f4-d">Produccion agil con entrega promedio en 48 horas habiles.</p>
-                    <div class="about-v2__card-line"></div>
                 </div>
             </div>
         </div>
@@ -570,7 +548,7 @@ if (empty($galRow2)) $galRow2 = $galRow1;
     <script src="js/carousel.js?v=17"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
-    <script src="js/gallery-gsap.js?v=6"></script>
+    <script src="js/gallery-gsap.js?v=7"></script>
     <script>
     // Quick View Modal
     function openQuickView(card) {
