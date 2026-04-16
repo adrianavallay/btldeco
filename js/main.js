@@ -284,19 +284,9 @@
         localStorage.setItem(STORAGE_KEY, theme);
     }
 
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-        setTheme(saved);
-    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        setTheme('dark');
-    }
+    setTheme('light');
 
-    if (themeToggle) {
-        themeToggle.addEventListener('click', () => {
-            const current = html.getAttribute('data-theme') || 'light';
-            setTheme(current === 'light' ? 'dark' : 'light');
-        });
-    }
+    // Theme toggle disabled — always light mode
 
     // =========================================================
     // i18n LANGUAGE TOGGLE
