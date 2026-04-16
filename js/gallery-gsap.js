@@ -96,6 +96,22 @@
         });
     }
 
+    // ── Pin About: stays fixed, Contact slides over it ──
+    if (aboutSection) {
+        var contactSection = document.querySelector('.contact');
+        if (contactSection) {
+            ScrollTrigger.create({
+                trigger: aboutSection,
+                start: 'top -20%',
+                end: function () {
+                    return '+=' + contactSection.offsetHeight;
+                },
+                pin: true,
+                pinSpacing: false
+            });
+        }
+    }
+
     // About header
     var aboutHeader = document.getElementById('aboutHeader');
     if (aboutHeader) {
