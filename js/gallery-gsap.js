@@ -81,6 +81,21 @@
     // ABOUT V2 — SCROLL ANIMATIONS
     // ══════════════════════════════════════════
 
+    // ── Pin gallery: stays fixed, About slides over it ──
+    var gallerySection = document.querySelector('.gallery');
+    var aboutSection = document.querySelector('.about-v2');
+    if (gallerySection && aboutSection) {
+        ScrollTrigger.create({
+            trigger: gallerySection,
+            start: 'center center',
+            end: function () {
+                return '+=' + aboutSection.offsetHeight;
+            },
+            pin: true,
+            pinSpacing: false
+        });
+    }
+
     // About header
     var aboutHeader = document.getElementById('aboutHeader');
     if (aboutHeader) {
