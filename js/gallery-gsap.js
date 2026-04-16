@@ -87,7 +87,7 @@
     if (gallerySection && aboutSection) {
         ScrollTrigger.create({
             trigger: gallerySection,
-            start: 'center center',
+            start: 'top 20%',
             end: function () {
                 return '+=' + aboutSection.offsetHeight;
             },
