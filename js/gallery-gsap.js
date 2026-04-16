@@ -102,7 +102,7 @@
     if (ctaSection && contactSection) {
         ScrollTrigger.create({
             trigger: ctaSection,
-            start: 'top 20%',
+            start: 'top 0%',
             end: function () {
                 return '+=' + contactSection.offsetHeight;
             },
