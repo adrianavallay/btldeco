@@ -41,7 +41,6 @@ define('SITE_NAME', 'BTLDECO');
 define('SITE_URL', rtrim((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost'), '/'));
 define('ADMIN_USER', env('ADMIN_USER', 'admin'));
 define('ADMIN_PASS', env('ADMIN_PASS_HASH', ''));
-define('ADMIN_PASS_PLAIN', env('ADMIN_PASS_PLAIN', ''));
 
 define('MP_ACCESS_TOKEN', env('MP_ACCESS_TOKEN', ''));
 define('MP_PUBLIC_KEY', env('MP_PUBLIC_KEY', ''));

@@ -62,11 +62,10 @@ function cliente_change_password(int $id, string $current, string $new): array {
 // ── ADMIN AUTH ──
 
 function admin_login(string $user, string $pass): bool {
-    if ($user === ADMIN_USER && $pass === ADMIN_PASS_PLAIN) {
-        $_SESSION['admin_auth'] = true;
-        return true;
-    }
-    return false;
+    if ($user !== ADMIN_USER) return false;
+    if (ADMIN_PASS === '' || !password_verify($pass, ADMIN_PASS)) return false;
+    $_SESSION['admin_auth'] = true;
+    return true;
 }
 
 function admin_logout(): void {
