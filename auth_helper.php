@@ -84,6 +84,7 @@ function cliente_register(string $nombre, string $email, string $password, strin
     $stmt = $db->prepare("INSERT INTO clientes (nombre, email, password, telefono) VALUES (?, ?, ?, ?)");
     $stmt->execute([$nombre, $email, $hash, $telefono]);
     $id = (int) $db->lastInsertId();
+    session_regenerate_id(true);
     $_SESSION['cliente_id'] = $id;
     $_SESSION['cliente_nombre'] = $nombre;
     $_SESSION['cliente_email'] = $email;
@@ -107,6 +108,7 @@ function cliente_login(string $email, string $password): array {
     }
 
     login_record_attempt($identifier, true);
+    session_regenerate_id(true);
     $_SESSION['cliente_id'] = (int) $c['id'];
     $_SESSION['cliente_nombre'] = $c['nombre'];
     $_SESSION['cliente_email'] = $c['email'];
@@ -153,6 +155,7 @@ function admin_login(string $user, string $pass): array {
     }
 
     login_record_attempt($identifier, true);
+    session_regenerate_id(true);
     $_SESSION['admin_auth'] = true;
     return ['ok' => true, 'mensaje' => 'Sesión iniciada'];
 }
