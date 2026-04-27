@@ -49,28 +49,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // ── CHANGE PASSWORD ──
     if ($action === 'change_password') {
-        $current = $_POST['current_password'] ?? '';
+        $current  = $_POST['current_password'] ?? '';
         $new_pass = $_POST['new_password'] ?? '';
-        $confirm = $_POST['confirm_password'] ?? '';
+        $confirm  = $_POST['confirm_password'] ?? '';
 
-        if ($current !== ADMIN_PASS_PLAIN) {
-            $password_result = ['ok' => false, 'msg' => 'La contrasena actual es incorrecta.'];
-        } elseif (strlen($new_pass) < 6) {
-            $password_result = ['ok' => false, 'msg' => 'La nueva contrasena debe tener al menos 6 caracteres.'];
+        if (ADMIN_PASS === '' || !password_verify($current, ADMIN_PASS)) {
+            $password_result = ['ok' => false, 'msg' => 'La contraseña actual es incorrecta.'];
         } elseif ($new_pass !== $confirm) {
-            $password_result = ['ok' => false, 'msg' => 'Las contrasenas no coinciden.'];
+            $password_result = ['ok' => false, 'msg' => 'Las contraseñas no coinciden.'];
         } else {
-            // Save new password to override file
-            $override_file = __DIR__ . '/config_override.php';
-            $hash = password_hash($new_pass, PASSWORD_DEFAULT);
-            $override_content = "<?php\n// Auto-generated password override — " . date('Y-m-d H:i:s') . "\n";
-            $override_content .= "// Do not edit manually\n";
-            $override_content .= "define('ADMIN_PASS_OVERRIDE', " . var_export($new_pass, true) . ");\n";
-
-            if (file_put_contents($override_file, $override_content)) {
-                $password_result = ['ok' => true, 'msg' => "Contrasena guardada en config_override.php. Debes actualizar ADMIN_PASS_PLAIN en config.php manualmente para que tome efecto permanente."];
+            $pwCheck = validate_password($new_pass);
+            if (!$pwCheck['ok']) {
+                $password_result = ['ok' => false, 'msg' => $pwCheck['mensaje']];
             } else {
-                $password_result = ['ok' => false, 'msg' => 'No se pudo escribir el archivo config_override.php. Verificar permisos.'];
+                $hash = password_hash($new_pass, PASSWORD_DEFAULT);
+                $password_result = [
+                    'ok'   => true,
+                    'msg'  => "Hash generado. Copialo y reemplazá la línea ADMIN_PASS_HASH en el archivo .env del servidor (vía File Manager de Hostinger).",
+                    'hash' => $hash,
+                ];
             }
         }
     }
@@ -235,6 +232,13 @@ $pdo_version = $db->getAttribute(PDO::ATTR_SERVER_VERSION) ?? 'N/A';
         <?php if ($password_result): ?>
             <div class="result-box <?= $password_result['ok'] ? 'ok' : 'err' ?>">
                 <?= sanitize($password_result['msg']) ?>
+                <?php if (!empty($password_result['hash'])): ?>
+                    <div style="margin-top:12px;">
+                        <strong>Nuevo ADMIN_PASS_HASH:</strong>
+                        <pre style="background:#f5f5f5;border:1px solid #ddd;padding:10px;margin-top:6px;font-family:monospace;font-size:0.78rem;overflow-x:auto;user-select:all;"><?= sanitize($password_result['hash']) ?></pre>
+                        <p style="font-size:0.78rem;color:#666;margin:6px 0 0;">Copialo y reemplazá la línea <code>ADMIN_PASS_HASH=...</code> del archivo <code>.env</code> en producción. La contraseña vieja seguirá funcionando hasta que actualices el .env.</p>
+                    </div>
+                <?php endif; ?>
             </div>
         <?php endif; ?>
     </div>

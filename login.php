@@ -40,15 +40,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             flash('error', 'Completá todos los campos obligatorios');
         } elseif ($password !== $confirm) {
             flash('error', 'Las contraseñas no coinciden');
-        } elseif (strlen($password) < 6) {
-            flash('error', 'La contraseña debe tener al menos 6 caracteres');
         } else {
-            $res = cliente_register($nombre, $email, $password, $telefono);
-            if ($res['ok']) {
-                flash('success', $res['mensaje']);
-                redirect('mi-cuenta.php');
+            $pwCheck = validate_password($password);
+            if (!$pwCheck['ok']) {
+                flash('error', $pwCheck['mensaje']);
             } else {
-                flash('error', $res['mensaje']);
+                $res = cliente_register($nombre, $email, $password, $telefono);
+                if ($res['ok']) {
+                    flash('success', $res['mensaje']);
+                    redirect('mi-cuenta.php');
+                } else {
+                    flash('error', $res['mensaje']);
+                }
             }
         }
     }
@@ -121,7 +124,7 @@ include __DIR__ . '/includes/header.php';
 
             <div class="auth-field">
                 <label for="reg-password">Contraseña *</label>
-                <input type="password" id="reg-password" name="password" required placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+                <input type="password" id="reg-password" name="password" required minlength="10" placeholder="Mínimo 10 caracteres, con letras y números" autocomplete="new-password">
             </div>
 
             <div class="auth-field">

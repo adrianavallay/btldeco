@@ -45,14 +45,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             flash('error', 'Completá todos los campos de contraseña');
         } elseif ($new !== $confirm) {
             flash('error', 'Las contraseñas nuevas no coinciden');
-        } elseif (strlen($new) < 6) {
-            flash('error', 'La nueva contraseña debe tener al menos 6 caracteres');
         } else {
-            $res = cliente_change_password(cliente_id(), $current, $new);
-            if ($res['ok']) {
-                flash('success', $res['mensaje']);
+            $pwCheck = validate_password($new);
+            if (!$pwCheck['ok']) {
+                flash('error', $pwCheck['mensaje']);
             } else {
-                flash('error', $res['mensaje']);
+                $res = cliente_change_password(cliente_id(), $current, $new);
+                if ($res['ok']) {
+                    flash('success', $res['mensaje']);
+                } else {
+                    flash('error', $res['mensaje']);
+                }
             }
         }
         redirect(url_pagina('mi-cuenta'));
