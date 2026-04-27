@@ -46,13 +46,50 @@ if (empty($cart)) {
     redirect('carrito.php');
 }
 
-// ── Calculate totals ──────────────────────────────────────
+// ── Re-validar carrito contra la DB (nunca confiar en precios de sesión) ──
+$producto_ids = array_values(array_unique(array_filter(array_map(fn($i) => (int) ($i['producto_id'] ?? 0), $cart))));
+if (empty($producto_ids)) {
+    flash('error', 'El carrito está vacío o es inválido.');
+    redirect('carrito.php');
+}
+
+$placeholders = implode(',', array_fill(0, count($producto_ids), '?'));
+$stmtP = pdo()->prepare("SELECT id, nombre, precio, precio_oferta, stock, estado FROM productos WHERE id IN ($placeholders)");
+$stmtP->execute($producto_ids);
+$db_productos = [];
+foreach ($stmtP->fetchAll() as $p) {
+    $db_productos[(int) $p['id']] = $p;
+}
+
 $subtotal = 0;
 $cart_items = [];
 foreach ($cart as $key => $item) {
-    $line_total = $item['precio'] * $item['qty'];
+    $pid = (int) ($item['producto_id'] ?? 0);
+    $qty = max(1, (int) ($item['qty'] ?? 0));
+    $prod = $db_productos[$pid] ?? null;
+
+    if (!$prod || $prod['estado'] !== 'activo') {
+        flash('error', 'El producto "' . sanitize((string)($item['nombre'] ?? '?')) . '" ya no está disponible.');
+        redirect('carrito.php');
+    }
+    if ($qty > (int) $prod['stock']) {
+        flash('error', 'Stock insuficiente para "' . sanitize($prod['nombre']) . '". Disponible: ' . (int) $prod['stock']);
+        redirect('carrito.php');
+    }
+
+    // Precio autoritativo: oferta si > 0, sino precio normal
+    $precio = ((float) $prod['precio_oferta']) > 0 ? (float) $prod['precio_oferta'] : (float) $prod['precio'];
+    $line_total = $precio * $qty;
     $subtotal += $line_total;
-    $cart_items[] = $item;
+
+    $cart_items[] = [
+        'producto_id' => $pid,
+        'nombre'      => $prod['nombre'],
+        'variante'    => (string) ($item['variante'] ?? ''),
+        'qty'         => $qty,
+        'precio'      => $precio,
+        'line_total'  => $line_total,
+    ];
 }
 
 $descuento = 0;
