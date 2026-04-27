@@ -55,12 +55,12 @@ if (empty($galRow2)) $galRow2 = $galRow1;
                 <li><a href="#contacto" data-i18n="nav-contacto">Contacto</a></li>
             </ul>
             <div class="navbar__actions">
-                <a href="tienda.php" class="btn btn--primary btn--sm" data-i18n="nav-cta">TIENDA</a>
+                <a href="tienda" class="btn btn--primary btn--sm" data-i18n="nav-cta">TIENDA</a>
                 <button class="theme-toggle" id="themeToggle" aria-label="Cambiar tema">
                     <svg class="theme-toggle__sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
                     <svg class="theme-toggle__moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
                 </button>
-                <a href="<?= is_cliente() ? 'mi-cuenta.php' : 'login.php' ?>" class="cart-btn" aria-label="<?= is_cliente() ? 'Mi cuenta' : 'Ingresar' ?>" title="<?= is_cliente() ? 'Mi cuenta' : 'Ingresar' ?>">
+                <a href="<?= is_cliente() ? 'mi-cuenta' : 'login' ?>" class="cart-btn" aria-label="<?= is_cliente() ? 'Mi cuenta' : 'Ingresar' ?>" title="<?= is_cliente() ? 'Mi cuenta' : 'Ingresar' ?>">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                 </a>
                 <button class="cart-btn" id="cartBtn" aria-label="Carrito">
@@ -116,7 +116,7 @@ if (empty($galRow2)) $galRow2 = $galRow1;
                         Macetas, figuras, portavelas y mas — diseño argentino para tu hogar.
                     </p>
                     <div class="hero__cta reveal">
-                        <a href="https://btldeco.com.ar/tienda.php" class="btn btn--hero-outline btn--lg" data-i18n="hero-btn1">
+                        <a href="https://btldeco.com.ar/tienda" class="btn btn--hero-outline btn--lg" data-i18n="hero-btn1">
                             VER PRODUCTOS
                         </a>
                         <a href="#productos" class="btn btn--hero-solid btn--lg" data-i18n="hero-btn2">
@@ -236,14 +236,14 @@ if (empty($galRow2)) $galRow2 = $galRow1;
                 <?php foreach ($featured as $i => $fp): ?>
                 <div class="pc-slide" style="--i:<?= $i ?>">
                     <div class="pc-card">
-                        <a href="producto_detalle.php?slug=<?= urlencode($fp['slug']) ?>" class="pc-card__link">
+                        <a href="producto/<?= urlencode($fp['slug']) ?>" class="pc-card__link">
                             <div class="pc-card__img">
                                 <img src="<?= img_url($fp['imagen_principal']) ?>" alt="<?= sanitize($fp['nombre']) ?>" loading="lazy">
                                 <span class="pc-card__cat"><?= sanitize($fp['categoria_nombre'] ?? '') ?></span>
                             </div>
                         </a>
                         <div class="pc-card__body">
-                            <a href="producto_detalle.php?slug=<?= urlencode($fp['slug']) ?>" class="pc-card__name"><?= sanitize($fp['nombre']) ?></a>
+                            <a href="producto/<?= urlencode($fp['slug']) ?>" class="pc-card__name"><?= sanitize($fp['nombre']) ?></a>
                             <span class="pc-card__price"><?= price(($fp['precio_oferta'] && $fp['precio_oferta'] < $fp['precio']) ? $fp['precio_oferta'] : $fp['precio']) ?></span>
                             <button class="pc-card__cart" onclick="window.btlCart.add(<?= $fp['id'] ?>)">
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
@@ -264,7 +264,7 @@ if (empty($galRow2)) $galRow2 = $galRow1;
 
         <!-- CTA -->
         <div class="container" style="text-align:center;margin-top:40px;">
-            <a href="tienda.php" class="btn btn--primary btn--lg reveal">
+            <a href="tienda" class="btn btn--primary btn--lg reveal">
                 VER TODA LA TIENDA
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </a>
@@ -374,7 +374,7 @@ if (empty($galRow2)) $galRow2 = $galRow1;
                 <div class="about-v2__story">
                     <p>Somos un estudio de diseño que transforma ideas en objetos reales. Cada pieza combina tecnologia de impresion 3D con terminaciones hechas a mano.</p>
                     <p>Nos apasiona el detalle. Desde la eleccion del material hasta el acabado final, cada producto pasa por un control de calidad que garantiza que llegue perfecto a tu hogar.</p>
-                    <a href="tienda.php" class="btn btn--primary btn--lg" style="margin-top:24px;">VER PRODUCTOS <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+                    <a href="tienda" class="btn btn--primary btn--lg" style="margin-top:24px;">VER PRODUCTOS <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
                 </div>
 
                 <div class="about-v2__values">

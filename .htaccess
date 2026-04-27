@@ -11,12 +11,28 @@
 RedirectMatch 404 /\.git(/|$)
 RedirectMatch 404 /bkp(/|$)
 
-# ── Forzar HTTPS ──
 <IfModule mod_rewrite.c>
     RewriteEngine On
+
+    # ── Forzar HTTPS ──
     RewriteCond %{HTTPS} off
     RewriteCond %{HTTP:X-Forwarded-Proto} !https
     RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    # ── 301 .php → URL limpia (sólo GET, para no romper formularios POST) ──
+    RewriteCond %{REQUEST_METHOD} ^GET$
+    RewriteCond %{THE_REQUEST} \s/+([^.\s?]+)\.php[\s?] [NC]
+    RewriteRule ^ /%1 [R=301,L]
+
+    # ── Pretty URLs para productos / categorías / búsqueda ──
+    RewriteRule ^producto/([^/]+)/?$ producto_detalle.php?slug=$1 [QSA,L]
+    RewriteRule ^categoria/([^/]+)/?$ tienda.php?cat=$1 [QSA,L]
+    RewriteRule ^buscar/(.+)$ buscar.php?q=$1 [QSA,L]
+
+    # ── Internal rewrite: /algo → algo.php (si no existe el archivo/directorio) ──
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^([^/]+)/?$ $1.php [L]
 </IfModule>
 
 # ── Headers de seguridad ──

@@ -279,11 +279,11 @@ $pedido_id = (int) ($_GET['id'] ?? 0);
         </p>
 
         <div class="status-actions">
-            <a href="checkout.php" class="btn-retry">
+            <a href="checkout" class="btn-retry">
                 Reintentar pago
                 <svg viewBox="0 0 24 24"><path d="M3 12h18M13 5l7 7-7 7"/></svg>
             </a>
-            <a href="tienda.php" class="link-back">Seguir comprando</a>
+            <a href="tienda" class="link-back">Seguir comprando</a>
         </div>
 
         <div class="help-box">
