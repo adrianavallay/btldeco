@@ -39,7 +39,7 @@ if (empty($galRow2)) $galRow2 = $galRow1;
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css?v=49">
+    <link rel="stylesheet" href="css/styles.css?v=50">
 </head>
 <body>
 
@@ -112,7 +112,7 @@ if (empty($galRow2)) $galRow2 = $galRow1;
                         Macetas, figuras, portavelas y mas — diseño argentino para tu hogar.
                     </p>
                     <div class="hero__cta reveal">
-                        <a href="#contacto" class="btn btn--hero-outline btn--lg" data-i18n="hero-btn1">
+                        <a href="https://btldeco.com.ar/tienda.php" class="btn btn--hero-outline btn--lg" data-i18n="hero-btn1">
                             VER PRODUCTOS
                         </a>
                         <a href="#productos" class="btn btn--hero-solid btn--lg" data-i18n="hero-btn2">
@@ -544,7 +544,7 @@ if (empty($galRow2)) $galRow2 = $galRow1;
     </button>
 
     <?php include "includes/cart_drawer.php"; ?>
-    <script src="js/main.js?v=18"></script>
+    <script src="js/main.js?v=19"></script>
     <script src="js/carousel.js?v=17"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>

@@ -661,7 +661,8 @@
             const target = document.querySelector(id);
             if (target) {
                 e.preventDefault();
-                const offset = navbar.offsetHeight + 20;
+                const scrollMargin = parseFloat(getComputedStyle(target).scrollMarginTop) || 0;
+                const offset = navbar.offsetHeight + 20 + scrollMargin;
                 const top = target.getBoundingClientRect().top + window.scrollY - offset;
                 window.scrollTo({ top, behavior: 'smooth' });
             }
