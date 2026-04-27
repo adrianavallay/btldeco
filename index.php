@@ -123,29 +123,29 @@ if (empty($galRow2)) $galRow2 = $galRow1;
                 </div>
                 <div class="hero__accordion reveal">
                     <div class="accordion-item" data-index="0">
-                        <img src="https://images.unsplash.com/photo-1485955900006-10f4d324d411?w=500&h=600&fit=crop" alt="Maceta Geometrica">
+                        <img src="uploads/imagenes/btl-deco-1.png" alt="Floreros">
                         <div class="accordion-item__overlay"></div>
-                        <span class="accordion-item__title">Maceta Geometrica</span>
+                        <span class="accordion-item__title">Floreros</span>
                     </div>
                     <div class="accordion-item" data-index="1">
-                        <img src="https://images.unsplash.com/photo-1602028915047-37269d1a73f7?w=500&h=600&fit=crop" alt="Figura Abstracta">
+                        <img src="uploads/imagenes/btl-deco-2.png" alt="Porta Sahumerios">
                         <div class="accordion-item__overlay"></div>
-                        <span class="accordion-item__title">Figura Abstracta</span>
+                        <span class="accordion-item__title">Porta Sahumerios</span>
                     </div>
                     <div class="accordion-item" data-index="2">
-                        <img src="https://images.unsplash.com/photo-1603204077167-2fa0397f49de?w=500&h=600&fit=crop" alt="Portavela Moon">
+                        <img src="uploads/imagenes/btl-deco-3.png" alt="Porta Difusores">
                         <div class="accordion-item__overlay"></div>
-                        <span class="accordion-item__title">Portavela Moon</span>
+                        <span class="accordion-item__title">Porta Difusores</span>
                     </div>
                     <div class="accordion-item" data-index="3">
-                        <img src="https://images.unsplash.com/photo-1578500494198-246f612d3b3d?w=500&h=600&fit=crop" alt="Florero Spiral">
+                        <img src="uploads/imagenes/btl-deco-4.png" alt="Deco Cocina">
                         <div class="accordion-item__overlay"></div>
-                        <span class="accordion-item__title">Florero Spiral</span>
+                        <span class="accordion-item__title">Deco Cocina</span>
                     </div>
                     <div class="accordion-item active" data-index="4">
-                        <img src="https://images.unsplash.com/photo-1507473885765-e6ed057ab6fe?w=500&h=600&fit=crop" alt="Lampara Deco">
+                        <img src="uploads/imagenes/btl-deco-5.png" alt="Deco Living - Comedor">
                         <div class="accordion-item__overlay"></div>
-                        <span class="accordion-item__title">Lampara Deco</span>
+                        <span class="accordion-item__title">Deco Living - Comedor</span>
                     </div>
                 </div>
             </div>
