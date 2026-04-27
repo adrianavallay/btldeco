@@ -2,138 +2,295 @@
 require_once __DIR__ . '/config.php';
 
 $pedido_id = (int) ($_GET['id'] ?? 0);
-$cartCount = cart_count();
-
-$page_title = 'Pago cancelado';
-include __DIR__ . '/includes/header.php';
 ?>
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pago cancelado — BTLDECO</title>
+    <meta name="robots" content="noindex,nofollow">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css?v=51">
+    <style>
+        .status-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 120px 24px 80px;
+            background:
+                radial-gradient(1200px 600px at 20% 0%, rgba(239,68,68,0.06), transparent 60%),
+                radial-gradient(900px 500px at 80% 100%, rgba(var(--accent-rgb, 200,140,80), 0.05), transparent 60%),
+                var(--bg);
+        }
+        .status-card {
+            max-width: 560px;
+            width: 100%;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 56px 48px 44px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.03);
+            animation: cardIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @media (max-width: 600px) {
+            .status-card { padding: 40px 28px 32px; border-radius: 20px; }
+        }
 
-<style>
-    .cancel-card {
-      max-width: 560px;
-      margin: 0 auto;
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 48px 40px;
-      text-align: center;
-    }
-    @media (max-width: 600px) {
-      .cancel-card { padding: 32px 20px; }
-    }
+        @keyframes cardIn {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
 
-    /* Red X icon */
-    .x-icon {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      background: rgba(239, 68, 68, 0.12);
-      border: 3px solid #ef4444;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 24px;
-      position: relative;
-      animation: scaleIn .4s ease;
-    }
-    .x-icon::before,
-    .x-icon::after {
-      content: '';
-      position: absolute;
-      width: 32px;
-      height: 4px;
-      background: #ef4444;
-      border-radius: 2px;
-    }
-    .x-icon::before { transform: rotate(45deg); }
-    .x-icon::after  { transform: rotate(-45deg); }
+        .status-icon {
+            width: 88px;
+            height: 88px;
+            border-radius: 50%;
+            background: rgba(239, 68, 68, 0.10);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 28px;
+            position: relative;
+            animation: iconPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s both;
+        }
+        .status-icon::after {
+            content: '';
+            position: absolute;
+            inset: -8px;
+            border-radius: 50%;
+            border: 2px solid rgba(239, 68, 68, 0.15);
+            animation: ring 1.8s ease-out infinite;
+        }
+        @keyframes ring {
+            0%   { transform: scale(0.95); opacity: 0.8; }
+            100% { transform: scale(1.25); opacity: 0; }
+        }
+        .status-icon svg {
+            width: 40px;
+            height: 40px;
+            stroke: #ef4444;
+            stroke-width: 2.5;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            animation: drawX 0.5s ease-out 0.4s both;
+        }
+        @keyframes iconPop {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes drawX {
+            0% { stroke-dasharray: 60; stroke-dashoffset: 60; }
+            100% { stroke-dasharray: 60; stroke-dashoffset: 0; }
+        }
 
-    @keyframes scaleIn {
-      0% { transform: scale(0); opacity: 0; }
-      60% { transform: scale(1.15); }
-      100% { transform: scale(1); opacity: 1; }
-    }
+        .status-eyebrow {
+            display: inline-block;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.08);
+            padding: 6px 14px;
+            border-radius: 100px;
+            margin-bottom: 18px;
+        }
+        .status-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.8rem, 4vw, 2.4rem);
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            color: var(--text);
+            margin: 0 0 14px;
+            line-height: 1.15;
+        }
+        .status-title em {
+            font-style: italic;
+            color: var(--accent);
+        }
+        .status-subtitle {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-muted);
+            font-size: 1rem;
+            line-height: 1.65;
+            margin: 0 auto 6px;
+            max-width: 440px;
+        }
+        .status-detail {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-muted);
+            font-size: 0.88rem;
+            line-height: 1.65;
+            margin: 0 0 36px;
+            opacity: 0.85;
+        }
+        .ref-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 10px;
+            padding: 6px 14px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            font-size: 0.82rem;
+            color: var(--text);
+            font-weight: 500;
+        }
+        .ref-pill strong {
+            font-weight: 600;
+            color: var(--accent);
+        }
 
-    .cancel-card h1 {
-      font-family: 'Sora', sans-serif;
-      font-size: 1.8rem;
-      margin-bottom: 8px;
-      color: var(--text);
-    }
-    .cancel-card .subtitle {
-      color: var(--text-muted);
-      font-size: .95rem;
-      margin-bottom: 12px;
-      line-height: 1.6;
-    }
-    .cancel-card .detail {
-      color: var(--text-muted);
-      font-size: .85rem;
-      margin-bottom: 32px;
-      line-height: 1.6;
-    }
+        .status-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 12px;
+            max-width: 320px;
+            margin: 0 auto;
+        }
+        .status-actions .btn-retry {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 16px 32px;
+            background: var(--accent);
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 0.88rem;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            border: none;
+            border-radius: 100px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+        }
+        .status-actions .btn-retry:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            background: var(--accent-hover, var(--accent));
+        }
+        .status-actions .btn-retry svg {
+            width: 16px; height: 16px;
+            stroke: currentColor;
+            stroke-width: 2;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        .status-actions .link-back {
+            color: var(--text-muted);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.88rem;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 10px;
+            transition: color 0.2s;
+        }
+        .status-actions .link-back:hover {
+            color: var(--text);
+        }
 
-    /* Buttons */
-    .cancel-actions {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 14px;
-    }
-    .cancel-actions .btn-primary {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 14px 32px;
-      background: var(--accent);
-      color: #fff;
-      font-weight: 600;
-      font-size: .9rem;
-      border: none;
-      border-radius: 10px;
-      text-decoration: none;
-      cursor: pointer;
-      transition: background .2s, transform .15s;
-    }
-    .cancel-actions .btn-primary:hover {
-      background: var(--accent-light);
-      transform: translateY(-1px);
-    }
-    .cancel-actions .link-secondary {
-      color: var(--accent-light);
-      font-size: .88rem;
-      text-decoration: none;
-      font-weight: 500;
-      transition: opacity .2s;
-    }
-    .cancel-actions .link-secondary:hover {
-      opacity: .8;
-      text-decoration: underline;
-    }
-  </style>
+        .help-box {
+            margin-top: 36px;
+            padding-top: 28px;
+            border-top: 1px solid var(--border);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+        .help-box a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .help-box a:hover { text-decoration: underline; }
 
-<!-- ═══════════ MAIN CONTENT ═══════════ -->
-<section class="container" style="padding-top:120px;padding-bottom:80px;min-height:80vh;display:flex;align-items:center;justify-content:center;">
-  <div class="cancel-card fade-in">
+        /* Minimal navbar — sólo logo */
+        .status-nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            padding: 24px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+        }
+        .status-nav__logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--text);
+            text-decoration: none;
+            letter-spacing: -0.01em;
+        }
+        .status-nav__logo span {
+            color: var(--accent);
+        }
+        .status-nav__home {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        .status-nav__home:hover { color: var(--text); }
+    </style>
+</head>
+<body>
 
-    <!-- Red X -->
-    <div class="x-icon"></div>
+<nav class="status-nav">
+    <a href="<?= SITE_URL ?>/" class="status-nav__logo">BTLDECO<span>.</span></a>
+    <a href="<?= SITE_URL ?>/" class="status-nav__home">← Volver al inicio</a>
+</nav>
 
-    <h1>Pago cancelado</h1>
-    <p class="subtitle">Tu pedido no fue procesado.</p>
-    <p class="detail">
-      No se realiz&oacute; ning&uacute;n cargo a tu cuenta.
-      <?php if ($pedido_id > 0): ?>
-        <br>Referencia de pedido: <strong>#<?= $pedido_id ?></strong>
-      <?php endif; ?>
-    </p>
+<main class="status-page">
+    <div class="status-card">
+        <div class="status-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <line x1="6" y1="6" x2="18" y2="18"/>
+                <line x1="18" y1="6" x2="6" y2="18"/>
+            </svg>
+        </div>
 
-    <!-- Actions -->
-    <div class="cancel-actions">
-      <a href="<?= url_pagina('checkout') ?>" class="btn-primary">Reintentar pago</a>
-      <a href="<?= SITE_URL ?>/" class="link-secondary">&larr; Volver a la tienda</a>
+        <span class="status-eyebrow">Transacción interrumpida</span>
+
+        <h1 class="status-title">Pago <em>cancelado</em></h1>
+        <p class="status-subtitle">Tu pedido no fue procesado y no se realizó ningún cargo a tu cuenta.</p>
+        <p class="status-detail">
+            Podés intentar nuevamente o seguir explorando la tienda.
+            <?php if ($pedido_id > 0): ?>
+                <br><span class="ref-pill">Referencia: <strong>#<?= $pedido_id ?></strong></span>
+            <?php endif; ?>
+        </p>
+
+        <div class="status-actions">
+            <a href="checkout.php" class="btn-retry">
+                Reintentar pago
+                <svg viewBox="0 0 24 24"><path d="M3 12h18M13 5l7 7-7 7"/></svg>
+            </a>
+            <a href="tienda.php" class="link-back">Seguir comprando</a>
+        </div>
+
+        <div class="help-box">
+            ¿Tuviste algún problema? Escribinos a <a href="mailto:<?= NOTIFY_EMAIL ?>"><?= NOTIFY_EMAIL ?></a> y te ayudamos.
+        </div>
     </div>
-  </div>
-</section>
+</main>
 
-<?php include __DIR__ . '/includes/footer.php'; ?>
+</body>
+</html>

@@ -107,7 +107,7 @@ $flash_success = flash('success');
             </div>
             <?php endif; ?>
 
-            <form action="checkout_process.php" method="POST" id="checkoutForm">
+            <form action="checkout_process.php" method="POST" id="checkoutForm" target="_blank">
                 <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
                 <input type="hidden" name="metodo_pago" id="metodoPagoInput" value="mercadopago">
 
