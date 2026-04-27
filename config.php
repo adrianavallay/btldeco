@@ -155,7 +155,14 @@ function cliente_id(): ?int {
 
 function cart_count(): int {
     $cart = $_SESSION['cart'] ?? [];
-    return array_sum(array_column($cart, 'qty'));
+    $count = 0;
+    foreach ($cart as $item) {
+        if (!is_array($item)) continue;
+        if (empty($item['producto_id']) || empty($item['nombre'])) continue;
+        $qty = (int)($item['qty'] ?? 0);
+        if ($qty > 0) $count += $qty;
+    }
+    return $count;
 }
 
 function flash(string $key, ?string $msg = null) {

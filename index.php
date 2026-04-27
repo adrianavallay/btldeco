@@ -62,7 +62,8 @@ if (empty($galRow2)) $galRow2 = $galRow1;
                 </button>
                 <button class="cart-btn" id="cartBtn" aria-label="Carrito">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
-                    <span class="cart-badge" id="cartBadge">0</span>
+                    <?php $cc = cart_count(); ?>
+                    <span class="cart-badge" id="cartBadge"<?= $cc > 0 ? '' : ' style="display:none;"' ?>><?= $cc ?></span>
                 </button>
                 <button class="navbar__toggle" id="navToggle" aria-label="Menu">
                     <span></span><span></span><span></span>
