@@ -1,0 +1,28 @@
+# ============================================================
+# BTLDECO — Apache config
+# ============================================================
+
+# ── Bloquear archivos sensibles ──
+<FilesMatch "^\.env|^\.env\..*|composer\.json|composer\.lock|\.gitignore|\.git|\.htaccess$">
+    Require all denied
+</FilesMatch>
+
+# ── Bloquear acceso a directorios privados ──
+RedirectMatch 404 /\.git(/|$)
+RedirectMatch 404 /bkp(/|$)
+
+# ── Forzar HTTPS ──
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{HTTPS} off
+    RewriteCond %{HTTP:X-Forwarded-Proto} !https
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</IfModule>
+
+# ── Headers de seguridad ──
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+    Header set X-XSS-Protection "1; mode=block"
+</IfModule>
