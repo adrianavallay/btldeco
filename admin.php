@@ -17,8 +17,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !is_admin()) {
     } else {
         $user = $_POST['usuario'] ?? '';
         $pass = $_POST['password'] ?? '';
-        if (!admin_login($user, $pass)) {
-            $login_error = 'Usuario o contraseña incorrectos';
+        $res = admin_login($user, $pass);
+        if (!$res['ok']) {
+            $login_error = $res['mensaje'];
         }
     }
 }
