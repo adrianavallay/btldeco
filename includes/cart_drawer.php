@@ -34,4 +34,4 @@
         <a href="tienda.php" class="cart-continue" data-i18n="cart-continue">Seguir comprando</a>
     </div>
 </div>
-<script src="js/carrito.js?v=8"></script>
+<script src="js/carrito.js?v=9"></script>

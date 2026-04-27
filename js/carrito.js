@@ -93,7 +93,7 @@
         cartFooter.style.display = 'block';
 
         itemsList.forEach(function(item) {
-            var itemKey = item.key || (item.producto_id + (item.variante ? '-' + item.variante : ''));
+            var itemKey = String(item.key || (item.producto_id + (item.variante ? '-' + item.variante : '')));
             var itemTotal = item.precio * item.qty;
             subtotal += itemTotal;
 
