@@ -2,25 +2,55 @@
 // ============================================================
 // CONFIGURACIÓN GLOBAL — TIENDA
 // ============================================================
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'u761525878_btldeco');
-define('DB_USER', 'u761525878_btldeco');
-define('DB_PASS', '1!sC?wtKBt#7');
+
+// ── Cargar variables del archivo .env ──
+function load_env(string $path): void {
+    if (!is_file($path) || !is_readable($path)) return;
+    $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        $line = trim($line);
+        if ($line === '' || $line[0] === '#') continue;
+        if (!str_contains($line, '=')) continue;
+        [$key, $value] = explode('=', $line, 2);
+        $key = trim($key);
+        $value = trim($value);
+        // Quitar comillas envolventes si las hay
+        if (strlen($value) >= 2 && (($value[0] === '"' && substr($value, -1) === '"') || ($value[0] === "'" && substr($value, -1) === "'"))) {
+            $value = substr($value, 1, -1);
+        }
+        if ($key !== '' && getenv($key) === false) {
+            putenv("$key=$value");
+            $_ENV[$key] = $value;
+        }
+    }
+}
+
+function env(string $key, ?string $default = null): ?string {
+    $val = $_ENV[$key] ?? getenv($key);
+    return ($val === false || $val === null || $val === '') ? $default : $val;
+}
+
+load_env(__DIR__ . '/.env');
+
+define('DB_HOST', env('DB_HOST', 'localhost'));
+define('DB_NAME', env('DB_NAME'));
+define('DB_USER', env('DB_USER'));
+define('DB_PASS', env('DB_PASS', ''));
 
 define('SITE_NAME', 'BTLDECO');
 define('SITE_URL', rtrim((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost'), '/'));
-define('ADMIN_USER', 'admin');
-define('ADMIN_PASS', '$2y$10$xQ8kG5YQ7z6wN3v5Q7z6wOJ5Q7z6wN3v5Q7z6wN3v5Q7z6wN3v5Q'); // cambiar
-define('ADMIN_PASS_PLAIN', 'admin123'); // Solo para primer login, después cambiar
+define('ADMIN_USER', env('ADMIN_USER', 'admin'));
+define('ADMIN_PASS', env('ADMIN_PASS_HASH', ''));
+define('ADMIN_PASS_PLAIN', env('ADMIN_PASS_PLAIN', ''));
 
-define('MP_ACCESS_TOKEN', 'APP_USR-7846101981125452-041322-5833c1020b924f1276abf5026351d565-430042144');
-define('MP_PUBLIC_KEY', 'APP_USR-c5a26bbd-13bd-4fc4-b3f8-9f0292b12890');
+define('MP_ACCESS_TOKEN', env('MP_ACCESS_TOKEN', ''));
+define('MP_PUBLIC_KEY', env('MP_PUBLIC_KEY', ''));
 
 define('ITEMS_PER_PAGE', 12);
 define('UPLOAD_DIR', __DIR__ . '/uploads/productos/');
 define('UPLOAD_URL', SITE_URL . '/uploads/productos/');
 
-define('NOTIFY_EMAIL', 'adrian@dypconsultora.com');
+define('NOTIFY_EMAIL', env('NOTIFY_EMAIL', 'noreply@example.com'));
 define('STOCK_MINIMO_ALERTA', 5);
 
 // Sesión

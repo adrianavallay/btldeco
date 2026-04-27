@@ -1,4 +1,7 @@
 .DS_Store
+.env
+security_review.html
+security_review.pdf
 uploads/productos/*
 uploads/categorias/*
 uploads/slides/*
