@@ -36,7 +36,7 @@ if ($pedido && $pedido['notas'] === 'transferencia') $metodo = 'transferencia';
 
     <nav class="navbar" id="navbar">
         <div class="container navbar__inner">
-            <a href="index.php" class="navbar__logo">BTLDECO<span class="logo-dot"></span></a>
+            <a href="https://btldeco.com.ar/" class="navbar__logo">BTLDECO<span class="logo-dot"></span></a>
             <ul class="navbar__links" id="navLinks">
                 <li><a href="index.php"><?= t("home") ?></a></li>
                 <li><a href="tienda.php"><?= t("shop") ?></a></li>
