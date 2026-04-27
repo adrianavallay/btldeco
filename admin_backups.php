@@ -8,6 +8,7 @@ if (!is_admin()) {
 // ── Delete backup via POST ──
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delete') {
     header('Content-Type: application/json; charset=utf-8');
+    csrf_check();
     $file = $_POST['file'] ?? '';
     if (!preg_match('/^backup_(db|files|full)_[\d\-_]+\.(sql\.gz|zip)$/', $file)) {
         echo json_encode(['ok' => false, 'mensaje' => 'Archivo no valido']);
@@ -247,6 +248,7 @@ $badge_colors = [
 </div>
 
 <script>
+const CSRF_TOKEN = <?= json_encode(csrf_token()) ?>;
 var archivoARestaurar = '';
 var tipoARestaurar = '';
 var currentDeleteFile = '';
@@ -262,7 +264,9 @@ function runBackup(tipo) {
     progress.style.display = 'flex';
     result.style.display = 'none';
 
-    fetch('backup_runner.php?tipo=' + tipo)
+    fetch('backup_runner.php?tipo=' + tipo + '&csrf=' + encodeURIComponent(CSRF_TOKEN), {
+        headers: { 'X-CSRF-Token': CSRF_TOKEN }
+    })
         .then(function(r) { return r.json(); })
         .then(function(data) {
             progress.style.display = 'none';
@@ -324,7 +328,7 @@ document.getElementById('modalConfirmar').addEventListener('click', function() {
 
     fetch('restore_database.php', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': CSRF_TOKEN },
         body: JSON.stringify({ archivo: archivoARestaurar, tipo: tipoARestaurar })
     })
     .then(function(r) { return r.json(); })
@@ -360,8 +364,8 @@ function executeDelete() {
 
     fetch('admin_backups.php', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: 'action=delete&file=' + encodeURIComponent(currentDeleteFile)
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRF-Token': CSRF_TOKEN },
+        body: 'csrf=' + encodeURIComponent(CSRF_TOKEN) + '&action=delete&file=' + encodeURIComponent(currentDeleteFile)
     })
     .then(function(r) { return r.json(); })
     .then(function(data) {

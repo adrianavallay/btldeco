@@ -42,6 +42,7 @@ $admin_page = 'migracion';
       <li>Credenciales NO incluidas</li>
     </ul>
     <form method="POST" action="export_db.php">
+      <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
       <button type="submit" style="
         width:100%;padding:14px;background:#111;color:#fff;
         border:none;border-radius:8px;font-size:0.85rem;
@@ -67,6 +68,7 @@ $admin_page = 'migracion';
       <li>Sin carpeta /bkp/ ni /.git/</li>
     </ul>
     <form method="POST" action="export_files.php">
+      <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
       <button type="submit" style="
         width:100%;padding:14px;background:#7c3aed;color:#fff;
         border:none;border-radius:8px;font-size:0.85rem;

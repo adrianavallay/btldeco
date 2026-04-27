@@ -9,6 +9,13 @@ if (!is_admin()) {
     exit;
 }
 
+// CSRF check
+$token = $_POST['csrf'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
+if (!hash_equals(csrf_token(), $token)) {
+    echo json_encode(['ok' => false, 'mensaje' => 'Token inválido']);
+    exit;
+}
+
 if (!isset($_FILES['csv_file']) || $_FILES['csv_file']['error'] !== UPLOAD_ERR_OK) {
     echo json_encode(['ok' => false, 'mensaje' => 'Error al subir el archivo']);
     exit;

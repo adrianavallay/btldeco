@@ -36,6 +36,7 @@ function handle_image_upload(array $file, string $dest_dir): ?string {
 
 // ── POST ACTIONS ──
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_check();
     $action = $_POST['action'] ?? '';
 
     // ── CREATE ──
@@ -551,6 +552,7 @@ if (isset($_GET['edit'])) {
                 </td>
                 <td>
                     <form method="POST" style="display:inline">
+                        <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
                         <input type="hidden" name="action" value="toggle_destacado">
                         <input type="hidden" name="id" value="<?= $p['id'] ?>">
                         <button type="submit" class="star-btn <?= $p['destacado'] ? 'active' : '' ?>" title="Destacado">&#9733;</button>
@@ -560,6 +562,7 @@ if (isset($_GET['edit'])) {
                     <div class="actions">
                         <a href="?edit=<?= $p['id'] ?>" class="btn btn-outline btn-sm">Editar</a>
                         <form method="POST" style="display:inline" onsubmit="return confirm('Eliminar este producto?')">
+                            <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
                             <input type="hidden" name="action" value="delete">
                             <input type="hidden" name="id" value="<?= $p['id'] ?>">
                             <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
@@ -604,6 +607,7 @@ if (isset($_GET['edit'])) {
     </div>
     <div class="modal-body">
         <form method="POST" enctype="multipart/form-data" id="productForm">
+            <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
             <input type="hidden" name="action" value="<?= $edit ? 'update' : 'create' ?>">
             <?php if ($edit): ?>
                 <input type="hidden" name="id" value="<?= $edit['id'] ?>">
@@ -946,6 +950,7 @@ if (isset($_GET['edit'])) {
 
 <script src="js/admin.js"></script>
 <script>
+const CSRF_TOKEN = <?= json_encode(csrf_token()) ?>;
 // ── Modal helpers ──
 function openProductModal(){
     // Reset form for new product
@@ -1074,6 +1079,7 @@ function ejecutarExport() {
   var conEncabezado = document.getElementById('exportConEncabezado').checked ? '1' : '0';
   var form = document.createElement('form');
   form.method = 'POST'; form.action = 'export_productos.php';
+  var csrfInp = document.createElement('input'); csrfInp.type='hidden'; csrfInp.name='csrf'; csrfInp.value=CSRF_TOKEN; form.appendChild(csrfInp);
   campos.forEach(function(c){
     var inp = document.createElement('input'); inp.type='hidden'; inp.name='campos[]'; inp.value=c; form.appendChild(inp);
   });
@@ -1172,10 +1178,11 @@ function ejecutarImport() {
   var formData = new FormData();
   formData.append('csv_file', document.getElementById('csvFileInput').files[0]);
   formData.append('mapeo', JSON.stringify(mapeo));
+  formData.append('csrf', CSRF_TOKEN);
   document.getElementById('importPaso2').style.display = 'none';
   document.getElementById('importPaso3').style.display = 'block';
   document.getElementById('importResultado').innerHTML = '<p style="color:#6b7280;">Importando...</p>';
-  fetch('import_productos.php', { method: 'POST', body: formData })
+  fetch('import_productos.php', { method: 'POST', headers: { 'X-CSRF-Token': CSRF_TOKEN }, body: formData })
     .then(function(r){ return r.json(); })
     .then(function(data){
       var html = '<div style="font-size:3rem;margin-bottom:12px;">'+(data.ok ? '✓' : '✗')+'</div>';

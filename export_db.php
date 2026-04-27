@@ -6,6 +6,13 @@ if (empty($_SESSION['admin_auth'])) {
 }
 require_once __DIR__ . '/config.php';
 
+// CSRF check
+$token = $_POST['csrf'] ?? $_GET['csrf'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
+if (!hash_equals(csrf_token(), $token)) {
+    http_response_code(403);
+    exit('Token inválido');
+}
+
 set_time_limit(300);
 ini_set('memory_limit', '256M');
 

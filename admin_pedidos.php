@@ -31,6 +31,7 @@ if (!function_exists('estado_badge')) {
 
 // ── POST ACTIONS ──
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_check();
     $action = $_POST['action'] ?? '';
 
     // ── Update estado ──
@@ -253,6 +254,7 @@ $qs_base = $qs_parts ? implode('&', $qs_parts) . '&' : '';
       <h1 style="margin:0;">Pedidos <span class="badge-count"><?= $total_pedidos ?></span></h1>
     </div>
     <form method="POST" style="display:inline;">
+      <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
       <input type="hidden" name="action" value="export_csv">
       <input type="hidden" name="f_estado" value="<?= sanitize($f_estado) ?>">
       <input type="hidden" name="f_desde" value="<?= sanitize($f_desde) ?>">
@@ -453,6 +455,7 @@ $qs_base = $qs_parts ? implode('&', $qs_parts) . '&' : '';
               <td style="display:flex;gap:6px;">
                 <button class="btn-ver" onclick="openPedido(<?= $p['id'] ?>)">Ver</button>
                 <form method="POST" style="display:inline;" onsubmit="return confirm('¿Eliminar pedido #<?= $p['id'] ?>? Esta accion no se puede deshacer.')">
+                  <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
                   <input type="hidden" name="action" value="delete_pedido">
                   <input type="hidden" name="pedido_id" value="<?= $p['id'] ?>">
                   <button type="submit" class="btn-ver" style="color:#ef4444;border-color:rgba(239,68,68,0.3);">Eliminar</button>
@@ -536,6 +539,7 @@ foreach ($pedidos as $p) {
 }
 ?>
 <script>
+const CSRF_TOKEN = <?= json_encode(csrf_token()) ?>;
 const pedidosData = <?= json_encode($pedidos_json, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
 
 function sanitizeHTML(str) {
@@ -648,6 +652,7 @@ function openPedido(id) {
         '<div class="modal-section">' +
             '<h3>Estado del pedido</h3>' +
             '<form method="POST" class="estado-form">' +
+                '<input type="hidden" name="csrf" value="' + CSRF_TOKEN + '">' +
                 '<input type="hidden" name="action" value="update_estado">' +
                 '<input type="hidden" name="pedido_id" value="' + p.id + '">' +
                 '<div class="estado-btns">' +
@@ -670,6 +675,7 @@ function openPedido(id) {
             '<h3>Notas internas</h3>' +
             notasDisplay +
             '<form method="POST" style="margin-top:12px;">' +
+                '<input type="hidden" name="csrf" value="' + CSRF_TOKEN + '">' +
                 '<input type="hidden" name="action" value="add_nota">' +
                 '<input type="hidden" name="pedido_id" value="' + p.id + '">' +
                 '<textarea name="nota" class="notas-area" placeholder="Agregar nota..."></textarea>' +
@@ -690,8 +696,8 @@ function reenviarEmail(pedidoId, tipo) {
     msgEl.innerHTML = '<span style="color:#71717a;font-size:.82rem;">Enviando...</span>';
     fetch('admin_pedidos.php', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: 'action=reenviar_email&pedido_id=' + pedidoId + '&tipo=' + tipo
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRF-Token': CSRF_TOKEN },
+        body: 'csrf=' + encodeURIComponent(CSRF_TOKEN) + '&action=reenviar_email&pedido_id=' + pedidoId + '&tipo=' + tipo
     })
     .then(function(r) { return r.json(); })
     .then(function(data) {

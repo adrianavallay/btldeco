@@ -34,6 +34,7 @@ $msg_err = '';
 
 // ── POST Actions ──
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_check();
     $action = $_POST['action'] ?? '';
 
     // SAVE (create or update)
@@ -184,11 +185,13 @@ $admin_page = 'slides';
                 <div class="slide-card__actions">
                     <button class="btn btn--sm btn--outline" onclick='editSlide(<?= json_encode($s, JSON_HEX_APOS | JSON_HEX_QUOT) ?>)'>Editar</button>
                     <form method="POST" style="display:inline;">
+                        <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
                         <input type="hidden" name="action" value="toggle">
                         <input type="hidden" name="slide_id" value="<?= $s['id'] ?>">
                         <button type="submit" class="btn btn--sm btn--outline"><?= $s['activo'] ? 'Desactivar' : 'Activar' ?></button>
                     </form>
                     <form method="POST" style="display:inline;" onsubmit="return confirm('Eliminar este slide?')">
+                        <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
                         <input type="hidden" name="action" value="eliminar">
                         <input type="hidden" name="slide_id" value="<?= $s['id'] ?>">
                         <button type="submit" class="btn btn--sm btn--danger">&#10005;</button>
@@ -206,6 +209,7 @@ $admin_page = 'slides';
     </div>
 
     <form method="POST" id="slideForm">
+        <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
         <input type="hidden" name="action" value="guardar">
         <input type="hidden" name="slide_id" id="slideId" value="0">
         <input type="hidden" name="imagen" id="slideImagen" value="">

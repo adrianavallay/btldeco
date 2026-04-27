@@ -4,6 +4,13 @@ require_once __DIR__ . '/auth_helper.php';
 
 if (!is_admin()) { http_response_code(403); exit('No autorizado'); }
 
+// CSRF check
+$token = $_POST['csrf'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
+if (!hash_equals(csrf_token(), $token)) {
+    http_response_code(403);
+    exit('Token inválido');
+}
+
 $campos_permitidos = ['id','nombre','descripcion','descripcion_corta',
   'precio','precio_oferta','stock','stock_minimo','estado','destacado',
   'imagen_principal','slug','meta_titulo','meta_descripcion',

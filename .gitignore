@@ -10,3 +10,4 @@ bkp/*
 !uploads/categorias/.gitkeep
 !uploads/slides/.gitkeep
 !bkp/.gitkeep
+security_checklist.html

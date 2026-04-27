@@ -8,6 +8,16 @@ if (php_sapi_name() !== 'cli' && !is_admin()) {
     exit;
 }
 
+// CSRF check (skip si es CLI)
+if (php_sapi_name() !== 'cli') {
+    $token = $_GET['csrf'] ?? $_POST['csrf'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
+    if (!hash_equals(csrf_token(), $token)) {
+        http_response_code(403);
+        echo json_encode(['ok' => false, 'mensaje' => 'Token inválido']);
+        exit;
+    }
+}
+
 define('BKP_DIR', __DIR__ . '/bkp/');
 define('MAX_BACKUPS', 10);
 

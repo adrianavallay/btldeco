@@ -11,10 +11,15 @@ if (isset($_GET['logout'])) {
 // ── Login POST ──
 $login_error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !is_admin()) {
-    $user = $_POST['usuario'] ?? '';
-    $pass = $_POST['password'] ?? '';
-    if (!admin_login($user, $pass)) {
-        $login_error = 'Usuario o contraseña incorrectos';
+    $token = $_POST['csrf'] ?? '';
+    if (!hash_equals(csrf_token(), $token)) {
+        $login_error = 'Token de seguridad inválido. Recargá la página e intentá de nuevo.';
+    } else {
+        $user = $_POST['usuario'] ?? '';
+        $pass = $_POST['password'] ?? '';
+        if (!admin_login($user, $pass)) {
+            $login_error = 'Usuario o contraseña incorrectos';
+        }
     }
 }
 
@@ -174,6 +179,7 @@ function estado_badge(string $estado): string {
       <p class="login-error"><?= sanitize($login_error) ?></p>
     <?php endif; ?>
     <form method="POST" autocomplete="off">
+      <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
       <div class="field">
         <label for="usuario">Usuario</label>
         <input type="text" id="usuario" name="usuario" placeholder="admin" required autofocus>

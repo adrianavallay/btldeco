@@ -26,6 +26,11 @@ function estado_badge(string $estado): string {
 }
 }
 
+// ── CSRF check para todas las peticiones POST ──
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_check();
+}
+
 // ── POST: Eliminar cliente (JSON) ──
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
@@ -243,6 +248,7 @@ $qs_base = $qs_parts ? '&' . implode('&', $qs_parts) : '';
       <label>Estado</label>
       <span>
         <form method="POST" style="display:inline;">
+          <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
           <input type="hidden" name="action" value="toggle_activo">
           <input type="hidden" name="cliente_id" value="<?= $cliente_detalle['id'] ?>">
           <input type="hidden" name="back" value="admin_clientes.php?id=<?= $cliente_detalle['id'] ?>">
@@ -321,10 +327,12 @@ $qs_base = $qs_parts ? '&' . implode('&', $qs_parts) : '';
     <button type="submit" class="btn-ver">Filtrar</button>
   </form>
   <form method="POST" style="display:inline;">
+    <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
     <input type="hidden" name="action" value="export_contactos">
     <button type="submit" class="btn-export" style="background:linear-gradient(135deg,#10b981,#059669);border-color:#10b981;">&#128222; Exportar Contactos</button>
   </form>
   <form method="POST" style="display:inline;">
+    <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
     <input type="hidden" name="action" value="export_csv">
     <button type="submit" class="btn-export">&#11015; Exportar CSV</button>
   </form>
@@ -360,6 +368,7 @@ $qs_base = $qs_parts ? '&' . implode('&', $qs_parts) : '';
             <td><?= $c['fecha_registro'] ? date('d/m/Y', strtotime($c['fecha_registro'])) : '-' ?></td>
             <td>
               <form method="POST" style="display:inline;">
+                <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
                 <input type="hidden" name="action" value="toggle_activo">
                 <input type="hidden" name="cliente_id" value="<?= $c['id'] ?>">
                 <input type="hidden" name="back" value="admin_clientes.php?page=<?= $page ?><?= $qs_base ?>">
@@ -422,12 +431,14 @@ $qs_base = $qs_parts ? '&' . implode('&', $qs_parts) : '';
 <script src="js/admin.js"></script>
 
 <script>
+const CSRF_TOKEN = <?= json_encode(csrf_token()) ?>;
+
 function eliminarCliente(id, nombre) {
   if (!confirm('¿Eliminar al cliente "' + nombre + '"?\nEsta acción no se puede deshacer.')) return;
 
   fetch('admin_clientes.php', {
     method: 'POST',
-    headers: {'Content-Type': 'application/json'},
+    headers: {'Content-Type': 'application/json', 'X-CSRF-Token': CSRF_TOKEN},
     body: JSON.stringify({action: 'eliminar', id: id})
   })
   .then(r => r.json())

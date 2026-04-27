@@ -60,6 +60,7 @@ switch ($periodo) {
 
 // ── POST: Export CSV ──
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'export_csv') {
+    csrf_check();
     $csv_desde = $_POST['fecha_desde'] ?? $fecha_desde;
     $csv_hasta = $_POST['fecha_hasta'] ?? $fecha_hasta;
 
@@ -329,6 +330,7 @@ $periodo_label = $periodo_labels[$periodo] ?? 'Este mes';
   <!-- Export CSV -->
   <div class="export-section">
     <form method="POST">
+      <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
       <input type="hidden" name="action" value="export_csv">
       <input type="hidden" name="fecha_desde" value="<?= sanitize($fecha_desde) ?>">
       <input type="hidden" name="fecha_hasta" value="<?= sanitize($fecha_hasta) ?>">
