@@ -44,6 +44,7 @@ define('ADMIN_PASS', env('ADMIN_PASS_HASH', ''));
 
 define('MP_ACCESS_TOKEN', env('MP_ACCESS_TOKEN', ''));
 define('MP_PUBLIC_KEY', env('MP_PUBLIC_KEY', ''));
+define('MP_WEBHOOK_SECRET', env('MP_WEBHOOK_SECRET', ''));
 
 define('ITEMS_PER_PAGE', 12);
 define('UPLOAD_DIR', __DIR__ . '/uploads/productos/');

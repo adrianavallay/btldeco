@@ -7,14 +7,16 @@ require_once __DIR__ . '/email_helper.php';
 http_response_code(200);
 header('Content-Type: application/json');
 
+// ── Read raw body once (needed for signature validation + JSON parse) ──
+$raw_body = file_get_contents('php://input');
+
 // ── Read notification data ────────────────────────────────
 $topic = $_GET['topic'] ?? $_GET['type'] ?? '';
 $mp_id = $_GET['id'] ?? $_GET['data_id'] ?? '';
 
 // MP may also send JSON body
 if (empty($topic) || empty($mp_id)) {
-    $body = file_get_contents('php://input');
-    $json = json_decode($body, true);
+    $json = json_decode($raw_body, true);
     if ($json) {
         $topic = $json['topic'] ?? $json['type'] ?? $topic;
         $mp_id = $json['data']['id'] ?? $json['id'] ?? $mp_id;
@@ -24,6 +26,45 @@ if (empty($topic) || empty($mp_id)) {
             $topic = 'payment';
         }
     }
+}
+
+// ── Verificar firma HMAC X-Signature ──────────────────────
+// MP envía: X-Signature: ts=<timestamp>,v1=<hmac>
+// Manifiesto:  id:<data.id>;request-id:<x-request-id>;ts:<ts>;
+// HMAC-SHA256(manifiesto, MP_WEBHOOK_SECRET) debe matchear v1
+function mp_signature_valid(string $secret, string $data_id): bool {
+    if ($secret === '') return false; // sin secret no podemos validar
+
+    $sig_header = $_SERVER['HTTP_X_SIGNATURE'] ?? '';
+    $req_id     = $_SERVER['HTTP_X_REQUEST_ID'] ?? '';
+    if ($sig_header === '' || $req_id === '' || $data_id === '') return false;
+
+    // Parsear "ts=...,v1=..."
+    $parts = [];
+    foreach (explode(',', $sig_header) as $kv) {
+        $pair = array_pad(explode('=', trim($kv), 2), 2, '');
+        $parts[trim($pair[0])] = trim($pair[1]);
+    }
+    $ts = $parts['ts'] ?? '';
+    $v1 = $parts['v1'] ?? '';
+    if ($ts === '' || $v1 === '') return false;
+
+    $manifest = "id:{$data_id};request-id:{$req_id};ts:{$ts};";
+    $expected = hash_hmac('sha256', $manifest, $secret);
+    return hash_equals($expected, $v1);
+}
+
+if (defined('MP_WEBHOOK_SECRET') && MP_WEBHOOK_SECRET !== '') {
+    // Modo enforce: rechaza si la firma no valida
+    if (!mp_signature_valid(MP_WEBHOOK_SECRET, (string) $mp_id)) {
+        error_log("MP webhook: firma X-Signature inválida o ausente. IP=" . ($_SERVER['REMOTE_ADDR'] ?? '?') . " body=" . substr($raw_body, 0, 200));
+        http_response_code(401);
+        echo json_encode(['status' => 'invalid_signature']);
+        exit;
+    }
+} else {
+    // Modo legacy: secret no configurado todavía. Loguea warning pero acepta.
+    error_log("MP webhook: MP_WEBHOOK_SECRET no configurado — saltando validación de firma");
 }
 
 // ── Only process payment notifications ────────────────────
