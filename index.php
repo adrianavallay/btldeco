@@ -46,7 +46,7 @@ if (empty($galRow2)) $galRow2 = $galRow1;
     <!-- NAVBAR -->
     <nav class="navbar" id="navbar">
         <div class="container navbar__inner">
-            <a href="#" class="navbar__logo">BTLDECO<span class="logo-dot"></span></a>
+            <a href="https://btldeco.com.ar/" class="navbar__logo">BTLDECO<span class="logo-dot"></span></a>
             <ul class="navbar__links" id="navLinks">
                 <li><a href="#inicio" data-i18n="nav-inicio">Inicio</a></li>
                 <li><a href="#productos" data-i18n="nav-productos">Productos</a></li>
