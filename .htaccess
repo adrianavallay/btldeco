@@ -7,6 +7,28 @@
     Require all denied
 </FilesMatch>
 
+# ── Nunca servir logs si llegaran a aparecer en docroot ──
+<FilesMatch "(^error_log$|^php_errorlog$|\.log$)">
+    Require all denied
+</FilesMatch>
+
+# ── PHP: no mostrar errores al browser, sí loguearlos ──
+<IfModule mod_php.c>
+    php_flag display_errors Off
+    php_flag display_startup_errors Off
+    php_flag log_errors On
+</IfModule>
+<IfModule mod_php7.c>
+    php_flag display_errors Off
+    php_flag display_startup_errors Off
+    php_flag log_errors On
+</IfModule>
+<IfModule mod_php8.c>
+    php_flag display_errors Off
+    php_flag display_startup_errors Off
+    php_flag log_errors On
+</IfModule>
+
 # ── Bloquear acceso a directorios privados ──
 RedirectMatch 404 /\.git(/|$)
 RedirectMatch 404 /bkp(/|$)
