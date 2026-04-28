@@ -1,10 +1,9 @@
 <?php
-session_start();
+require_once __DIR__ . '/config.php';
 if (empty($_SESSION['admin_auth'])) {
     http_response_code(403);
     exit('Acceso denegado');
 }
-require_once __DIR__ . '/config.php';
 
 // CSRF check
 $token = $_POST['csrf'] ?? $_GET['csrf'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';

@@ -53,8 +53,17 @@ define('UPLOAD_URL', SITE_URL . '/uploads/productos/');
 define('NOTIFY_EMAIL', env('NOTIFY_EMAIL', 'noreply@example.com'));
 define('STOCK_MINIMO_ALERTA', 5);
 
-// Sesión
+// Sesión — flags de seguridad antes de iniciar
 if (session_status() === PHP_SESSION_NONE) {
+    $cookie_secure = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'
+        || ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https';
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path'     => '/',
+        'secure'   => $cookie_secure,
+        'httponly' => true,
+        'samesite' => 'Lax',
+    ]);
     session_start();
 }
 
