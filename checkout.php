@@ -292,24 +292,10 @@ $flash_success = flash('success');
                             <!-- Transfer details (hidden by default) -->
                             <div class="transfer-details" id="transferDetails" style="display:none;">
                                 <div class="transfer-details__card">
-                                    <p class="transfer-details__label"><?= t("transfer_data") ?></p>
-                                    <div class="transfer-details__row">
-                                        <span>Banco</span>
-                                        <strong>Banco Galicia</strong>
-                                    </div>
-                                    <div class="transfer-details__row">
-                                        <span>Titular</span>
-                                        <strong>BTLDECO SRL</strong>
-                                    </div>
-                                    <div class="transfer-details__row">
-                                        <span>CBU</span>
-                                        <strong>0070000000000000000</strong>
-                                    </div>
-                                    <div class="transfer-details__row">
-                                        <span>Alias</span>
-                                        <strong>BTLDECO.PAGOS</strong>
-                                    </div>
-                                    <p class="transfer-details__note"><?= t("transfer_note") ?></p>
+                                    <p class="transfer-details__label">Transferencia bancaria</p>
+                                    <p style="margin:0;font-size:.92rem;color:var(--text-muted);line-height:1.6;">
+                                        Cuando confirmes la compra te enviaremos por email los datos de la cuenta (Banco, Titular, CBU y Alias) para que realices la transferencia.
+                                    </p>
                                 </div>
                             </div>
                         </div>
