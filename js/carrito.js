@@ -39,7 +39,7 @@
 
     // API helper
     function cartFetch(action, params) {
-        const url = 'carrito_api.php?action=' + action;
+        const url = '/carrito_api.php?action=' + action;
         const body = new URLSearchParams(params || {});
         return fetch(url, { method: 'POST', body: body })
             .then(r => r.json());
@@ -99,7 +99,7 @@
 
             var imgSrc = item.imagen || '';
             if (imgSrc && !imgSrc.startsWith('http')) {
-                imgSrc = 'uploads/productos/' + imgSrc;
+                imgSrc = '/uploads/productos/' + imgSrc;
             }
 
             var safeKey = itemKey.replace(/'/g, "\\'");
