@@ -325,8 +325,8 @@ $flash_success = flash('success');
                                 <span><?= price($subtotal) ?></span>
                             </div>
                             <div class="checkout-totals__row">
-                                <span><?= t("shipping") ?></span>
-                                <span class="checkout-free-shipping"><?= t("free_shipping") ?></span>
+                                <span>Entrega a todo el país</span>
+                                <span style="color:var(--text-muted);font-size:.88rem;">Costo a consultar</span>
                             </div>
                             <?php if ($descuento > 0): ?>
                             <div class="checkout-totals__row checkout-totals__row--discount">
