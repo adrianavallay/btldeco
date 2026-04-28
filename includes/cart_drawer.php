@@ -12,7 +12,7 @@
         <div class="cart-empty" id="cartEmpty">
             <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
             <p data-i18n="cart-empty">Tu carrito esta vacio</p>
-            <a href="tienda.php" class="btn btn--primary btn--sm" data-i18n="cart-explore">EXPLORAR PRODUCTOS</a>
+            <a href="/tienda.php" class="btn btn--primary btn--sm" data-i18n="cart-explore">EXPLORAR PRODUCTOS</a>
         </div>
         <div class="cart-items" id="cartItems"></div>
     </div>
@@ -28,10 +28,10 @@
                 <span id="cartTotal">$0,00</span>
             </div>
         </div>
-        <a href="checkout.php" class="btn btn--primary btn--lg btn--full" data-i18n="cart-checkout">
+        <a href="/checkout.php" class="btn btn--primary btn--lg btn--full" data-i18n="cart-checkout">
             FINALIZAR COMPRA
         </a>
-        <a href="tienda.php" class="cart-continue" data-i18n="cart-continue">Seguir comprando</a>
+        <a href="/tienda.php" class="cart-continue" data-i18n="cart-continue">Seguir comprando</a>
     </div>
 </div>
 <script src="/js/carrito.js?v=10"></script>

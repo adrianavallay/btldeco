@@ -63,18 +63,18 @@ try {
             <a href="https://btldeco.com.ar/" class="navbar__logo">BTLDECO<span class="logo-dot"></span></a>
             <ul class="navbar__links" id="navLinks">
                 <li><a href="/"><?= t('home') ?></a></li>
-                <li><a href="tienda" class="active"><?= t('shop') ?></a></li>
+                <li><a href="/tienda" class="active"><?= t('shop') ?></a></li>
                 <li><a href="/#galeria"><?= t('collection') ?></a></li>
                 <li><a href="/#nosotros"><?= t('about') ?></a></li>
                 <li><a href="#contacto"><?= t('contact') ?></a></li>
             </ul>
             <div class="navbar__actions">
-                <a href="tienda" class="btn btn--primary btn--sm"><?= t('shop_btn') ?></a>
+                <a href="/tienda" class="btn btn--primary btn--sm"><?= t('shop_btn') ?></a>
                 <button class="theme-toggle" id="themeToggle" aria-label="Cambiar tema">
                     <svg class="theme-toggle__sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
                     <svg class="theme-toggle__moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
                 </button>
-                <a href="<?= is_cliente() ? 'mi-cuenta' : 'login' ?>" class="cart-btn" aria-label="<?= is_cliente() ? 'Mi cuenta' : 'Ingresar' ?>" title="<?= is_cliente() ? 'Mi cuenta' : 'Ingresar' ?>">
+                <a href="<?= is_cliente() ? '/mi-cuenta' : '/login' ?>" class="cart-btn" aria-label="<?= is_cliente() ? 'Mi cuenta' : 'Ingresar' ?>" title="<?= is_cliente() ? 'Mi cuenta' : 'Ingresar' ?>">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                 </a>
                 <button class="cart-btn" id="cartBtn" aria-label="Carrito">
@@ -110,17 +110,17 @@ try {
         <div class="container">
             <div class="tienda__toolbar">
                 <div class="tienda__filters">
-                    <a href="tienda" class="filter-pill <?= $cat_filter === '' ? 'active' : '' ?>"><?= t('filter_all') ?></a>
+                    <a href="/tienda" class="filter-pill <?= $cat_filter === '' ? 'active' : '' ?>"><?= t('filter_all') ?></a>
                     <?php foreach ($cats as $cat):
                         $catName = (current_lang() === 'en' && !empty($cat['nombre_en'])) ? $cat['nombre_en'] : $cat['nombre'];
                     ?>
-                        <a href="categoria/<?= urlencode($cat['slug']) ?>" class="filter-pill <?= $cat_filter === $cat['slug'] ? 'active' : '' ?>">
+                        <a href="/categoria/<?= urlencode($cat['slug']) ?>" class="filter-pill <?= $cat_filter === $cat['slug'] ? 'active' : '' ?>">
                             <?= sanitize($catName) ?>
                         </a>
                     <?php endforeach; ?>
                 </div>
                 <div class="tienda__sort">
-                    <select class="sort-select" onchange="window.location='tienda.php?cat=<?= urlencode($cat_filter) ?>&sort='+this.value">
+                    <select class="sort-select" onchange="window.location='/tienda.php?cat=<?= urlencode($cat_filter) ?>&sort='+this.value">
                         <option value="recientes" <?= $sort === 'recientes' ? 'selected' : '' ?>><?= t('sort_recent') ?></option>
                         <option value="precio_asc" <?= $sort === 'precio_asc' ? 'selected' : '' ?>><?= t('sort_price_asc') ?></option>
                         <option value="precio_desc" <?= $sort === 'precio_desc' ? 'selected' : '' ?>><?= t('sort_price_desc') ?></option>
@@ -137,14 +137,14 @@ try {
                 <div class="tienda__empty">
                     <p><?= $cat_filter ? t('no_products_cat') : t('no_products') ?>.</p>
                     <?php if ($cat_filter): ?>
-                        <a href="tienda" class="btn btn--outline" style="margin-top:16px;"><?= t('view_all') ?></a>
+                        <a href="/tienda" class="btn btn--outline" style="margin-top:16px;"><?= t('view_all') ?></a>
                     <?php endif; ?>
                 </div>
             <?php else: ?>
                 <div class="tienda__grid" id="tiendaGrid">
                     <?php foreach ($productos as $p): ?>
                         <div class="tienda-card">
-                            <a href="producto/<?= urlencode($p['slug']) ?>" class="tienda-card__link">
+                            <a href="/producto/<?= urlencode($p['slug']) ?>" class="tienda-card__link">
                                 <div class="tienda-card__image">
                                     <?php if ($p['precio_oferta'] && $p['precio_oferta'] < $p['precio']): ?>
                                         <span class="tienda-card__badge"><?= t('offer') ?></span>
