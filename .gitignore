@@ -10,4 +10,5 @@ bkp/*
 !uploads/categorias/.gitkeep
 !uploads/slides/.gitkeep
 !bkp/.gitkeep
+!bkp/.htaccess
 security_checklist.html

@@ -1,0 +1,33 @@
+# ============================================================
+# BTLDECO — Bloqueo total del directorio de backups
+# ============================================================
+# El root .htaccess ya hace RedirectMatch 404 /bkp(/|$). Esta es
+# la capa defensiva: si esa regla se rompe o se cambia, la única
+# vía a los backups debe seguir siendo download_backup.php (que
+# valida is_admin() y abre los archivos desde PHP).
+
+# ── Negar acceso directo a CUALQUIER archivo del directorio ──
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+</IfModule>
+
+# ── Apagar PHP (no debería haber, pero por las dudas) ──
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php5.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php7.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php8.c>
+    php_flag engine off
+</IfModule>
+
+# ── Sin listado de directorios ni CGI ──
+Options -Indexes -ExecCGI
