@@ -64,9 +64,11 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
     display: grid;
     grid-template-columns: 240px 1fr;
     gap: 32px;
+    padding-top: 120px;
+    padding-bottom: 80px;
 }
 @media (max-width: 768px) {
-    .account-layout { grid-template-columns: 1fr; gap: 20px; }
+    .account-layout { grid-template-columns: 1fr; gap: 20px; padding-top: 100px; }
 }
 .account-sidebar {
     background: var(--bg-card);
@@ -86,7 +88,9 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
     border-bottom: 1px solid var(--border);
 }
 .account-sidebar a {
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 10px;
     padding: 10px 12px;
     color: var(--text-muted);
     text-decoration: none;
@@ -95,6 +99,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
     transition: all 0.2s;
     margin-bottom: 2px;
 }
+.account-sidebar a svg { flex-shrink: 0; }
 .account-sidebar a:hover { background: var(--bg); color: var(--text); }
 .account-sidebar a.active { background: var(--accent); color: #fff; font-weight: 500; }
 .account-sidebar .logout-link {
