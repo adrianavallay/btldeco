@@ -143,23 +143,23 @@ include __DIR__ . '/includes/header.php';
                 <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
                 <input type="hidden" name="action" value="update_profile">
 
-                <div class="form-row">
-                    <label for="nombre">Nombre completo</label>
+                <div class="form-group">
+                    <label for="nombre">Nombre completo *</label>
                     <input type="text" id="nombre" name="nombre" value="<?= sanitize($cliente['nombre'] ?? '') ?>" required>
                 </div>
 
-                <div class="form-grid-2">
-                    <div class="form-row">
-                        <label for="email">Email</label>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="email">Email *</label>
                         <input type="email" id="email" name="email" value="<?= sanitize($cliente['email'] ?? '') ?>" required>
                     </div>
-                    <div class="form-row">
+                    <div class="form-group">
                         <label for="telefono">Teléfono</label>
                         <input type="tel" id="telefono" name="telefono" value="<?= sanitize($cliente['telefono'] ?? '') ?>" placeholder="+54 11 1234-5678">
                     </div>
                 </div>
 
-                <button type="submit" class="btn-save">Guardar cambios</button>
+                <button type="submit" class="btn-primary">Guardar cambios</button>
             </form>
         </div>
 
@@ -170,23 +170,23 @@ include __DIR__ . '/includes/header.php';
                 <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
                 <input type="hidden" name="action" value="change_password">
 
-                <div class="form-row">
-                    <label for="current_password">Contraseña actual</label>
+                <div class="form-group">
+                    <label for="current_password">Contraseña actual *</label>
                     <input type="password" id="current_password" name="current_password" required autocomplete="current-password">
                 </div>
 
-                <div class="form-grid-2">
-                    <div class="form-row">
-                        <label for="new_password">Nueva contraseña</label>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="new_password">Nueva contraseña *</label>
                         <input type="password" id="new_password" name="new_password" required autocomplete="new-password" placeholder="Mínimo 6 caracteres">
                     </div>
-                    <div class="form-row">
-                        <label for="confirm_password">Confirmar nueva contraseña</label>
+                    <div class="form-group">
+                        <label for="confirm_password">Confirmar nueva contraseña *</label>
                         <input type="password" id="confirm_password" name="confirm_password" required autocomplete="new-password">
                     </div>
                 </div>
 
-                <button type="submit" class="btn-save">Cambiar contraseña</button>
+                <button type="submit" class="btn-primary">Cambiar contraseña</button>
             </form>
         </div>
 
