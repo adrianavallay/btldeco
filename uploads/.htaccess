@@ -1,0 +1,58 @@
+# ============================================================
+# BTLDECO — Defense in depth: this directory must NEVER execute code
+# ============================================================
+# Even if validation in upload_imagen.php is bypassed and a script
+# file lands here, the server must refuse to run it.
+
+# ── Apagar el motor PHP en todas las versiones de mod_php ──
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php5.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php7.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php8.c>
+    php_flag engine off
+</IfModule>
+
+# ── Quitar handlers que podrían interpretar scripts ──
+<IfModule mod_mime.c>
+    RemoveHandler .php .phtml .php3 .php4 .php5 .php7 .phps .pht .phar
+    RemoveType    .php .phtml .php3 .php4 .php5 .php7 .phps .pht .phar
+    AddType text/plain .php .phtml .php3 .php4 .php5 .php7 .phps .pht .phar
+</IfModule>
+
+# ── Bloquear acceso directo a cualquier ejecutable ──
+<FilesMatch "\.(php|phtml|php3|php4|php5|php7|phps|pht|phar|cgi|pl|py|rb|sh|asp|aspx|jsp|exe)$">
+    # Apache 2.4+
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    # Apache 2.2 (fallback)
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# ── No exponer este propio archivo ──
+<Files ".htaccess">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</Files>
+
+# ── Desactivar listado de directorios ──
+Options -Indexes -ExecCGI
+
+# ── Sniff-proofing del navegador ──
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+</IfModule>
