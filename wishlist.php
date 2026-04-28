@@ -140,17 +140,6 @@ include __DIR__ . '/includes/header.php';
 ?>
 
 <!-- ============================================================
-     BREADCRUMBS
-     ============================================================ -->
-<div class="container" style="padding-top:80px;">
-    <nav class="breadcrumbs">
-        <a href="<?= SITE_URL ?>/">Inicio</a>
-        <span class="sep">/</span>
-        <span class="current">Mi Lista de Deseos</span>
-    </nav>
-</div>
-
-<!-- ============================================================
      MAIN CONTENT
      ============================================================ -->
 <main class="container page-enter">
