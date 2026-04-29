@@ -12,3 +12,6 @@ bkp/*
 !bkp/.gitkeep
 !bkp/.htaccess
 security_checklist.html
+
+# Documentación PDF de APIs (referencia local, no se publica al repo público)
+*.pdf
