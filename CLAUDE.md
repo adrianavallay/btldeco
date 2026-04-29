@@ -125,6 +125,18 @@ Implementado en `correo-argentino/helpers/ProvinciaMapper.php`.
 14. **`/labels` acepta `labelFormat` como query param** (no body), igual que `stateId` en `/agencies`.
 15. **`/auth` responde 204** (no 200). Verificar con `if ($status === 204)` no con `<300`.
 
+### Comportamiento real verificado contra `apitest.correoargentino.com.ar`
+
+- **Api key inexistente** → cualquier endpoint devuelve **401** con
+  `{"error":"Account not found by apiKey", "message":"Account not found by apiKey"}`
+  (verificado en `/auth` y `/agencies`). El PDF lista 403 para `/agencies` con creds
+  inválidas, pero en la práctica el 403 parece estar reservado para "api key válida
+  pero sin permiso sobre ese agreement".
+- El JSON de error siempre incluye los 5 campos: `timestamp`, `status`, `error`,
+  `message`, `path` (con leading slash). `message` puede ser igual a `error` o
+  agregar contexto.
+- Booleans en query string van como literales `true` / `false` (no `1` / `0`).
+
 ---
 
 ## Reglas duras del proyecto (no negociables)

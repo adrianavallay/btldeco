@@ -13,7 +13,7 @@
  *
  * Métodos por fase:
  *   FASE 2: auth()                                       ← implementado
- *   FASE 3: getAgencies(...)
+ *   FASE 3: getAgencies(...)                             ← implementado
  *   FASE 4: createOrder(array $payload)
  *   FASE 5: getLabel(array $items, ?string $labelFormat)
  *   FASE 6: getTracking(array $trackingNumbers, ?string $extClient)
@@ -58,6 +58,37 @@ final class CorreoArgentinoClient
     public function auth(): array
     {
         return $this->request('GET', '/paqar/v1/auth');
+    }
+
+    /**
+     * Listar sucursales habilitadas del agreement actual.
+     *
+     * IMPORTANTE: el cliente no traduce nombres de provincia. Pasar el código
+     * ISO de 1 letra ('B', 'C', 'X', ...). Para mapear desde nombre, usar
+     * ProvinciaMapper::nombreToCodigo() en la capa Service.
+     *
+     * @param string|null $stateId             Código provincia 1 letra (opcional, devuelve todas si null).
+     * @param bool|null   $pickupAvailability  Filtra sucursales con disponibilidad de entrega (null = sin filtro).
+     * @param bool|null   $packageReception    Filtra sucursales habilitadas para imposición (null = sin filtro).
+     * @return array      Ver request() para shape. En éxito (200), $r['json'] es un array de sucursales.
+     */
+    public function getAgencies(
+        ?string $stateId            = null,
+        ?bool   $pickupAvailability = null,
+        ?bool   $packageReception   = null
+    ): array {
+        $query = [];
+        if ($stateId !== null && $stateId !== '') {
+            $query['stateId'] = $stateId;
+        }
+        if ($pickupAvailability !== null) {
+            // La API espera literales "true"/"false", no 1/0.
+            $query['pickup_availability'] = $pickupAvailability ? 'true' : 'false';
+        }
+        if ($packageReception !== null) {
+            $query['package_reception'] = $packageReception ? 'true' : 'false';
+        }
+        return $this->request('GET', '/paqar/v1/agencies', ['query' => $query]);
     }
 
     // ── HTTP core ──────────────────────────────────────────────────────────
