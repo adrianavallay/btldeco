@@ -272,6 +272,100 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+    // ── ACCIONES MASIVAS (borrar / cambiar categoría / modificar precio) ──
+    if (in_array($action, ['bulk_delete', 'bulk_categoria', 'bulk_precio'], true)) {
+        $ids = $_POST['ids'] ?? [];
+        if (!is_array($ids)) $ids = [];
+        $ids = array_values(array_unique(array_filter(
+            array_map('intval', $ids),
+            fn($v) => $v > 0
+        )));
+
+        if (empty($ids)) {
+            $flash_err = 'No seleccionaste ningún producto.';
+        } else {
+            $ph = implode(',', array_fill(0, count($ids), '?')); // placeholders para IN (...)
+
+            // ── ELIMINAR ──
+            if ($action === 'bulk_delete') {
+                $borrados = 0;
+                $fallos = 0;
+                foreach ($ids as $id) {
+                    try {
+                        // Borrar imagen principal del disco
+                        $old = $db->prepare("SELECT imagen_principal FROM productos WHERE id = ?");
+                        $old->execute([$id]);
+                        $oimg = $old->fetchColumn();
+                        if ($oimg && file_exists(UPLOAD_DIR . $oimg)) unlink(UPLOAD_DIR . $oimg);
+                        // Borrar imágenes de la galería
+                        $g = $db->prepare("SELECT imagen FROM producto_imagenes WHERE producto_id = ?");
+                        $g->execute([$id]);
+                        foreach ($g->fetchAll(PDO::FETCH_COLUMN) as $gi) {
+                            if ($gi && file_exists(UPLOAD_DIR . $gi)) unlink(UPLOAD_DIR . $gi);
+                        }
+                        $db->prepare("DELETE FROM productos WHERE id = ?")->execute([$id]);
+                        $borrados++;
+                    } catch (Throwable $e) {
+                        $fallos++;
+                    }
+                }
+                $flash_ok = "Se eliminaron $borrados producto(s).";
+                if ($fallos > 0) {
+                    $flash_err = "$fallos no se pudieron eliminar (pueden estar en pedidos existentes).";
+                }
+            }
+
+            // ── CAMBIAR CATEGORÍA ──
+            if ($action === 'bulk_categoria') {
+                $nueva_cat = ($_POST['categoria_id'] ?? '') !== '' ? (int)$_POST['categoria_id'] : null;
+                $cat_ok = true;
+                if ($nueva_cat !== null) {
+                    $chk = $db->prepare("SELECT COUNT(*) FROM categorias WHERE id = ?");
+                    $chk->execute([$nueva_cat]);
+                    $cat_ok = (int)$chk->fetchColumn() > 0;
+                }
+                if (!$cat_ok) {
+                    $flash_err = 'La categoría seleccionada no existe.';
+                } else {
+                    $stmt = $db->prepare("UPDATE productos SET categoria_id = ? WHERE id IN ($ph)");
+                    $stmt->execute(array_merge([$nueva_cat], $ids));
+                    $flash_ok = "Categoría actualizada en " . count($ids) . " producto(s).";
+                }
+            }
+
+            // ── MODIFICAR PRECIO ──
+            if ($action === 'bulk_precio') {
+                $operacion = $_POST['operacion'] ?? '';
+                $tipo      = $_POST['tipo'] ?? '';
+                $valor_raw = str_replace(',', '.', trim($_POST['valor'] ?? ''));
+                $valor_ok  = is_numeric($valor_raw);
+                $valor     = (float)$valor_raw;
+
+                if (!in_array($operacion, ['aumentar', 'disminuir', 'establecer'], true) || !$valor_ok || $valor < 0) {
+                    $flash_err = 'Datos de modificación de precio inválidos.';
+                } elseif ($operacion !== 'establecer' && !in_array($tipo, ['porcentaje', 'fijo'], true)) {
+                    $flash_err = 'Elegí si el cambio es en porcentaje o monto fijo.';
+                } else {
+                    // El precio nunca baja de 0. Se redondea a 2 decimales.
+                    if ($operacion === 'establecer') {
+                        $set = "precio = ROUND(?, 2)";
+                    } elseif ($operacion === 'aumentar' && $tipo === 'porcentaje') {
+                        $set = "precio = ROUND(precio * (1 + ? / 100.0), 2)";
+                    } elseif ($operacion === 'aumentar') { // fijo
+                        $set = "precio = ROUND(precio + ?, 2)";
+                    } elseif ($operacion === 'disminuir' && $tipo === 'porcentaje') {
+                        $set = "precio = GREATEST(0, ROUND(precio * (1 - ? / 100.0), 2))";
+                    } else { // disminuir fijo
+                        $set = "precio = GREATEST(0, ROUND(precio - ?, 2))";
+                    }
+                    $stmt = $db->prepare("UPDATE productos SET $set WHERE id IN ($ph)");
+                    $stmt->execute(array_merge([$valor], $ids));
+                    $flash_ok = "Precio actualizado en " . count($ids) . " producto(s).";
+                }
+            }
+        }
+    }
+
     // Redirect to avoid resubmit (PRG pattern)
     if ($flash_ok) flash('ok', $flash_ok);
     if ($flash_err) flash('err', $flash_err);
@@ -508,6 +602,28 @@ if (isset($_GET['edit'])) {
     <?php if (count($productos) === 0): ?>
         <div class="table-wrap"><p class="empty">No hay productos<?= ($filter_q||$filter_cat||$filter_estado||$filter_stock) ? ' con esos filtros' : ' todavia' ?>.</p></div>
     <?php else: ?>
+
+    <!-- Barra de acciones masivas (aparece al seleccionar filas) -->
+    <div id="bulkBar" style="display:none;align-items:center;gap:10px;flex-wrap:wrap;background:#fff;border:1px solid #e8e8e8;border-radius:8px;padding:10px 16px;margin-bottom:12px;">
+        <span id="bulkCount" style="font-size:.85rem;font-weight:600;color:#333;">0 seleccionados</span>
+        <span style="color:#d4d4d8;">|</span>
+        <button type="button" class="btn btn-outline btn-sm" onclick="openBulkCategoria()">Cambiar categoria</button>
+        <button type="button" class="btn btn-outline btn-sm" onclick="openBulkPrecio()">Modificar precio</button>
+        <button type="button" class="btn btn-danger btn-sm" onclick="bulkDeleteProductos()">Eliminar</button>
+        <button type="button" class="btn btn-outline btn-sm" style="margin-left:auto;" onclick="clearProdSelection()">Cancelar</button>
+    </div>
+
+    <!-- Formulario oculto que envía la acción masiva -->
+    <form id="bulkForm" method="POST" style="display:none;">
+        <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
+        <input type="hidden" name="action"       id="bulkAction"    value="">
+        <input type="hidden" name="categoria_id" id="bulkCatId"     value="">
+        <input type="hidden" name="operacion"    id="bulkOperacion" value="">
+        <input type="hidden" name="tipo"         id="bulkTipo"      value="">
+        <input type="hidden" name="valor"        id="bulkValor"     value="">
+        <div id="bulkIds"></div>
+    </form>
+
     <div class="table-wrap table-container">
         <table>
             <thead>
@@ -599,6 +715,69 @@ if (isset($_GET['edit'])) {
 <!-- ================================================================ -->
 <!-- PRODUCT MODAL (Create / Edit)                                     -->
 <!-- ================================================================ -->
+<!-- ── MODAL: cambiar categoría en masa ── -->
+<div class="modal-overlay" id="modalBulkCat">
+<div class="modal">
+    <div class="modal-head">
+        <h2>Cambiar categoria</h2>
+        <button class="modal-close" onclick="closeBulkModals()">&times;</button>
+    </div>
+    <div class="modal-body">
+        <p style="font-size:.85rem;color:#666;margin-bottom:14px;">Se asignara a <span class="bulk-n">0</span> producto(s) seleccionado(s).</p>
+        <div class="form-group">
+            <label>Categoria</label>
+            <select id="selBulkCat">
+                <option value="">— Sin categoria —</option>
+                <?php foreach ($categorias as $c): ?>
+                    <option value="<?= $c['id'] ?>"><?= !empty($c['_es_hija']) ? '&nbsp;&nbsp;&#8627; ' : '' ?><?= sanitize($c['nombre']) ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <div class="form-actions">
+            <button type="button" class="btn btn-outline" onclick="closeBulkModals()">Cancelar</button>
+            <button type="button" class="btn btn-primary" onclick="applyBulkCategoria()">Aplicar</button>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- ── MODAL: modificar precio en masa ── -->
+<div class="modal-overlay" id="modalBulkPrecio">
+<div class="modal">
+    <div class="modal-head">
+        <h2>Modificar precio</h2>
+        <button class="modal-close" onclick="closeBulkModals()">&times;</button>
+    </div>
+    <div class="modal-body">
+        <p style="font-size:.85rem;color:#666;margin-bottom:14px;">Se aplicara a <span class="bulk-n">0</span> producto(s) seleccionado(s).</p>
+        <div class="form-group">
+            <label>Operacion</label>
+            <select id="selOperacion" onchange="onOperacionChange()">
+                <option value="aumentar">Aumentar precio</option>
+                <option value="disminuir">Disminuir precio</option>
+                <option value="establecer">Establecer un precio fijo</option>
+            </select>
+        </div>
+        <div class="form-group" id="grpTipo">
+            <label>Tipo</label>
+            <select id="selTipo" onchange="onTipoChange()">
+                <option value="porcentaje">Porcentaje (%)</option>
+                <option value="fijo">Monto fijo ($)</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label id="lblValor">Valor</label>
+            <input type="number" id="inpValor" step="0.01" min="0" placeholder="0">
+        </div>
+        <p id="precioHint" style="font-size:.78rem;color:#999;margin-top:-4px;"></p>
+        <div class="form-actions">
+            <button type="button" class="btn btn-outline" onclick="closeBulkModals()">Cancelar</button>
+            <button type="button" class="btn btn-primary" onclick="applyBulkPrecio()">Aplicar</button>
+        </div>
+    </div>
+</div>
+</div>
+
 <div class="modal-overlay <?= $edit ? 'open' : '' ?>" id="productModal">
 <div class="modal">
     <div class="modal-head">
@@ -1037,12 +1216,119 @@ function initCounter(inputId, counterId, max){
 initCounter('seo_titulo','seo_titulo_count',200);
 initCounter('seo_desc','seo_desc_count',300);
 
-// ── Check all ──
+// ── Check all + selección masiva ──
 const checkAll = document.getElementById('checkAll');
 if(checkAll){
     checkAll.addEventListener('change', () => {
         document.querySelectorAll('.row-check').forEach(cb => { cb.checked = checkAll.checked; });
+        prodUpdateBulkBar();
     });
+}
+document.addEventListener('change', function(e){
+    if(e.target && e.target.classList && e.target.classList.contains('row-check')) prodUpdateBulkBar();
+});
+
+function prodSelectedIds(){
+    return Array.prototype.slice.call(document.querySelectorAll('.row-check:checked')).map(function(cb){ return cb.value; });
+}
+function prodUpdateBulkBar(){
+    var ids = prodSelectedIds();
+    var bar = document.getElementById('bulkBar');
+    if(bar){
+        if(ids.length > 0){
+            bar.style.display = 'flex';
+            document.getElementById('bulkCount').textContent = ids.length + (ids.length === 1 ? ' seleccionado' : ' seleccionados');
+        } else {
+            bar.style.display = 'none';
+        }
+    }
+    document.querySelectorAll('.bulk-n').forEach(function(el){ el.textContent = ids.length; });
+    var all = document.querySelectorAll('.row-check');
+    if(checkAll){
+        checkAll.checked = all.length > 0 && ids.length === all.length;
+        checkAll.indeterminate = ids.length > 0 && ids.length < all.length;
+    }
+}
+function clearProdSelection(){
+    document.querySelectorAll('.row-check').forEach(function(cb){ cb.checked = false; });
+    prodUpdateBulkBar();
+}
+function fillBulkIds(){
+    var c = document.getElementById('bulkIds');
+    c.innerHTML = '';
+    prodSelectedIds().forEach(function(v){
+        var i = document.createElement('input');
+        i.type = 'hidden'; i.name = 'ids[]'; i.value = v;
+        c.appendChild(i);
+    });
+}
+
+// Eliminar seleccionados
+function bulkDeleteProductos(){
+    var ids = prodSelectedIds();
+    if(!ids.length) return;
+    if(!confirm('¿Eliminar ' + ids.length + ' producto(s)? Esta acción no se puede deshacer.')) return;
+    fillBulkIds();
+    document.getElementById('bulkAction').value = 'bulk_delete';
+    document.getElementById('bulkForm').submit();
+}
+
+// Modales de categoría / precio
+function openBulkCategoria(){ if(!prodSelectedIds().length) return; document.getElementById('modalBulkCat').classList.add('open'); }
+function openBulkPrecio(){ if(!prodSelectedIds().length) return; document.getElementById('modalBulkPrecio').classList.add('open'); onOperacionChange(); }
+function closeBulkModals(){
+    document.getElementById('modalBulkCat').classList.remove('open');
+    document.getElementById('modalBulkPrecio').classList.remove('open');
+}
+[ 'modalBulkCat', 'modalBulkPrecio' ].forEach(function(id){
+    var m = document.getElementById(id);
+    if(m) m.addEventListener('click', function(e){ if(e.target === this) closeBulkModals(); });
+});
+
+function applyBulkCategoria(){
+    fillBulkIds();
+    document.getElementById('bulkAction').value = 'bulk_categoria';
+    document.getElementById('bulkCatId').value = document.getElementById('selBulkCat').value;
+    document.getElementById('bulkForm').submit();
+}
+
+function onOperacionChange(){
+    var op = document.getElementById('selOperacion').value;
+    document.getElementById('grpTipo').style.display = (op === 'establecer') ? 'none' : 'block';
+    updatePrecioHint();
+}
+function onTipoChange(){ updatePrecioHint(); }
+function updatePrecioHint(){
+    var op   = document.getElementById('selOperacion').value;
+    var tipo = document.getElementById('selTipo').value;
+    var lbl  = document.getElementById('lblValor');
+    var hint = document.getElementById('precioHint');
+    if(op === 'establecer'){
+        lbl.textContent = 'Nuevo precio ($)';
+        hint.textContent = 'Todos los seleccionados quedarán con este precio.';
+        return;
+    }
+    if(tipo === 'porcentaje'){
+        lbl.textContent = 'Porcentaje (%)';
+        hint.textContent = (op === 'aumentar' ? 'Sube' : 'Baja') + ' el precio ese porcentaje (ej: 10 = ' + (op === 'aumentar' ? '+' : '-') + '10%).';
+    } else {
+        lbl.textContent = 'Monto ($)';
+        hint.textContent = (op === 'aumentar' ? 'Suma' : 'Resta') + ' esa cantidad de pesos al precio.';
+    }
+}
+function applyBulkPrecio(){
+    var valor = document.getElementById('inpValor').value;
+    if(valor === '' || isNaN(valor) || Number(valor) < 0){ alert('Ingresá un valor válido.'); return; }
+    var op = document.getElementById('selOperacion').value;
+    var tipo = document.getElementById('selTipo').value;
+    var n = prodSelectedIds().length;
+    if(!confirm('¿Aplicar el cambio de precio a ' + n + ' producto(s)?')) return;
+    fillBulkIds();
+    document.getElementById('bulkAction').value    = 'bulk_precio';
+    document.getElementById('bulkOperacion').value = op;
+    document.getElementById('bulkTipo').value      = (op === 'establecer') ? 'fijo' : tipo;
+    document.getElementById('bulkValor').value     = valor;
+    document.getElementById('bulkForm').submit();
 }
 
 // ══════════ EXPORT CSV ══════════
