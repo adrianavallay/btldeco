@@ -1,0 +1,53 @@
+PLANTILLA DE MIGRACIÓN — copiá este contenido a un archivo .php dentro de /migrations
+========================================================================================
+
+NOMBRE DEL ARCHIVO:
+  Usá un número correlativo + guion bajo + descripción corta. Ejemplos:
+    migrations/0001_agregar_telefono_a_clientes.php
+    migrations/0002_tabla_newsletter.php
+  El número define el ORDEN en que se ejecutan. Poné siempre el siguiente número libre.
+
+CONTENIDO (copiá desde <?php hasta el final):
+
+<?php
+// 0001_agregar_telefono_a_clientes
+// Descripción corta de qué hace esta migración.
+
+return [
+    'descripcion' => 'Agrega la columna telefono a la tabla clientes',
+
+    // Este closure recibe la conexión PDO y aplica el cambio.
+    // DEBE ser idempotente: usar los helpers mig_* para que correrlo
+    // dos veces no rompa nada.
+    'up' => function (PDO $db): void {
+
+        // --- Ejemplo: agregar una columna ---
+        mig_add_column($db, 'clientes', 'telefono', "VARCHAR(40) NOT NULL DEFAULT ''");
+
+        // --- Ejemplo: crear una tabla nueva ---
+        $db->exec("CREATE TABLE IF NOT EXISTS newsletter (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            email VARCHAR(191) NOT NULL,
+            creado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE KEY uq_email (email)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+        // --- Ejemplo: agregar un índice ---
+        mig_add_index($db, 'clientes', 'idx_telefono', 'telefono');
+
+        // --- Ejemplo: insertar/actualizar datos (semillas) de forma idempotente ---
+        $db->exec("INSERT INTO configuracion (clave, valor)
+                   VALUES ('envio_gratis_desde', '50000')
+                   ON DUPLICATE KEY UPDATE valor = valor");
+    },
+];
+
+HELPERS DISPONIBLES (definidos en migrations/lib.php):
+  mig_table_exists($db, 'tabla')                         -> bool
+  mig_column_exists($db, 'tabla', 'columna')             -> bool
+  mig_index_exists($db, 'tabla', 'indice')               -> bool
+  mig_add_column($db, 'tabla', 'columna', 'DEFINICION')  -> agrega si no existe
+  mig_add_index($db, 'tabla', 'indice', 'col1, col2')    -> agrega si no existe
+
+REGLA DE ORO: escribí siempre migraciones que se puedan correr varias veces sin efecto
+secundario (IF NOT EXISTS, helpers mig_*, INSERT ... ON DUPLICATE KEY UPDATE, etc.).
