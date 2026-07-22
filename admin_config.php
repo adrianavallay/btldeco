@@ -10,19 +10,9 @@ $db = pdo();
 $flash_ok  = '';
 $flash_err = '';
 
-// Garantizar que exista la tabla de configuración (idempotente, igual que en admin_redes.php)
-$db->exec("CREATE TABLE IF NOT EXISTS configuracion (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    clave VARCHAR(100) UNIQUE NOT NULL,
-    valor TEXT,
-    grupo VARCHAR(50) DEFAULT 'general',
-    fecha_modificacion DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
-
 $test_db_result = null;
 $test_email_result = null;
 $password_result = null;
-$mp_result = null;
 // ── POST ACTIONS ──
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
@@ -57,21 +47,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // ── GUARDAR CREDENCIALES MERCADOPAGO ──
-    if ($action === 'save_mercadopago') {
-        $mp_token  = trim($_POST['mp_access_token'] ?? '');
-        $mp_public = trim($_POST['mp_public_key'] ?? '');
-        $mp_secret = trim($_POST['mp_webhook_secret'] ?? '');
-        try {
-            set_config('mp_access_token',   $mp_token,  'mercadopago');
-            set_config('mp_public_key',     $mp_public, 'mercadopago');
-            set_config('mp_webhook_secret', $mp_secret, 'mercadopago');
-            $mp_result = ['ok' => true, 'msg' => 'Credenciales de MercadoPago guardadas. Ya quedan activas.'];
-        } catch (Throwable $e) {
-            $mp_result = ['ok' => false, 'msg' => 'No se pudieron guardar las credenciales: ' . $e->getMessage()];
-        }
-    }
-
     // ── CHANGE PASSWORD ──
     if ($action === 'change_password') {
         $current  = $_POST['current_password'] ?? '';
@@ -97,12 +72,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
-
-// ── Valores actuales de MercadoPago (base con respaldo en .env) ──
-$mp_access_token_val   = get_config('mp_access_token',   env('MP_ACCESS_TOKEN', ''));
-$mp_public_key_val     = get_config('mp_public_key',     env('MP_PUBLIC_KEY', ''));
-$mp_webhook_secret_val = get_config('mp_webhook_secret', env('MP_WEBHOOK_SECRET', ''));
-$mp_configurado        = ($mp_access_token_val !== '' && $mp_public_key_val !== '');
 
 // ── System info ──
 $php_version = phpversion();
@@ -208,56 +177,10 @@ $pdo_version = $db->getAttribute(PDO::ATTR_SERVER_VERSION) ?? 'N/A';
     <!-- ── MercadoPago ── -->
     <div class="config-section">
         <h3>MercadoPago (pagos)</h3>
-        <p style="color:#71717a;font-size:.88rem;margin-bottom:12px">
-            Cargá las credenciales de tu cuenta para poder cobrar. Las obtenés en tu
-            <a href="https://www.mercadopago.com.ar/developers/panel/app" target="_blank" rel="noopener">panel de desarrollador de MercadoPago</a>
-            (usá las credenciales de <strong>Producción</strong>).
+        <p style="color:#71717a;font-size:.88rem;margin-bottom:16px">
+            Cargá o editá las credenciales de MercadoPago y probá la conexión con la API en su propia pantalla.
         </p>
-        <p style="font-size:.85rem;margin-bottom:16px;">
-            Estado:
-            <?php if ($mp_configurado): ?>
-                <span style="color:#166534;font-weight:700;">&#10003; Configurado</span>
-            <?php else: ?>
-                <span style="color:#991b1b;font-weight:700;">&#10007; Falta configurar</span>
-            <?php endif; ?>
-        </p>
-        <form method="POST" style="max-width:560px">
-            <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
-            <input type="hidden" name="action" value="save_mercadopago">
-
-            <div class="form-group">
-                <label for="mp_public_key">Public Key</label>
-                <input type="text" id="mp_public_key" name="mp_public_key"
-                       value="<?= sanitize($mp_public_key_val) ?>" placeholder="APP_USR-..." autocomplete="off">
-            </div>
-
-            <div class="form-group">
-                <label for="mp_access_token">Access Token</label>
-                <input type="password" id="mp_access_token" name="mp_access_token"
-                       value="<?= sanitize($mp_access_token_val) ?>" placeholder="APP_USR-..." autocomplete="off">
-                <label style="font-size:.78rem;color:#666;display:inline-flex;align-items:center;gap:5px;margin-top:5px;cursor:pointer;">
-                    <input type="checkbox" onclick="toggleMpField('mp_access_token', this.checked)"> Mostrar
-                </label>
-            </div>
-
-            <div class="form-group">
-                <label for="mp_webhook_secret">Clave secreta del webhook <span style="color:#999;font-weight:400;">(opcional)</span></label>
-                <input type="password" id="mp_webhook_secret" name="mp_webhook_secret"
-                       value="<?= sanitize($mp_webhook_secret_val) ?>" placeholder="Para validar las notificaciones de pago" autocomplete="off">
-                <label style="font-size:.78rem;color:#666;display:inline-flex;align-items:center;gap:5px;margin-top:5px;cursor:pointer;">
-                    <input type="checkbox" onclick="toggleMpField('mp_webhook_secret', this.checked)"> Mostrar
-                </label>
-            </div>
-
-            <div class="form-actions">
-                <button type="submit" class="btn btn-primary">Guardar credenciales</button>
-            </div>
-        </form>
-        <?php if ($mp_result): ?>
-            <div class="result-box <?= $mp_result['ok'] ? 'ok' : 'err' ?>">
-                <?= sanitize($mp_result['msg']) ?>
-            </div>
-        <?php endif; ?>
+        <a href="admin_mercadopago.php" class="btn btn-primary">Configurar MercadoPago</a>
     </div>
 
     <!-- ── Test DB Connection ── -->
@@ -351,12 +274,6 @@ $pdo_version = $db->getAttribute(PDO::ATTR_SERVER_VERSION) ?? 'N/A';
 <?php include __DIR__ . '/includes/admin_footer.php'; ?>
 
 <script src="js/admin.js"></script>
-<script>
-function toggleMpField(id, show){
-    var f = document.getElementById(id);
-    if(f) f.type = show ? 'text' : 'password';
-}
-</script>
 
 </body>
 </html>
