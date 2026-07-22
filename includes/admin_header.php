@@ -62,8 +62,8 @@ function activePage($page) {
 
       <div class="sidebar-group">
         <div class="sidebar-group-title">Sistema</div>
-        <div class="sidebar-dropdown <?= in_array($admin_page, ['config', 'backups', 'redes', 'migracion']) ? 'open' : '' ?>">
-          <button class="sidebar-link sidebar-dropdown-toggle <?= in_array($admin_page, ['config', 'backups', 'redes', 'migracion']) ? 'active' : '' ?>">
+        <div class="sidebar-dropdown <?= in_array($admin_page, ['config', 'backups', 'redes', 'migracion', 'mercadopago']) ? 'open' : '' ?>">
+          <button class="sidebar-link sidebar-dropdown-toggle <?= in_array($admin_page, ['config', 'backups', 'redes', 'migracion', 'mercadopago']) ? 'active' : '' ?>">
             <span class="sidebar-icon material-symbols-outlined">settings</span> Configuraci&oacute;n
             <span class="sidebar-arrow">&#9656;</span>
           </button>
@@ -73,6 +73,9 @@ function activePage($page) {
             </a>
             <a href="admin_redes.php" class="sidebar-link sidebar-sublink <?= activePage('redes') ?>">
               <span class="sidebar-icon material-symbols-outlined">share</span> Redes Sociales
+            </a>
+            <a href="admin_mercadopago.php" class="sidebar-link sidebar-sublink <?= activePage('mercadopago') ?>">
+              <span class="sidebar-icon material-symbols-outlined">payments</span> MercadoPago
             </a>
             <a href="admin_backups.php" class="sidebar-link sidebar-sublink <?= activePage('backups') ?>">
               <span class="sidebar-icon material-symbols-outlined">backup</span> Backups
