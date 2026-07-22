@@ -382,6 +382,43 @@ function estado_badge(string $estado): string {
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 <script src="js/admin.js"></script>
 
+<!-- Inicializar los gráficos del dashboard con sus datos -->
+<script>
+  (function () {
+    if (typeof Chart === 'undefined') return; // Chart.js no se cargó (CDN bloqueado)
+
+    // Ventas últimos 30 días (línea)
+    if (typeof initSalesChart === 'function' && Array.isArray(chartDataVentas)) {
+      initSalesChart(
+        'chartVentas',
+        chartDataVentas.map(function (d) { return d.label; }),
+        chartDataVentas.map(function (d) { return d.total; })
+      );
+    }
+
+    // Ventas por categoría (barras)
+    if (typeof initCategoryChart === 'function' && Array.isArray(chartDataCategorias)) {
+      initCategoryChart(
+        'chartCategorias',
+        chartDataCategorias.map(function (d) { return d.categoria; }),
+        chartDataCategorias.map(function (d) { return Number(d.total); })
+      );
+    }
+
+    // Pedidos por estado (dona)
+    if (typeof initStatusChart === 'function' && chartDataEstados && typeof chartDataEstados === 'object') {
+      var labels = Object.keys(chartDataEstados);
+      var data   = labels.map(function (k) { return chartDataEstados[k]; });
+      var paleta = {
+        pendiente: '#e6a817', pagado: '#4a90a4', enviado: '#83a168',
+        entregado: '#6b8a52', cancelado: '#c0392b'
+      };
+      var colors = labels.map(function (k) { return paleta[k] || '#9ca3af'; });
+      initStatusChart('chartEstados', labels, data, colors);
+    }
+  })();
+</script>
+
 <?php endif; ?>
 
 </body>
