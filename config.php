@@ -42,9 +42,13 @@ define('SITE_URL', rtrim((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'of
 define('ADMIN_USER', env('ADMIN_USER', 'admin'));
 define('ADMIN_PASS', env('ADMIN_PASS_HASH', ''));
 
-define('MP_ACCESS_TOKEN', env('MP_ACCESS_TOKEN', ''));
-define('MP_PUBLIC_KEY', env('MP_PUBLIC_KEY', ''));
-define('MP_WEBHOOK_SECRET', env('MP_WEBHOOK_SECRET', ''));
+// Credenciales de MercadoPago: primero se buscan en la tabla `configuracion`
+// (cargables desde el panel de Configuración) y, si no hay, se usa el .env como
+// respaldo. get_config() es tolerante a fallos: si la base no está disponible,
+// devuelve el valor del .env.
+define('MP_ACCESS_TOKEN',   get_config('mp_access_token',   env('MP_ACCESS_TOKEN', '')));
+define('MP_PUBLIC_KEY',     get_config('mp_public_key',     env('MP_PUBLIC_KEY', '')));
+define('MP_WEBHOOK_SECRET', get_config('mp_webhook_secret', env('MP_WEBHOOK_SECRET', '')));
 
 define('ITEMS_PER_PAGE', 12);
 define('UPLOAD_DIR', __DIR__ . '/uploads/productos/');
