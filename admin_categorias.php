@@ -149,6 +149,88 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+    // ── BULK DELETE ──
+    if ($action === 'bulk_delete') {
+        $ids = $_POST['ids'] ?? [];
+        if (!is_array($ids)) $ids = [];
+        $ids = array_values(array_unique(array_filter(
+            array_map('intval', $ids),
+            fn($v) => $v > 0
+        )));
+
+        if (empty($ids)) {
+            $flash_err = 'No seleccionaste ninguna categoría.';
+        } else {
+            $eliminadas = 0;
+            $pendientes = $ids;
+
+            // Multi-pasada: borra las que se pueden y repite, para manejar
+            // el caso de seleccionar una categoría padre junto con sus hijas.
+            do {
+                $borro_algo = false;
+                foreach ($pendientes as $k => $id) {
+                    // ¿Tiene productos asociados?
+                    $cnt = $db->prepare("SELECT COUNT(*) FROM productos WHERE categoria_id = ?");
+                    $cnt->execute([$id]);
+                    if ((int)$cnt->fetchColumn() > 0) continue;
+
+                    // ¿Tiene subcategorías que todavía existen?
+                    $sub = $db->prepare("SELECT COUNT(*) FROM categorias WHERE padre_id = ?");
+                    $sub->execute([$id]);
+                    if ((int)$sub->fetchColumn() > 0) continue;
+
+                    // Borrar imagen del disco (si tiene) y la fila
+                    $old = $db->prepare("SELECT imagen FROM categorias WHERE id = ?");
+                    $old->execute([$id]);
+                    $old_img = $old->fetchColumn();
+                    if ($old_img && file_exists(UPLOAD_DIR . $old_img)) {
+                        unlink(UPLOAD_DIR . $old_img);
+                    }
+                    $db->prepare("DELETE FROM categorias WHERE id = ?")->execute([$id]);
+
+                    $eliminadas++;
+                    unset($pendientes[$k]);
+                    $borro_algo = true;
+                }
+            } while ($borro_algo && !empty($pendientes));
+
+            // Armar el detalle de las que quedaron sin borrar (y por qué)
+            $bloqueadas = [];
+            foreach ($pendientes as $id) {
+                $cnt = $db->prepare("SELECT COUNT(*) FROM productos WHERE categoria_id = ?");
+                $cnt->execute([$id]);
+                $pc = (int)$cnt->fetchColumn();
+                $sub = $db->prepare("SELECT COUNT(*) FROM categorias WHERE padre_id = ?");
+                $sub->execute([$id]);
+                $sc = (int)$sub->fetchColumn();
+                $nm = $db->prepare("SELECT nombre FROM categorias WHERE id = ?");
+                $nm->execute([$id]);
+                $nombre = $nm->fetchColumn() ?: "#$id";
+
+                if ($pc > 0) {
+                    $motivo = "$pc producto(s)";
+                } elseif ($sc > 0) {
+                    $motivo = "$sc subcategoría(s)";
+                } else {
+                    $motivo = 'en uso';
+                }
+                $bloqueadas[] = "$nombre ($motivo)";
+            }
+
+            if ($eliminadas > 0) {
+                $flash_ok = "Se eliminaron <strong>$eliminadas</strong> categoría(s).";
+            }
+            if (!empty($bloqueadas)) {
+                // Nota: el template escapa $flash_err, así que va texto plano.
+                $flash_err = count($bloqueadas) . " no se pudieron eliminar: "
+                           . implode('; ', $bloqueadas) . ".";
+            }
+            if ($eliminadas === 0 && empty($bloqueadas)) {
+                $flash_err = 'No se eliminó ninguna categoría.';
+            }
+        }
+    }
+
     // ── TOGGLE ACTIVA ──
     if ($action === 'toggle_activa') {
         $id = (int)($_POST['id'] ?? 0);
@@ -240,10 +322,26 @@ if (isset($_GET['edit'])) {
             <p>No hay categorias creadas aun. Crea la primera para organizar tus productos.</p>
         </div>
     <?php else: ?>
+
+    <!-- Barra de selección masiva (aparece al marcar filas) -->
+    <div id="bulkBar" style="display:none;align-items:center;gap:12px;background:#fff;border:1px solid #e8e8e8;border-radius:8px;padding:10px 16px;margin-bottom:12px;">
+        <span id="bulkCount" style="font-size:.85rem;font-weight:600;color:#333;">0 seleccionadas</span>
+        <button type="button" class="btn btn-danger btn-sm" onclick="bulkDeleteCategorias()">Eliminar seleccionadas</button>
+        <button type="button" class="btn btn-outline btn-sm" onclick="clearCatSelection()">Cancelar</button>
+    </div>
+
+    <!-- Formulario oculto para el borrado masivo -->
+    <form id="bulkForm" method="POST" style="display:none;">
+        <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
+        <input type="hidden" name="action" value="bulk_delete">
+        <div id="bulkIds"></div>
+    </form>
+
     <div class="table-wrap table-container">
         <table id="catTable">
             <thead>
                 <tr>
+                    <th style="width:36px;text-align:center;"><input type="checkbox" id="catSelectAll" title="Seleccionar todas"></th>
                     <th></th>
                     <th>Imagen</th>
                     <th>Nombre</th>
@@ -257,6 +355,7 @@ if (isset($_GET['edit'])) {
             <tbody>
                 <?php foreach ($categorias as $cat): ?>
                 <tr data-id="<?= $cat['id'] ?>" class="<?= $cat['activa'] ? '' : 'row-muted' ?>">
+                    <td style="text-align:center;"><input type="checkbox" class="cat-check" value="<?= $cat['id'] ?>"></td>
                     <td><span class="drag-handle" title="Arrastrar para reordenar">&#9776;</span></td>
                     <td>
                         <?php if ($cat['imagen']): ?>
@@ -430,6 +529,64 @@ document.getElementById('catModal').addEventListener('click', function(e) {
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') closeCatModal();
 });
+
+// ── Selección masiva de categorías ──
+function catUpdateBulkBar() {
+    var checked = document.querySelectorAll('.cat-check:checked');
+    var all = document.querySelectorAll('.cat-check');
+    var bar = document.getElementById('bulkBar');
+    var count = document.getElementById('bulkCount');
+    if (bar) {
+        if (checked.length > 0) {
+            bar.style.display = 'flex';
+            count.textContent = checked.length + (checked.length === 1 ? ' seleccionada' : ' seleccionadas');
+        } else {
+            bar.style.display = 'none';
+        }
+    }
+    var selectAll = document.getElementById('catSelectAll');
+    if (selectAll) {
+        selectAll.checked = all.length > 0 && checked.length === all.length;
+        selectAll.indeterminate = checked.length > 0 && checked.length < all.length;
+    }
+}
+
+var _catSelectAll = document.getElementById('catSelectAll');
+if (_catSelectAll) {
+    _catSelectAll.addEventListener('change', function() {
+        var self = this;
+        document.querySelectorAll('.cat-check').forEach(function(cb) { cb.checked = self.checked; });
+        catUpdateBulkBar();
+    });
+}
+
+document.addEventListener('change', function(e) {
+    if (e.target && e.target.classList && e.target.classList.contains('cat-check')) {
+        catUpdateBulkBar();
+    }
+});
+
+function clearCatSelection() {
+    document.querySelectorAll('.cat-check').forEach(function(cb) { cb.checked = false; });
+    catUpdateBulkBar();
+}
+
+function bulkDeleteCategorias() {
+    var checked = Array.prototype.slice.call(document.querySelectorAll('.cat-check:checked'));
+    if (checked.length === 0) return;
+    if (!confirm('¿Eliminar ' + checked.length + ' categoría(s)?\n\nLas que tengan productos o subcategorías se omitirán automáticamente.')) return;
+
+    var container = document.getElementById('bulkIds');
+    container.innerHTML = '';
+    checked.forEach(function(cb) {
+        var input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'ids[]';
+        input.value = cb.value;
+        container.appendChild(input);
+    });
+    document.getElementById('bulkForm').submit();
+}
 </script>
 
 </body>
